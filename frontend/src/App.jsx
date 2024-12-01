@@ -10,7 +10,7 @@ function App() {
   return (
     <>
       <Navbar />
-      <div id="appMainElement" style={{ backgroundColor: 'white' }}>
+      <div id="appMainElement" style={{ backgroundColor: 'white', height: '100vh', width:'100vw'}}>
         <Routes>
           <Route path='/' element={<Dash />} />
           <Route path='/projects' element={<AllProjects />} />

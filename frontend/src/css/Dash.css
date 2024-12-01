@@ -4,6 +4,7 @@
     border-radius: 5px;
     padding: 10px 25px;
     background-color: inherit;
+    color: black;
 }
 #dashBody{
     display: flex;

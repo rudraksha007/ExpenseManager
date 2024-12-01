@@ -1,6 +1,7 @@
 #allProjectContent{
     padding: 10px 20px;
     text-align: center;
+    
 }
 #projectTable, #projectTitle{
     display: grid;
