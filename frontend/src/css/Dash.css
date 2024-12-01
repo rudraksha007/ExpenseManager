@@ -1,0 +1,17 @@
+.dashSection{
+    width: 30dvw;
+    box-shadow: 2px 2px 5px gray;
+    border-radius: 5px;
+    padding: 10px 25px;
+    background-color: inherit;
+}
+#dashBody{
+    display: flex;
+    padding: 10px 25px;
+    row-gap: 20px;
+    column-gap: 20px;
+    background-color: inherit;
+}
+#dashUserProjects{
+    text-align: center;
+}

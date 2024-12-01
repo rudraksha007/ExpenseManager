@@ -1,0 +1,11 @@
+{
+  "name": "expense-manager",
+  "version": "1.0.0",
+  "description": "This is a web based expense manager app, currently designed for ILS",
+  "main": "index.js",
+  "scripts": {
+    "start": "cd frontend && npm start"
+  },
+  "author": "rudraksha007",
+  "license": "ISC"
+}

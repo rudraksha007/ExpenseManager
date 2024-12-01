@@ -1,0 +1,12 @@
+#userProjectsTable{
+    display: grid;
+    grid-template-columns: 1fr 6fr 3fr;
+    grid-auto-rows: max-content;
+    overflow-y: auto;
+    gap: 2px;
+    max-height: 35dvh;
+}
+#userProjectsTable>div{
+    font-size: 1rem;
+    background-color: rgb(222, 222, 222);
+}
