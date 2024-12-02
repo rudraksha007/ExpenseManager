@@ -3,6 +3,10 @@ import { useParams } from 'react-router-dom';
 import '../css/Project.css';
 import { FaPlus } from 'react-icons/fa';
 import ManpowerPopup from '../sideComponents/ManpowerPopup';
+import TravelsPopup from '../sideComponents/TravelsPopup';
+import ConsumablesPopup from '../sideComponents/ConsumablesPopup';
+import EquipmentsPopup from '../sideComponents/EquipmentsPopup';
+import ContingencyPopup from '../sideComponents/Contingency';
 
 function Project() {
     let { id } = useParams();
@@ -245,7 +249,7 @@ function Project() {
                     <span className="projectTabDataHeading">Date</span>
                     <span className="projectTabDataHeading">Bill</span>
                     {data[0]}
-                    <div className="add hoverable" onClick={() => setPopup(<ManpowerPopup reset={()=>setPopup(<></>)} />)}><FaPlus /></div>
+                    <div className="add hoverable" onClick={() => setPopup(<ManpowerPopup reset={() => setPopup(<></>)} />)}><FaPlus /></div>
                 </div>
                 <div className="projectTabContentData">
                     <span className="projectTabDataHeading">Sl.</span>
@@ -254,6 +258,7 @@ function Project() {
                     <span className="projectTabDataHeading">Date</span>
                     <span className="projectTabDataHeading">Bill</span>
                     {data[1]}
+                    <div className="add hoverable" onClick={() => setPopup(<TravelsPopup reset={() => setPopup(<></>)} />)}><FaPlus /></div>
                 </div>
                 <div className="projectTabContentData">
                     <span className="projectTabDataHeading">Sl.</span>
@@ -262,6 +267,7 @@ function Project() {
                     <span className="projectTabDataHeading">Date</span>
                     <span className="projectTabDataHeading">Bill</span>
                     {data[2]}
+                    <div className="add hoverable" onClick={() => setPopup(<ConsumablesPopup reset={() => setPopup(<></>)} />)}><FaPlus /></div>
                 </div>
                 <div className="projectTabContentData">
                     <span className="projectTabDataHeading">Sl.</span>
@@ -270,6 +276,7 @@ function Project() {
                     <span className="projectTabDataHeading">Date</span>
                     <span className="projectTabDataHeading">Bill</span>
                     {data[3]}
+                    <div className="add hoverable" onClick={() => setPopup(<EquipmentsPopup reset={() => setPopup(<></>)} />)}><FaPlus /></div>
                 </div>
                 <div className="projectTabContentData">
                     <span className="projectTabDataHeading">Sl.</span>
@@ -278,6 +285,7 @@ function Project() {
                     <span className="projectTabDataHeading">Date</span>
                     <span className="projectTabDataHeading">Bill</span>
                     {data[4]}
+                    <div className="add hoverable" onClick={() => setPopup(<ContingencyPopup reset={() => setPopup(<></>)} />)}><FaPlus /></div>
                 </div>
             </div>
         </div>
