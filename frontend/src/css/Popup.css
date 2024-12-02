@@ -1,0 +1,40 @@
+.projectPopup{
+    height: 100dvh;
+    width: 100dvw;
+    background-color: rgba(0, 0, 0, 0.5);
+    position: fixed;
+    z-index: 10;
+    top: 0;
+    left: 0;
+}
+.projectPopupCont{
+    height: 70%;
+    width: 25%;
+    background-color: white;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    border-radius: 10px;
+    padding: 15px 25px;
+    display: flex;
+    flex-direction: column;
+}
+.projectPopupCont>form{
+    display: flex;
+    flex-direction: column;
+    /* justify-content: space-evenly; */
+    row-gap: 10px;
+    flex-grow: 1;
+}
+.projectPopupCont>form>label{
+    width: 100%;
+    height: 30px;
+    align-items: center;
+    display: flex;
+}
+.projectPopupCont>form>label>input{
+    flex-grow: 1;
+    height: 90%;
+    margin: 5px 5px;
+}

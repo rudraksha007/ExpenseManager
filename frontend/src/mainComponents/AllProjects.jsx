@@ -1,4 +1,6 @@
 import '../css/AllProjects.css';
+import { Link } from 'react-router-dom';
+import { FaInfoCircle, FaEdit } from 'react-icons/fa';
 
 function AllProjects() {
     return (
@@ -20,7 +22,10 @@ function AllProjects() {
                 <div>The fuuu</div>
                 <div>Anytime</div>
                 <div>Sometime</div>
-                <div>Delete</div>
+                <div className='allProjectsActions'>
+                    <Link to='/projects/abc' title="View Project Details"><FaInfoCircle size={20} /></Link>
+                    <Link to='/projects/edit/abc' title="Edit Project"><FaEdit size={20} /></Link>
+                </div>
             </div>
         </div>
     )

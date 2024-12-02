@@ -3,14 +3,21 @@
     border-width: 10px;
 }
 nav{
-    height: 10vh;
+    height: 10dvh;
     display: flex;
+    position: absolute;
     justify-content: space-evenly;
     font-family: inherit;
     /* font-style: normal; */
-    height: 10vh;
+    height: 10dvh;
+    width: 100dvw;
     background-color: green;
     box-shadow: 3px 2px 5px gray;
+    z-index: 5;
+}
+#navHolder{
+    height: 10dvh;
+    width: 100dvw;
 }
 nav>a{
     text-decoration: none;

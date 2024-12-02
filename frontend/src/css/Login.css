@@ -52,6 +52,7 @@
     outline: none;
     border: none;
     background-color: rgb(222, 222, 222);
+    color: gray;
 }
 #loginNewAcct{
     font-size: small;
@@ -65,4 +66,5 @@
 #submitDiv>input{
     border: none;
     border-radius: 10px;
+    background-color: green;
 }

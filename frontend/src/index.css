@@ -14,14 +14,34 @@
 }
 #root{
   height: 100vh;
-  width: 100vw;
+  width: 100dvw;
   color: black;
+  
+}
+#root>div{
+  height: 90dvh;
+  width: 100dvw;
+}
+#root>div>div{
+  padding: 10px 25px;
 }
 a {
   font-weight: 500;
   text-decoration: inherit;
+  color: black;
+  text-decoration: none;
+  text-decoration: underline;
 }
-
+#appMainElement{
+  z-index: 0;
+}
+input{
+  background-color: rgb(111, 111, 111);
+  color: rgb(222, 222, 222);
+}
+input::calendar-picker-indicator{ 
+  color: #000;
+}
 body {
   margin: 0;
   display: flex;
@@ -44,13 +64,11 @@ button {
   font-size: 1em;
   font-weight: 500;
   font-family: inherit;
-  background-color: #1a1a1a;
+  background-color: green;
   cursor: pointer;
   transition: border-color 0.25s;
 }
-button:hover {
-  border-color: #646cff;
-}
+
 button:focus,
 button:focus-visible {
   outline: 4px auto -webkit-focus-ring-color;
@@ -68,7 +86,7 @@ button:focus-visible {
     background-color: #f9f9f9;
   }
 } */
-.hoverable{
+.hoverable, button{
   cursor: pointer;
   transition: all 0.3s ease-in-out;
 }
