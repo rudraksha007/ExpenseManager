@@ -35,7 +35,7 @@ a {
 #appMainElement{
   z-index: 0;
 }
-input{
+input, select{
   background-color: rgb(111, 111, 111);
   color: rgb(222, 222, 222);
 }

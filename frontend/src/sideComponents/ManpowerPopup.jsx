@@ -13,6 +13,7 @@ function ManpowerPopup({reset}) {
                 <form id='addManpowerForm'>
                     <label htmlFor="date">Date: <input type="date" id="date" name="date" max={today} required /></label>
                     <label htmlFor="indentId">Indent ID: <input type="text" id="indentId" name="indentId" required /></label>
+                    <label htmlFor="indentId">Manpower Amt: <input type="number" id="manpowerAmt" min='1' name="manpowerAmt" required /></label>
                     <label htmlFor="bill">Bill (PDF): <input type="file" id="bill" name="bill" accept="application/pdf" required /></label>
                 </form>
                 <button type="submit" form='addManpowerForm'>Submit</button>

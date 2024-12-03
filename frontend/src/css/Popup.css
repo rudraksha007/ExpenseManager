@@ -23,18 +23,37 @@
 .projectPopupCont>form{
     display: flex;
     flex-direction: column;
-    /* justify-content: space-evenly; */
     row-gap: 10px;
     flex-grow: 1;
 }
-.projectPopupCont>form>label{
+.projectPopupCont>form>label, .projectPopupCont>form select{
     width: 100%;
     height: 30px;
     align-items: center;
     display: flex;
+    justify-content: space-between;
+}
+.requestDetailField{
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 2px;
+    background-color: rgb(222, 222, 222);
+    padding: 5px 10px;
+}
+.requestDetailField>h4{
+    margin: 10px;
+}
+.requestDetailGroup{
+    flex-grow: 1;
+    overflow-y: auto;
+}
+.requestPopupActions{
+    display: flex;
+    justify-content: space-evenly;
 }
 .projectPopupCont>form>label>input{
-    flex-grow: 1;
     height: 90%;
+    width: 60%;
     margin: 5px 5px;
 }

@@ -223,6 +223,8 @@ function Project() {
             <h1>Project Details</h1>
             <div id="projectDetails">
                 <div>Funded By: {/** no. of active projects from data */}</div>
+                <div>Project Id: {id}</div>
+                <div>Title</div>
                 <div>Indentation Amt:</div>
                 <div>Manpower Allocation Amt:</div>
                 <div>Consumables Allocation Amt:</div>
@@ -230,8 +232,6 @@ function Project() {
                 <div>Overhead Allocation Amt:</div>
                 <div>Equipment Allocation Amt:</div>
                 <div>Travel Allocation Amt:</div>
-                <div>Project Id: {id}</div>
-                <div>Title</div>
             </div>
             <div id="projectTabs" style={{ color: 'white' }}>
                 <div className="hoverable" onClick={() => setActiveTab('Manpower')}> Manpower</div>
