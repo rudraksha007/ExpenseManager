@@ -7,6 +7,7 @@ import TravelsPopup from '../sideComponents/TravelsPopup';
 import ConsumablesPopup from '../sideComponents/ConsumablesPopup';
 import EquipmentsPopup from '../sideComponents/EquipmentsPopup';
 import ContingencyPopup from '../sideComponents/Contingency';
+import { fetchData } from '../assets/scripts';
 
 function Project() {
     let { id } = useParams();
@@ -14,199 +15,140 @@ function Project() {
     const [data, setData] = useState([]);
     const [popup, setPopup] = useState(<></>);
     useEffect(() => {
-        async function fetchData() {
-            try {
-                // const response = await fetch(`http://localhost:5000/api/projects/${id}`);
-                // console.log(response);
-                let response = {
-                    id: "abc",
-                    title: "Project Title",
-                    capital: 1000,
-                    fundedBy: "The fuuu",
-                    startDate: "Anytime",
-                    endDate: "Sometime",
-                    manpower: [
-                        {
-                            id: "REQ001",
-                            indentId: "IND001",
-                            date: "2023-10-01",
-                            bill: 1000
-                        },
-                        {
-                            id: "REQ002",
-                            indentId: "IND002",
-                            date: "2023-10-02",
-                            bill: 2000
-                        },
-                        {
-                            id: "REQ003",
-                            indentId: "IND003",
-                            date: "2023-10-03",
-                            bill: 3000
-                        }
-                    ],
-                    travels: [
-                        {
-                            id: "REQ101",
-                            indentId: "IND101",
-                            date: "2023-10-11",
-                            bill: 1100
-                        },
-                        {
-                            id: "REQ102",
-                            indentId: "IND102",
-                            date: "2023-10-12",
-                            bill: 2200
-                        },
-                        {
-                            id: "REQ103",
-                            indentId: "IND103",
-                            date: "2023-10-13",
-                            bill: 3300
-                        }
-                    ],
-                    consumables: [
-                        {
-                            id: "REQ201",
-                            indentId: "IND201",
-                            date: "2023-10-21",
-                            bill: 2100
-                        },
-                        {
-                            id: "REQ202",
-                            indentId: "IND202",
-                            date: "2023-10-22",
-                            bill: 2200
-                        },
-                        {
-                            id: "REQ203",
-                            indentId: "IND203",
-                            date: "2023-10-23",
-                            bill: 2300
-                        }
-                    ],
-                    equipments: [
-                        {
-                            id: "REQ301",
-                            indentId: "IND301",
-                            date: "2023-10-31",
-                            bill: 3100
-                        },
-                        {
-                            id: "REQ302",
-                            indentId: "IND302",
-                            date: "2023-11-01",
-                            bill: 3200
-                        },
-                        {
-                            id: "REQ303",
-                            indentId: "IND303",
-                            date: "2023-11-02",
-                            bill: 3300
-                        }
-                    ],
-                    contingency: [
-                        {
-                            id: "REQ401",
-                            indentId: "IND401",
-                            date: "2023-11-11",
-                            bill: 4100
-                        },
-                        {
-                            id: "REQ402",
-                            indentId: "IND402",
-                            date: "2023-11-12",
-                            bill: 4200
-                        },
-                        {
-                            id: "REQ403",
-                            indentId: "IND403",
-                            date: "2023-11-13",
-                            bill: 4300
-                        }
-                    ],
-                    overhead: [
-                        {
-                            id: "REQ501",
-                            indentId: "IND501",
-                            date: "2023-11-21",
-                            bill: 5100
-                        },
-                        {
-                            id: "REQ502",
-                            indentId: "IND502",
-                            date: "2023-11-22",
-                            bill: 5200
-                        },
-                        {
-                            id: "REQ503",
-                            indentId: "IND503",
-                            date: "2023-11-23",
-                            bill: 5300
-                        }
-                    ],
-                    projectManager: "Mr. X"
-                }
-
-                {
-                    let manpowerContent = [];
-                    response.manpower.map((item, index) => (
-                        manpowerContent.push([
-                            <div key={`${item.id}-sl`}>{index + 1}</div>,
-                            <div key={`${item.id}-requestId`}>{item.id}</div>,
-                            <div key={`${item.id}-indentId`}>{item.indentId}</div>,
-                            <div key={`${item.id}-date`}>{item.date}</div>,
-                            <div key={`${item.id}-bill`}>${item.bill}</div>
-                        ])
-                    ));
-                    let travelsContent = [];
-                    response.travels.map((item, index) => (
-                        travelsContent.push([
-                            <div key={`${item.id}-sl`}>{index + 1}</div>,
-                            <div key={`${item.id}-requestId`}>{item.id}</div>,
-                            <div key={`${item.id}-indentId`}>{item.indentId}</div>,
-                            <div key={`${item.id}-date`}>{item.date}</div>,
-                            <div key={`${item.id}-bill`}>${item.bill}</div>
-                        ])
-                    ));
-                    let consumablesContent = [];
-                    response.consumables.map((item, index) => (
-                        consumablesContent.push([
-                            <div key={`${item.id}-sl`}>{index + 1}</div>,
-                            <div key={`${item.id}-requestId`}>{item.id}</div>,
-                            <div key={`${item.id}-indentId`}>{item.indentId}</div>,
-                            <div key={`${item.id}-date`}>{item.date}</div>,
-                            <div key={`${item.id}-bill`}>${item.bill}</div>
-                        ])
-                    ));
-
-                    let equipmentsContent = [];
-                    response.equipments.map((item, index) => (
-                        equipmentsContent.push([
-                            <div key={`${item.id}-sl`}>{index + 1}</div>,
-                            <div key={`${item.id}-requestId`}>{item.id}</div>,
-                            <div key={`${item.id}-indentId`}>{item.indentId}</div>,
-                            <div key={`${item.id}-date`}>{item.date}</div>,
-                            <div key={`${item.id}-bill`}>${item.bill}</div>
-                        ])
-                    ));
-
-                    let contingencyContent = [];
-                    response.contingency.map((item, index) => (
-                        contingencyContent.push([
-                            <div key={`${item.id}-sl`}>{index + 1}</div>,
-                            <div key={`${item.id}-requestId`}>{item.id}</div>,
-                            <div key={`${item.id}-indentId`}>{item.indentId}</div>,
-                            <div key={`${item.id}-date`}>{item.date}</div>,
-                            <div key={`${item.id}-bill`}>${item.bill}</div>
-                        ])
-                    ));
-                    setData([manpowerContent, travelsContent, consumablesContent, equipmentsContent, contingencyContent]);
-                }// map all the data to the respective arrays
-            } catch (error) {
+        async function fillData() {
+            // let response = await fetchData(`http://localhost:5000/api/projects/${id}`);
+            let response = {
+                id: "abc",
+                title: "Project Title",
+                capital: 1000,
+                fundedBy: "The fuuu",
+                startDate: "Anytime",
+                endDate: "Sometime",
+                manpower: [
+                    {
+                        id: "REQ001",
+                        indentId: "IND001",
+                        date: "2023-10-01",
+                        bill: 1000
+                    },
+                    {
+                        id: "REQ002",
+                        indentId: "IND002",
+                        date: "2023-10-02",
+                        bill: 2000
+                    },
+                    {
+                        id: "REQ003",
+                        indentId: "IND003",
+                        date: "2023-10-03",
+                        bill: 3000
+                    }
+                ],
+                travels: [
+                    {
+                        id: "REQ101",
+                        indentId: "IND101",
+                        date: "2023-10-11",
+                        bill: 1100
+                    },
+                    {
+                        id: "REQ102",
+                        indentId: "IND102",
+                        date: "2023-10-12",
+                        bill: 2200
+                    },
+                    {
+                        id: "REQ103",
+                        indentId: "IND103",
+                        date: "2023-10-13",
+                        bill: 3300
+                    }
+                ],
+                consumables: [
+                    {
+                        id: "REQ201",
+                        indentId: "IND201",
+                        date: "2023-10-21",
+                        bill: 2100
+                    },
+                    {
+                        id: "REQ202",
+                        indentId: "IND202",
+                        date: "2023-10-22",
+                        bill: 2200
+                    },
+                    {
+                        id: "REQ203",
+                        indentId: "IND203",
+                        date: "2023-10-23",
+                        bill: 2300
+                    }
+                ],
+                equipments: [
+                    {
+                        id: "REQ301",
+                        indentId: "IND301",
+                        date: "2023-10-31",
+                        bill: 3100
+                    },
+                    {
+                        id: "REQ302",
+                        indentId: "IND302",
+                        date: "2023-11-01",
+                        bill: 3200
+                    },
+                    {
+                        id: "REQ303",
+                        indentId: "IND303",
+                        date: "2023-11-02",
+                        bill: 3300
+                    }
+                ],
+                contingency: [
+                    {
+                        id: "REQ401",
+                        indentId: "IND401",
+                        date: "2023-11-11",
+                        bill: 4100
+                    },
+                    {
+                        id: "REQ402",
+                        indentId: "IND402",
+                        date: "2023-11-12",
+                        bill: 4200
+                    },
+                    {
+                        id: "REQ403",
+                        indentId: "IND403",
+                        date: "2023-11-13",
+                        bill: 4300
+                    }
+                ],
+                overhead: [
+                    {
+                        id: "REQ501",
+                        indentId: "IND501",
+                        date: "2023-11-21",
+                        bill: 5100
+                    },
+                    {
+                        id: "REQ502",
+                        indentId: "IND502",
+                        date: "2023-11-22",
+                        bill: 5200
+                    },
+                    {
+                        id: "REQ503",
+                        indentId: "IND503",
+                        date: "2023-11-23",
+                        bill: 5300
+                    }
+                ],
+                projectManager: "Mr. X"
             }
+            setData(compileDate(response));
         }
-        fetchData();
+        fillData();
     }, [id]);
 
     useEffect(() => {
@@ -293,3 +235,59 @@ function Project() {
 }
 
 export default Project;
+
+function compileDate(response) {
+    let manpowerContent = [];
+    response.manpower.map((item, index) => (
+        manpowerContent.push([
+            <div key={`${item.id}-sl`}>{index + 1}</div>,
+            <div key={`${item.id}-requestId`}>{item.id}</div>,
+            <div key={`${item.id}-indentId`}>{item.indentId}</div>,
+            <div key={`${item.id}-date`}>{item.date}</div>,
+            <div key={`${item.id}-bill`}>${item.bill}</div>
+        ])
+    ));
+    let travelsContent = [];
+    response.travels.map((item, index) => (
+        travelsContent.push([
+            <div key={`${item.id}-sl`}>{index + 1}</div>,
+            <div key={`${item.id}-requestId`}>{item.id}</div>,
+            <div key={`${item.id}-indentId`}>{item.indentId}</div>,
+            <div key={`${item.id}-date`}>{item.date}</div>,
+            <div key={`${item.id}-bill`}>${item.bill}</div>
+        ])
+    ));
+    let consumablesContent = [];
+    response.consumables.map((item, index) => (
+        consumablesContent.push([
+            <div key={`${item.id}-sl`}>{index + 1}</div>,
+            <div key={`${item.id}-requestId`}>{item.id}</div>,
+            <div key={`${item.id}-indentId`}>{item.indentId}</div>,
+            <div key={`${item.id}-date`}>{item.date}</div>,
+            <div key={`${item.id}-bill`}>${item.bill}</div>
+        ])
+    ));
+
+    let equipmentsContent = [];
+    response.equipments.map((item, index) => (
+        equipmentsContent.push([
+            <div key={`${item.id}-sl`}>{index + 1}</div>,
+            <div key={`${item.id}-requestId`}>{item.id}</div>,
+            <div key={`${item.id}-indentId`}>{item.indentId}</div>,
+            <div key={`${item.id}-date`}>{item.date}</div>,
+            <div key={`${item.id}-bill`}>${item.bill}</div>
+        ])
+    ));
+
+    let contingencyContent = [];
+    response.contingency.map((item, index) => (
+        contingencyContent.push([
+            <div key={`${item.id}-sl`}>{index + 1}</div>,
+            <div key={`${item.id}-requestId`}>{item.id}</div>,
+            <div key={`${item.id}-indentId`}>{item.indentId}</div>,
+            <div key={`${item.id}-date`}>{item.date}</div>,
+            <div key={`${item.id}-bill`}>${item.bill}</div>
+        ])
+    ));
+    return [manpowerContent, travelsContent, consumablesContent, equipmentsContent, contingencyContent];
+}
