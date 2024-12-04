@@ -1,30 +1,44 @@
-#allProjectContent{
-    
+#allProjectsContent, #allProfilesContent{
     text-align: center;
-    
 }
-.projectTable, #projectTitle{
+#allProfilesTable, #allProjectsTable{
     display: grid;
     grid-template-columns: 1fr 6fr 2fr 3fr 2fr 2fr 2fr;
     gap: 2px;
     grid-auto-rows: max-content;
 }
-.projectTable>div{
-    padding: 5px 10px;
-    background-color: rgb(222, 222, 222);
-}
-#projectTitle>div{
-    padding: 5px 0;
+.allProfilesTableTitle, .allProjectsTableTitle{
     background-color: green;
     color: white;
     font-size: large;
     font-weight: bold;
 }
-#projectTable>div{
-    padding: 5px 0;
+#allProjectsTable>div, #allProfilesTable>div{
+    padding: 5px 10px;
+    box-sizing: border-box;
+}
+#allProjectsTable>div:not(.allProjectsTableTitle), #allProfilesTable>div:not(.allProfilesTableTitle){
     background-color: rgb(222, 222, 222);
 }
-.allProjectsActions{
+.allProjectsActions, .allProfilesActions{
     display: flex;
     justify-content: space-evenly;
+}
+#filters{
+    display: flex;
+    justify-content: space-evenly;
+    align-items: center;
+    flex-wrap: wrap;
+    padding: 10px 0;
+    gap: 10px;
+}
+#filters> label> input:not([type="button"]), #filters> label>select{
+    margin-right: 5px;
+    width: 200px;
+    height: 25px;
+}
+#applyFilter{
+    width:80px; 
+    background-color:green; 
+    color:white;
 }

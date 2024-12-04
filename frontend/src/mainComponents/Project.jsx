@@ -12,7 +12,8 @@ import { fetchData } from '../assets/scripts';
 function Project() {
     let { id } = useParams();
     const [activeTab, setActiveTab] = useState('Manpower');
-    const [data, setData] = useState([]);
+    const [table, setTable] = useState([]);
+    const [data, setData] = useState({});
     const [popup, setPopup] = useState(<></>);
     useEffect(() => {
         async function fillData() {
@@ -20,7 +21,7 @@ function Project() {
             let response = {
                 id: "abc",
                 title: "Project Title",
-                capital: 1000,
+                totalIndent: 1000,
                 fundedBy: "The fuuu",
                 startDate: "Anytime",
                 endDate: "Sometime",
@@ -146,7 +147,9 @@ function Project() {
                 ],
                 projectManager: "Mr. X"
             }
-            setData(compileDate(response));
+            setTable(compileDate(response));
+            let {manpower, travels, consumables, equipments, contingency, overhead, ...filtered} = response;
+            setData(filtered);
         }
         fillData();
     }, [id]);
@@ -164,16 +167,16 @@ function Project() {
             {popup}
             <h1>Project Details</h1>
             <div id="projectDetails">
-                <div>Funded By: {/** no. of active projects from data */}</div>
+                <div>Funded By: {data.fundedBy}</div>
                 <div>Project Id: {id}</div>
-                <div>Title</div>
-                <div>Indentation Amt:</div>
-                <div>Manpower Allocation Amt:</div>
-                <div>Consumables Allocation Amt:</div>
-                <div>Contingency Allocation Amt:</div>
-                <div>Overhead Allocation Amt:</div>
-                <div>Equipment Allocation Amt:</div>
-                <div>Travel Allocation Amt:</div>
+                <div>Title: {data.title}</div>
+                <div>Indentation Amt: ${data.totalIndent}</div>
+                {/* <div>Manpower Allocation Amt: ${data[0].reduce((acc, item) => acc + item.bill, 0)}</div> */}
+                {/* <div>Consumables Allocation Amt: ${data[2].reduce((acc, item) => acc + item.bill, 0)}</div> */}
+                {/* <div>Contingency Allocation Amt: ${data[4].reduce((acc, item) => acc + item.bill, 0)}</div> */}
+                {/* <div>Overhead Allocation Amt: ${data[0].reduce((acc, item) => acc + item.bill, 0)}</div> */}
+                {/* <div>Equipment Allocation Amt: ${data[3].reduce((acc, item) => acc + item.bill, 0)}</div> */}
+                {/* <div>Travel Allocation Amt: ${data[1].reduce((acc, item) => acc + item.bill, 0)}</div> */}
             </div>
             <div id="projectTabs" style={{ color: 'white' }}>
                 <div className="hoverable" onClick={() => setActiveTab('Manpower')}> Manpower</div>
@@ -183,14 +186,13 @@ function Project() {
                 <div className="hoverable" onClick={() => setActiveTab('Contingency')}>Contingency</div>
             </div>
             <div id="projectTabContent">
-
                 <div className="projectTabContentData">
                     <span className="projectTabDataHeading">Sl.</span>
                     <span className="projectTabDataHeading">Request Id</span>
                     <span className="projectTabDataHeading">Indent Id</span>
                     <span className="projectTabDataHeading">Date</span>
                     <span className="projectTabDataHeading">Bill</span>
-                    {data[0]}
+                    {table[0]}
                     <div className="add hoverable" onClick={() => setPopup(<ManpowerPopup reset={() => setPopup(<></>)} />)}><FaPlus /></div>
                 </div>
                 <div className="projectTabContentData">
@@ -199,7 +201,7 @@ function Project() {
                     <span className="projectTabDataHeading">Indent Id</span>
                     <span className="projectTabDataHeading">Date</span>
                     <span className="projectTabDataHeading">Bill</span>
-                    {data[1]}
+                    {table[1]}
                     <div className="add hoverable" onClick={() => setPopup(<TravelsPopup reset={() => setPopup(<></>)} />)}><FaPlus /></div>
                 </div>
                 <div className="projectTabContentData">
@@ -208,7 +210,7 @@ function Project() {
                     <span className="projectTabDataHeading">Indent Id</span>
                     <span className="projectTabDataHeading">Date</span>
                     <span className="projectTabDataHeading">Bill</span>
-                    {data[2]}
+                    {table[2]}
                     <div className="add hoverable" onClick={() => setPopup(<ConsumablesPopup reset={() => setPopup(<></>)} />)}><FaPlus /></div>
                 </div>
                 <div className="projectTabContentData">
@@ -217,7 +219,7 @@ function Project() {
                     <span className="projectTabDataHeading">Indent Id</span>
                     <span className="projectTabDataHeading">Date</span>
                     <span className="projectTabDataHeading">Bill</span>
-                    {data[3]}
+                    {table[3]}
                     <div className="add hoverable" onClick={() => setPopup(<EquipmentsPopup reset={() => setPopup(<></>)} />)}><FaPlus /></div>
                 </div>
                 <div className="projectTabContentData">
@@ -226,7 +228,7 @@ function Project() {
                     <span className="projectTabDataHeading">Indent Id</span>
                     <span className="projectTabDataHeading">Date</span>
                     <span className="projectTabDataHeading">Bill</span>
-                    {data[4]}
+                    {table[4]}
                     <div className="add hoverable" onClick={() => setPopup(<ContingencyPopup reset={() => setPopup(<></>)} />)}><FaPlus /></div>
                 </div>
             </div>

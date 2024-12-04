@@ -13,16 +13,18 @@
   -moz-osx-font-smoothing: grayscale;
 }
 #root{
-  height: 100vh;
-  width: 100dvw;
+  height: 100dvh;
+  width: 100%;
   color: black;
-  
+  /* overflow-x: hidden; */
 }
-#root>div{
+#appMainElement{
   height: 90dvh;
   width: 100dvw;
+  z-index: 0;
+  overflow: hidden;
 }
-#root>div>div{
+#appMainElement>div{
   padding: 10px 25px;
 }
 a {
@@ -32,16 +34,11 @@ a {
   text-decoration: none;
   text-decoration: underline;
 }
-#appMainElement{
-  z-index: 0;
-}
 input, select{
-  background-color: rgb(111, 111, 111);
-  color: rgb(222, 222, 222);
+  background-color: rgb(222, 222, 222);
+  color-scheme: light;
 }
-input::calendar-picker-indicator{ 
-  color: #000;
-}
+
 body {
   margin: 0;
   display: flex;
@@ -74,22 +71,13 @@ button:focus-visible {
   outline: 4px auto -webkit-focus-ring-color;
 }
 
-/* @media (prefers-color-scheme: light) {
-  :root {
-    color: #213547;
-    background-color: #ffffff;
-  }
-  a:hover {
-    color: #747bff;
-  }
-  button {
-    background-color: #f9f9f9;
-  }
-} */
 .hoverable, button{
   cursor: pointer;
   transition: all 0.3s ease-in-out;
 }
 .hoverable:hover{
   filter: brightness(90%);
+}
+.hoverable:active{
+  filter: brightness(80%);
 }
