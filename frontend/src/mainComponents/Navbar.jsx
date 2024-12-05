@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react'
 import { NavLink, Link, useNavigate } from 'react-router-dom'
-import { FaBars, FaTimes, FaUserPlus, FaSignOutAlt, FaPlus, FaUser } from 'react-icons/fa';
+import { FaBars, FaTimes, FaUserPlus, FaSignOutAlt, FaPlus, FaUser, FaTasks } from 'react-icons/fa';
 import { useContext } from 'react';
 
 
@@ -42,6 +42,8 @@ function Navbar() {
                             <>
                                 <Link to='/signup' className='hoverable'> <FaUserPlus size={40} style={{ marginRight: 8 }} /> Create New User</Link>
                                 <Link to='/profiles' className='hoverable'> <FaUser size={40} style={{ marginRight: 8 }} /> All Users</Link>
+                                <Link to='/investors' className='hoverable'> <FaUserPlus size={40} style={{ marginRight: 8 }} /> Add Investors</Link>
+                                <Link to='/approval' className='hoverable'> <FaTasks size={40} style={{ marginRight: 8 }} /> Pending Approvals</Link>
                             </> : <></>}
                         <Link to='/signout' className='hoverable'> <FaSignOutAlt size={40} style={{ marginRight: 8 }} /> Sign Out</Link>
                     </div>

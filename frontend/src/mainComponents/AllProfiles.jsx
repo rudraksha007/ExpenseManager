@@ -3,17 +3,21 @@ import { FaInfoCircle, FaEdit } from 'react-icons/fa';
 import { useState, useEffect } from 'react';
 import { fetchData } from '../assets/scripts.js';
 import React from 'react';
+import PageControls from '../sideComponents/PageControls.jsx';
 
 function AllProfiles() {
 
     const [profiles, setProfiles] = useState([]);
+    const [page, setPage] = useState(1);
+    const total = React.useRef(0);
 
     useEffect(() => {
         document.title = 'All Profiles';
         async function getProfiles() {
-            const data = await fetchData('profiles');
+            const data = await fetchData(`profiles~${page}`);
             if (data) {
                 let l = [];
+                total.current = data.total;
                 data.profiles.map((profile, index) => {
                     let style = {};
                     if (profile.role == 'Manager') {
@@ -45,6 +49,7 @@ function AllProfiles() {
     return (
         <div id='allProfilesContent'>
             <h1>Profiles</h1>
+            <PageControls page={page} setPage={setPage} total={total.current} max={25} />
             <div id="filters">
                 <label>
                     Search:

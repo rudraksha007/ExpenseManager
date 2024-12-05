@@ -61,7 +61,7 @@
     width: 60%;
     margin: 5px 5px;
 }
-#addManpowerPopupProfileTable{
+#addManpowerPopupProfileTable,#decManpowerPopupProfileTable{
     display: grid;
     gap: 2px;
     grid-template-columns: 1fr 5fr 3fr;

@@ -80,8 +80,8 @@ function Project() {
                             <span className="projectTabDataHeading">Bill</span>
                             {table[0]}
                             <div className="add">
-                                <div className='hoverable inherit'><FaEdit size={20} onClick={() => setPopup(<DecManpowerPopup reset={() => setPopup(<></>)} />)} /></div>
-                                <div className='hoverable inherit'><FaPlus size={20} onClick={() => setPopup(<AddManpowerPopup reset={() => setPopup(<></>)}/>)} /></div>
+                                <div className='hoverable inherit'><FaEdit size={20} onClick={() => setPopup(<DecManpowerPopup reset={() => setPopup(<></>)} proj={data}/>)} /></div>
+                                <div className='hoverable inherit'><FaPlus size={20} onClick={() => setPopup(<AddManpowerPopup reset={() => setPopup(<></>)}/>)} proj={data}/></div>
                             </div>
                         </div>
                         <div className="projectTabContentData">

@@ -19,7 +19,7 @@ function AllProjects() {
     useEffect(() => {
         document.title = 'All Projects';
         async function getProjects() {
-            const data = await fetchData('projects');
+            const data = await fetchData(`projects~${page}`);
             if (data) {
                 let l = [];
                 data.projects.map((project, index) => (
@@ -39,7 +39,7 @@ function AllProjects() {
                     )
                 ));
                 setProjects(l);
-                total.current = data.projects.length;
+                total.current = data.total;
                 setLoading(false);
             }
         }

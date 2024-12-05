@@ -31,9 +31,10 @@ let data = {
                 endDate: '2023-10-31',
                 isActive: false
             }
-        ]
+        ],
+        total: 3
     },
-    projects:{
+    "projects~1":{
         projects: [
             {
                 "id": 1,
@@ -59,7 +60,8 @@ let data = {
                 "startDate": "2021-06-01",
                 "endDate": "2021-11-30"
             }
-        ]
+        ],
+        total: 3
     },
     indents:{
         indents: [
@@ -143,6 +145,11 @@ let data = {
         fundedBy: "The fuuu",
         startDate: "Anytime",
         endDate: "Sometime",
+        workers:[
+            {id: "W001", name: "Worker 1"},
+            {id: "W002", name: "Worker 2"},
+            {id: "W003", name: "Worker 3"}
+        ],
         manpower: [
             {
                 id: "REQ001",

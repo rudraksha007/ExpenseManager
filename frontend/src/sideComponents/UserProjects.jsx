@@ -8,7 +8,7 @@ function UserProjects() {
     const [loading, setLoading] = useState(true);
     useEffect(() => {
         async function fetchProjects() {
-            const data = (await fetchData('projects')).projects;
+            const data = (await fetchData('projects~1')).projects;
             let projectList = [];
             data.map((project, index) => (
                 projectList.push(
