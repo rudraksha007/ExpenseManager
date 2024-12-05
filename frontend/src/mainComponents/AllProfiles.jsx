@@ -10,39 +10,10 @@ function AllProfiles() {
 
     useEffect(() => {
         async function getProfiles() {
-            // const data = await fetchData('/api/profiles');
-            const data = [
-                {
-                    id: 1,
-                    name: 'John Doe',
-                    role: 'Admin',
-                    email: 'john.doe@example.com',
-                    startDate: '2023-01-01',
-                    endDate: '2023-12-31',
-                    isActive: false
-                },
-                {
-                    id: 2,
-                    name: 'Jane Smith',
-                    role: 'Scientist',
-                    email: 'jane.smith@example.com',
-                    startDate: '2023-02-01',
-                    endDate: '',
-                    isActive: true
-                },
-                {
-                    id: 3,
-                    name: 'Alice Johnson',
-                    role: 'Manager',
-                    email: 'alice.johnson@example.com',
-                    startDate: '2023-03-01',
-                    endDate: '2023-10-31',
-                    isActive: false
-                }
-            ];
+            const data = await fetchData('profiles');
             if (data) {
                 let l = [];
-                data.map((profile, index) => {
+                data.profiles.map((profile, index) => {
                     let style = {};
                     if (profile.role == 'Manager') {
                         style = { backgroundColor: 'rgb(200, 200, 250)' };

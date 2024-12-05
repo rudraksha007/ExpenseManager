@@ -1,5 +1,6 @@
 #allProjectsContent, #allProfilesContent{
     text-align: center;
+    background-color: white;
 }
 #allProfilesTable, #allProjectsTable{
     display: grid;

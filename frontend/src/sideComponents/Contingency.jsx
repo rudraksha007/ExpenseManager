@@ -15,7 +15,7 @@ function ContingencyPopup({ reset }) {
                     <label htmlFor="contingencyId">Contingency ID: <input type="text" id="contingencyId" name="contingencyId" required /></label>
                     <label htmlFor="description">Description: <textarea id="description" name="description" required /></label>
                 </form>
-                <button type="submit" form='addContingencyForm'>Submit</button>
+                <button type="submit" form='addContingencyForm' className='hoverable'>Submit</button>
             </div>
         </div>
     );

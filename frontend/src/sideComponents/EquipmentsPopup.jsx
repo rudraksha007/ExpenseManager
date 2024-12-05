@@ -29,7 +29,7 @@ function EquipmentsPopup({ reset }) {
                     <label htmlFor="invoiceAmount">Invoice Amount: <input type="number" id="invoiceAmount" name="invoiceAmount" disabled value={total} /></label>
                     <label htmlFor="receipt">Receipt (PDF): <input type="file" id="receipt" name="receipt" accept="application/pdf" required /></label>
                 </form>
-                <button type="submit" form='addEquipmentForm'>Submit</button>
+                <button type="submit" form='addEquipmentForm' className='hoverable'>Submit</button>
             </div>
         </div>
     );

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import '../css/Project.css';
-import { FaPlus } from 'react-icons/fa';
+import { FaPlus,FaEdit } from 'react-icons/fa';
 import ManpowerPopup from '../sideComponents/ManpowerPopup';
 import TravelsPopup from '../sideComponents/TravelsPopup';
 import ConsumablesPopup from '../sideComponents/ConsumablesPopup';
@@ -165,7 +165,8 @@ function Project() {
     return (
         <div id='projectMainDiv'>
             {popup}
-            <h1>Project Details</h1>
+            <h1>Project Details <FaEdit size={40} className='hoverable' style={{position:'absolute', right:20}}/></h1>
+            
             <div id="projectDetails">
                 <div>Funded By: {data.fundedBy}</div>
                 <div>Project Id: {id}</div>

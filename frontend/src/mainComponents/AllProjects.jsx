@@ -1,48 +1,27 @@
 import '../css/AllProjects.css';
-import { Link } from 'react-router-dom';
+import { data, Link } from 'react-router-dom';
 import { FaInfoCircle, FaEdit } from 'react-icons/fa';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { fetchData } from '../assets/scripts.js';
 import React from 'react';
+import { Oval } from 'react-loader-spinner';
+import PageControls from '../sideComponents/PageControls';
 
 function AllProjects() {
 
     const [projects, setProjects] = useState([]);
     const [toDate, setToDate] = useState(new Date().toISOString().split("T")[0]);
     const [fromDate, setFromDate] = useState(null);
+    const [page, setPage] = useState(1);
+    const total = useRef(0);
+    const [loading, setLoading] = useState(true);
 
     useEffect(() => {
         async function getProjects() {
-            // const data = await fetchData('/api/projects');
-            const data = [
-                {
-                    id: 1,
-                    title: 'Project Alpha',
-                    capital: 5000,
-                    fundedBy: 'Investor A',
-                    startDate: '2023-01-01',
-                    endDate: '2023-12-31'
-                },
-                {
-                    id: 2,
-                    title: 'Project Beta',
-                    capital: 10000,
-                    fundedBy: 'Investor B',
-                    startDate: '2023-02-01',
-                    endDate: '2023-11-30'
-                },
-                {
-                    id: 3,
-                    title: 'Project Gamma',
-                    capital: 7500,
-                    fundedBy: 'Investor C',
-                    startDate: '2023-03-01',
-                    endDate: '2023-10-31'
-                }
-            ];
+            const data = await fetchData('projects');
             if (data) {
                 let l = [];
-                data.map((project, index) => (
+                data.projects.map((project, index) => (
                     l.push(
                         <React.Fragment key={project.id}>
                             <div>{index + 1}</div>
@@ -59,55 +38,64 @@ function AllProjects() {
                     )
                 ));
                 setProjects(l);
+                total.current = data.projects.length;
+                setLoading(false);
             }
         }
         getProjects();
-    }, []);
+    }, [page]);
     return (
-        <div id='allProjectsContent'>
-            <h1>Projects</h1>
-            <div id="filters">
-                <label>
-                    Search:
-                    <input type="text" placeholder="Search" />
-                </label>
-                <label>
-                    Status:
-                    <select name="status" id="status">
-                        <option value="all">All</option>
-                        <option value="active">Active</option>
-                        <option value="completed">Completed</option>
-                    </select>
-                </label>
-                <label>
-                    Funded By:
-                    <select name="fundedBy" id="fundedBy">
-                        <option value="all">All</option>
-                        <option value="Investor A">Investor A</option>
-                        <option value="Investor B">Investor B</option>
-                        <option value="Investor C">Investor C</option>
-                    </select>
-                </label>
-                <label>
-                    From Date:
-                    <input type="date" id="fromDate" name="fromDate" placeholder="From Date" max={toDate} onChange={(e) => setFromDate(e.currentTarget.value)} />
-                </label>
-                <label>
-                    To Date:
-                    <input type="date" id="toDate" name="toDate" placeholder="To Date" min={fromDate} max={new Date().toISOString().split("T")[0]} onChange={(e) => setToDate(e.currentTarget.value)} />
-                </label>
-            </div>
-            <div id="allProjectsTable">
-                <div className='allProjectsTableTitle'>Sl.</div>
-                <div className='allProjectsTableTitle'>Title</div>
-                <div className='allProjectsTableTitle'>Capital</div>
-                <div className='allProjectsTableTitle'>Funded By</div>
-                <div className='allProjectsTableTitle'>Start Date</div>
-                <div className='allProjectsTableTitle'>End Date</div>
-                <div className='allProjectsTableTitle'>Action</div>
-                {projects}
-            </div>
-        </div>
+        <>
+            {loading ? <Oval color='black' height={80} strokeWidth={5} /> :
+                <div id='allProjectsContent'>
+                    <h1>Projects </h1>
+                    <PageControls page={page} setPage={setPage} total={total.current} max={25} />
+                    <div id="filters">
+                        <label>
+                            Search:
+                            <input type="text" placeholder="Search" />
+                        </label>
+                        <label>
+                            Status:
+                            <select name="status" id="status">
+                                <option value="all">All</option>
+                                <option value="active">Active</option>
+                                <option value="completed">Completed</option>
+                            </select>
+                        </label>
+                        <label>
+                            Funded By:
+                            <select name="fundedBy" id="fundedBy">
+                                <option value="all">All</option>
+                                <option value="Investor A">Investor A</option>
+                                <option value="Investor B">Investor B</option>
+                                <option value="Investor C">Investor C</option>
+                            </select>
+                        </label>
+                        <label>
+                            From Date:
+                            <input type="date" id="fromDate" name="fromDate" placeholder="From Date" max={toDate} onChange={(e) => setFromDate(e.currentTarget.value)} />
+                        </label>
+                        <label>
+                            To Date:
+                            <input type="date" id="toDate" name="toDate" placeholder="To Date" min={fromDate} max={new Date().toISOString().split("T")[0]} onChange={(e) => setToDate(e.currentTarget.value)} />
+                        </label>
+                        <label><input type="button" value="Apply" id='applyFilter' /></label>
+                    </div>
+                    <div id="allProjectsTable">
+                        <div className='allProjectsTableTitle'>Sl.</div>
+                        <div className='allProjectsTableTitle'>Title</div>
+                        <div className='allProjectsTableTitle'>Capital</div>
+                        <div className='allProjectsTableTitle'>Funded By</div>
+                        <div className='allProjectsTableTitle'>Start Date</div>
+                        <div className='allProjectsTableTitle'>End Date</div>
+                        <div className='allProjectsTableTitle'>Action</div>
+                        {projects}
+
+                    </div>
+                </div>
+            }
+        </>
     )
 }
 

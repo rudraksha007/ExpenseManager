@@ -1,43 +1,30 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useRef } from 'react';
 import '../css/Requests.css';
 import IndentPopup from '../sideComponents/IndentPopup';
+import { FaPlus } from 'react-icons/fa';
+import { Oval } from 'react-loader-spinner';
+import PageControls from '../sideComponents/PageControls';
+import { fetchData } from '../assets/scripts';
 
 function Indents() {
     const [popup, setPopup] = React.useState(<></>);
     const [indents, setIndents] = React.useState([]);
+    const [loading, setLoading] = React.useState(true);
+    const total = useRef(0);
+    const[page, setPage] = React.useState(1);
     useEffect(() => {
         document.title = 'All Indents';
         async function fetchIndents() {
             try {
-                // const response = await fetch('/api/indents');
-                // const data = await response.json();
-                const data = [
-                    {
-                        id: '554sdssafese',
-                        projectNo: '123',
-                        title: 'Project1',
-                        amount: '1000',
-                        status: 'Pending'
-                    },
-                    {
-                        id: 'abc123',
-                        projectNo: '124',
-                        title: 'Project2',
-                        amount: '2000',
-                        status: 'Approved'
-                    },
-                    {
-                        id: 'def456',
-                        projectNo: '125',
-                        title: 'Project3',
-                        amount: '3000',
-                        status: 'Rejected'
-                    }
-                ];
+                
+                const data = await fetchData('indents');
+                total.current = data.indents.length;
                 let l = [];
-                data.map((indent, index) => (
+                console.log(data.indents);
+                
+                data.indents.map((indent, index) => (
                     l.push(
-                        <div className="allInputsTable" key={indent.id}>
+                        <React.Fragment key={indent.id}>
                             <div>{index + 1}</div>
                             <div>{indent.projectNo}</div>
                             <div>{indent.title}</div>
@@ -46,32 +33,40 @@ function Indents() {
                             <div title='Click to view Details' className='indentId hoverable' onClick={() => setPopup(<IndentPopup id={indent.id} reset={() => setPopup(<></>)} />)}>
                                 {indent.id}
                             </div>
-                        </div>
+                        </React.Fragment>
                     )
                 ));
                 setIndents(l);
             } catch (error) {
                 console.error('Error fetching indents:', error);
             }
+            finally{
+                setLoading(false);
+            }
         }
 
         fetchIndents();
     }, []);
     return (
-        <div id='allInputsContent'>
-            {popup}
-            <h1>All Indents</h1>
-            <div id="allInputsTitle">
-                <div>Sl.</div>
-                <div>Project No</div>
-                <div>Title</div>
-                <div>Indent Amount</div>
-                <div>Indent Status</div>
-                <div>Indent ID (details) </div>
-
-            </div>
-            {indents}
-        </div>
+        <>
+            {loading ? <Oval color='black' height={80} strokeWidth={5}/> :
+                <div id='allInputsContent'>
+                    {popup}
+                    <h1>All Indents</h1>
+                    <PageControls page={page} setPage={setPage} total={total.current} max={25}/>
+                    <div id="allInputsTable">
+                        <div className='allInputsTableTitle'>Sl.</div>
+                        <div className='allInputsTableTitle'>Project No</div>
+                        <div className='allInputsTableTitle'>Title</div>
+                        <div className='allInputsTableTitle'>Indent Amount</div>
+                        <div className='allInputsTableTitle'>Indent Status</div>
+                        <div className='allInputsTableTitle'>Indent ID (details) </div>
+                        {indents}
+                        <div className="add hoverable"><FaPlus /></div>
+                    </div>
+                </div>
+            }
+        </>
     );
 };
 

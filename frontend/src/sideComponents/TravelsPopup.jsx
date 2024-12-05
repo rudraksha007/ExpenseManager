@@ -17,7 +17,7 @@ function TravelsPopup({ reset }) {
                     <label htmlFor="invoiceAmount">Invoice Amount: <input type="number" min='1' id="invoiceAmount" name="invoiceAmount" required /></label>
                     <label htmlFor="receipt">Receipt (PDF): <input type="file" id="receipt" name="receipt" accept="application/pdf" required /></label>
                 </form>
-                <button type="submit" form='addTravelForm'>Submit</button>
+                <button type="submit" form='addTravelForm' className='hoverable'>Submit</button>
             </div>
         </div>
     );

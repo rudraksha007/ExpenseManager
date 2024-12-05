@@ -1,8 +1,11 @@
 import { Link } from "react-router-dom";
 import '../css/Login.css';
+import { useEffect,useContext } from "react";
+import { ProfileContext } from "../assets/UserProfile";
 
 function Login() {
     // {/*onSubmit={handleSubmit(onSubmit)}*/ }
+    const {profile, setProfile} = useContext(ProfileContext);
     return (
         // <p style={{ fontFamily: 'Arial', textAlign: 'center' }}>Password 6 characters or more &#169;</p>
         <div id="loginMainDiv">

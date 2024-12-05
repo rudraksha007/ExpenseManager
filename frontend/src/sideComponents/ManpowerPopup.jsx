@@ -16,7 +16,7 @@ function ManpowerPopup({reset}) {
                     <label htmlFor="indentId">Manpower Amt: <input type="number" id="manpowerAmt" min='1' name="manpowerAmt" required /></label>
                     <label htmlFor="bill">Bill (PDF): <input type="file" id="bill" name="bill" accept="application/pdf" required /></label>
                 </form>
-                <button type="submit" form='addManpowerForm'>Submit</button>
+                <button type="submit" form='addManpowerForm' className='hoverable'>Submit</button>
             </div>
         </div>
     );
