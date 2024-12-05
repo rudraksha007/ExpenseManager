@@ -17,6 +17,7 @@ function AllProjects() {
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
+        document.title = 'All Projects';
         async function getProjects() {
             const data = await fetchData('projects');
             if (data) {

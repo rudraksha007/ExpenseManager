@@ -6,6 +6,9 @@ import { ProfileContext } from "../assets/UserProfile";
 function Login() {
     // {/*onSubmit={handleSubmit(onSubmit)}*/ }
     const {profile, setProfile} = useContext(ProfileContext);
+    useEffect(() => {
+        document.title = 'Login';
+    }, []);
     return (
         // <p style={{ fontFamily: 'Arial', textAlign: 'center' }}>Password 6 characters or more &#169;</p>
         <div id="loginMainDiv">
@@ -17,7 +20,6 @@ function Login() {
                 </div>
                 <div id="submitDiv">
                     <label id="loginNewAcct">Don't have an account? <Link to={"/signin"}>Create New Account</Link></label>
-
                     <input type="submit" className="hoverable"/>
                 </div>
             </form>

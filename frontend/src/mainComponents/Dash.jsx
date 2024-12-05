@@ -1,10 +1,14 @@
 import Userinfobar from "../sideComponents/UserInfo";
-import '../css/Dash.css'
+import '../css/Dash.css';
 import UserProjects from "../sideComponents/UserProjects";
 import { useNavigate } from "react-router-dom";
+import { useEffect } from "react";
 
 function Dash() {
     const navigate = useNavigate();
+    useEffect(() => {
+        document.title = 'Project Management System';
+    },[]);
     return (
         <div id='dashBody'>
             <div className="dashSection" id='dashUserInfo'><Userinfobar /></div>

@@ -9,6 +9,7 @@ function AllProfiles() {
     const [profiles, setProfiles] = useState([]);
 
     useEffect(() => {
+        document.title = 'All Profiles';
         async function getProfiles() {
             const data = await fetchData('profiles');
             if (data) {
@@ -26,7 +27,7 @@ function AllProfiles() {
                             <div style={style}>{index + 1}</div>
                             <div style={style}>{profile.name}</div>
                             <div style={style}>{profile.role}</div>
-                            <div style={style}>{profile.email}</div>
+                            <div style={style}>{profile.id}</div>
                             <div style={style}>{profile.startDate}</div>
                             <div style={style}>{profile.isActive ? 'Active' : profile.endDate}</div>
                             <div className='allProfilesActions' style={style}>
@@ -64,7 +65,7 @@ function AllProfiles() {
                 <div className='allProfilesTableTitle'>Sl.</div>
                 <div className='allProfilesTableTitle'>Name</div>
                 <div className='allProfilesTableTitle'>Role</div>
-                <div className='allProfilesTableTitle'>Email</div>
+                <div className='allProfilesTableTitle'>Employee Id</div>
                 <div className='allProfilesTableTitle'>Start Date</div>
                 <div className='allProfilesTableTitle'>End Date</div>
                 <div className='allProfilesTableTitle'>Action</div>

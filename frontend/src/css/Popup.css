@@ -7,6 +7,10 @@
     top: 0;
     left: 0;
 }
+#manpowerPopupCont{
+    height: 85%;
+    width: 50%;
+}
 .projectPopupCont{
     height: 70%;
     width: 25%;
@@ -56,4 +60,12 @@
     height: 90%;
     width: 60%;
     margin: 5px 5px;
+}
+#addManpowerPopupProfileTable{
+    display: grid;
+    gap: 2px;
+    grid-template-columns: 1fr 5fr 3fr;
+}
+#addManpowerPopupProfileTable>div:not(.tableTitle){
+    background-color: rgb(222, 222, 222);
 }

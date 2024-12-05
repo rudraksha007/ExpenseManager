@@ -1,10 +1,12 @@
 import { Link } from "react-router-dom";
 import '../css/Login.css';
+import { useEffect } from "react";
 
 function Signup() {
-    // {/*onSubmit={handleSubmit(onSubmit)}*/ }
+    useEffect(() => {
+        document.title = 'Add New User';
+    }, []);
     return (
-        // <p style={{ fontFamily: 'Arial', textAlign: 'center' }}>Password 6 characters or more &#169;</p>
         <div id="loginMainDiv">
             <form>
                 <h1>Signup</h1>
@@ -25,7 +27,6 @@ function Signup() {
                 </div>
                 <div id="submitDiv">
                     <label id="loginNewAcct">Don't have an account? <Link to={"/signin"}>Create New Account</Link></label>
-
                     <input type="submit" className="hoverable" />
                 </div>
             </form >

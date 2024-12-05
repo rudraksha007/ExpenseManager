@@ -12,7 +12,6 @@ function Navbar() {
     const { profile, setProfile } = useContext(ProfileContext);
     const navigate = useNavigate();
     useEffect(() => {
-        document.title = 'Login';
         if (profile) {
             navigate('/');
         }
