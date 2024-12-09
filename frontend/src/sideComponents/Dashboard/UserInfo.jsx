@@ -1,8 +1,8 @@
 import React, { useContext, useEffect } from 'react'
 
-import person from '../assets/images/person.webp';
-import '../css/UserInfo.css';
-import { ProfileContext } from '../assets/UserProfile';
+import person from '../../assets/images/person.webp';
+import '../../css/UserInfo.css';
+import { ProfileContext } from '../../assets/UserProfile';
 
 function UserInfo() {
   const { profile } = useContext(ProfileContext);
@@ -15,7 +15,7 @@ function UserInfo() {
       </div>
       <p>Userame: {profile?profile.username:""}</p>
       <p>Ongoing Projects: {profile?profile.projects.active.length:0}</p>
-      <p>LoggedIn As: {profile?profile.rank:""}</p>
+      <p>LoggedIn As: {profile?profile.role:""}</p>
     </>
   )
 }

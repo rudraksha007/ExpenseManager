@@ -1,15 +1,16 @@
 import React, { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, Link } from 'react-router-dom';
 import '../css/Project.css';
 import { FaPlus, FaEdit } from 'react-icons/fa';
-import AddManpowerPopup from '../sideComponents/AddManpowerPopup';
-import TravelsPopup from '../sideComponents/TravelsPopup';
-import ConsumablesPopup from '../sideComponents/ConsumablesPopup';
-import EquipmentsPopup from '../sideComponents/EquipmentsPopup';
-import ContingencyPopup from '../sideComponents/Contingency';
+import AddManpowerPopup from '../sideComponents/projectPage/AddManpowerPopup';
+import TravelsPopup from '../sideComponents/projectPage/TravelsPopup';
+import ConsumablesPopup from '../sideComponents/projectPage/ConsumablesPopup';
+import EquipmentsPopup from '../sideComponents/projectPage/EquipmentsPopup';
+import ContingencyPopup from '../sideComponents/projectPage/Contingency';
 import { fetchData } from '../assets/scripts';
 import { Oval } from 'react-loader-spinner';
-import DecManpowerPopup from '../sideComponents/DecManpowerPopup';
+import DecManpowerPopup from '../sideComponents/projectPage/DecManpowerPopup';
+import ManpowerEditDetailsPopup from '../sideComponents/projectPage/ManpowerDetailsPopup';
 
 function Project() {
     let { id } = useParams();
@@ -23,7 +24,7 @@ function Project() {
         async function fillData() {
             let response = await fetchData(`projects/${id}`);
             // let response = 
-            setTable(compileDate(response));
+            setTable(compileDate(response, setPopup));
             let { manpower, travels, consumables, equipments, contingency, overhead, ...filtered } = response;
             setData(filtered);
             document.title = `Project: ${filtered.title}`;
@@ -50,7 +51,7 @@ function Project() {
             {loading ? <Oval color='black' height={80} strokeWidth={5} /> :
                 <div id='projectMainDiv'>
                     {popup}
-                    <h1>Project Details <FaEdit size={40} className='hoverable' style={{ position: 'absolute', right: 20 }} /></h1>
+                    <h1>Project Details <FaEdit size={40} className='hoverable' title='Edit' style={{ position: 'absolute', right: 20 }} /></h1>
 
                     <div id="projectDetails">
                         <div>Funded By: {data.fundedBy}</div>
@@ -73,15 +74,15 @@ function Project() {
                     </div>
                     <div id="projectTabContent">
                         <div className="projectTabContentData">
-                            <span className="projectTabDataHeading">Sl.</span>
-                            <span className="projectTabDataHeading">Request Id</span>
-                            <span className="projectTabDataHeading">Indent Id</span>
-                            <span className="projectTabDataHeading">Date</span>
-                            <span className="projectTabDataHeading">Bill</span>
+                            <span className="tableTitle">Sl.</span>
+                            <span className="tableTitle">Request Id</span>
+                            <span className="tableTitle">Indent Id</span>
+                            <span className="tableTitle">Date</span>
+                            <span className="tableTitle">Details</span>
                             {table[0]}
                             <div className="add">
-                                <div className='hoverable inherit'><FaEdit size={20} onClick={() => setPopup(<DecManpowerPopup reset={() => setPopup(<></>)} proj={data}/>)} /></div>
-                                <div className='hoverable inherit'><FaPlus size={20} onClick={() => setPopup(<AddManpowerPopup reset={() => setPopup(<></>)}/>)} proj={data}/></div>
+                                <div className='hoverable inherit'><FaEdit size={20} onClick={() => setPopup(<DecManpowerPopup reset={() => setPopup(<></>)} proj={data} />)} /></div>
+                                <div className='hoverable inherit'><FaPlus size={20} onClick={() => setPopup(<AddManpowerPopup reset={() => setPopup(<></>)} />)} proj={data} /></div>
                             </div>
                         </div>
                         <div className="projectTabContentData">
@@ -129,17 +130,23 @@ function Project() {
 
 export default Project;
 
-function compileDate(response) {
+function compileDate(response, setPopup) {
     let manpowerContent = [];
-    response.manpower.map((item, index) => (
+    console.log(response);
+    
+    response.manpower.map((item, index) => {
+        let style = {};
+        if (item.action === 'added'){
+            style = {backgroundColor: 'rgb(200, 250, 200)'};
+        }else{ style = {backgroundColor: 'rgb(250, 200, 200)'}; }
         manpowerContent.push([
-            <div key={`${item.id}-sl`}>{index + 1}</div>,
-            <div key={`${item.id}-requestId`}>{item.id}</div>,
-            <div key={`${item.id}-indentId`}>{item.indentId}</div>,
-            <div key={`${item.id}-date`}>{item.date}</div>,
-            <div key={`${item.id}-bill`}>${item.bill}</div>
+            <div key={`${item.id}-sl`} style={style}>{index + 1}</div>,
+            <div key={`${item.id}-requestId`} style={style}>{item.id}</div>,
+            <div key={`${item.id}-indentId`} style={style}>{item.indentId}</div>,
+            <div key={`${item.id}-date`} style={style}>{item.date}</div>,
+            <div key={`${item.id}-bill`} style={style} className='hoverable' onClick={() => setPopup(<ManpowerEditDetailsPopup reset={() => setPopup(<></>)} entry={item} />)}> <b><u>{item.action=='added'? "Added":"Removed"}</u></b> </div>
         ])
-    ));
+    });
     let travelsContent = [];
     response.travels.map((item, index) => (
         travelsContent.push([
@@ -147,7 +154,7 @@ function compileDate(response) {
             <div key={`${item.id}-requestId`}>{item.id}</div>,
             <div key={`${item.id}-indentId`}>{item.indentId}</div>,
             <div key={`${item.id}-date`}>{item.date}</div>,
-            <div key={`${item.id}-bill`}>${item.bill}</div>
+            <div key={`${item.id}-bill`}><Link to={item.billLink}>${item.bill}</Link></div>
         ])
     ));
     let consumablesContent = [];
@@ -157,7 +164,7 @@ function compileDate(response) {
             <div key={`${item.id}-requestId`}>{item.id}</div>,
             <div key={`${item.id}-indentId`}>{item.indentId}</div>,
             <div key={`${item.id}-date`}>{item.date}</div>,
-            <div key={`${item.id}-bill`}>${item.bill}</div>
+            <div key={`${item.id}-bill`}><Link to={item.billLink}>${item.bill}</Link></div>
         ])
     ));
 
@@ -168,7 +175,7 @@ function compileDate(response) {
             <div key={`${item.id}-requestId`}>{item.id}</div>,
             <div key={`${item.id}-indentId`}>{item.indentId}</div>,
             <div key={`${item.id}-date`}>{item.date}</div>,
-            <div key={`${item.id}-bill`}>${item.bill}</div>
+            <div key={`${item.id}-bill`}><Link to={item.billLink}>${item.bill}</Link></div>
         ])
     ));
 
@@ -179,7 +186,7 @@ function compileDate(response) {
             <div key={`${item.id}-requestId`}>{item.id}</div>,
             <div key={`${item.id}-indentId`}>{item.indentId}</div>,
             <div key={`${item.id}-date`}>{item.date}</div>,
-            <div key={`${item.id}-bill`}>${item.bill}</div>
+            <div key={`${item.id}-bill`}><Link to={item.billLink}>${item.bill}</Link></div>
         ])
     ));
     return [manpowerContent, travelsContent, consumablesContent, equipmentsContent, contingencyContent];

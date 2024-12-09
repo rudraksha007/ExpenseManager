@@ -1,8 +1,8 @@
 import React from 'react';
-import '../css/Popup.css';
+import '../../css/Popup.css';
 import { FaTimes, FaEdit, FaCheck } from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
-import { fetchData } from '../assets/scripts.js';
+import { fetchData } from '../../assets/scripts.js';
 
 function IndentPopup({ reset, id }) {
     const navigate = useNavigate();

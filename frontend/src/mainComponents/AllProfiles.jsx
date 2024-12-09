@@ -35,8 +35,7 @@ function AllProfiles() {
                             <div style={style}>{profile.startDate}</div>
                             <div style={style}>{profile.isActive ? 'Active' : profile.endDate}</div>
                             <div className='allProfilesActions' style={style}>
-                                <Link to={`/profiles/${profile.id}`} title="View Profile Details"><FaInfoCircle size={20} /></Link>
-                                <Link to={`/profiles/edit/${profile.id}`} title="Edit Profile"><FaEdit size={20} /></Link>
+                                <Link to={`/profiles/${profile.id}`} title="View Profile Details"><FaEdit size={20} /></Link>
                             </div>
                         </React.Fragment>
                     )

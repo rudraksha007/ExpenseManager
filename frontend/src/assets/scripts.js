@@ -3,7 +3,7 @@ const mainUrl = 'http://localhost:8000/api/';
 
 let data = {
     profiles: {
-        profiles:[
+        profiles: [
             {
                 id: 1,
                 name: 'John Doe',
@@ -34,7 +34,7 @@ let data = {
         ],
         total: 3
     },
-    "projects~1":{
+    projects: {
         projects: [
             {
                 "id": 1,
@@ -63,7 +63,7 @@ let data = {
         ],
         total: 3
     },
-    indents:{
+    indents: {
         indents: [
             {
                 id: '554sdssafese',
@@ -88,8 +88,8 @@ let data = {
             }
         ]
     },
-    purchaseReqs:{
-        purchaseReqs:[
+    purchaseReqs: {
+        purchaseReqs: [
             {
                 id: 'req123',
                 item: 'Laptop',
@@ -113,8 +113,8 @@ let data = {
             }
         ]
     },
-    purchaseOrders:{
-        purchaseOrders:[
+    purchaseOrders: {
+        purchaseOrders: [
             {
                 id: 'ord123',
                 item: 'Laptop',
@@ -138,36 +138,52 @@ let data = {
             }
         ]
     },
-    projects_1:{
+    projects_1: {
         id: "abc",
         title: "Project Title",
         totalIndent: 1000,
         fundedBy: "The fuuu",
         startDate: "Anytime",
         endDate: "Sometime",
-        workers:[
-            {id: "W001", name: "Worker 1"},
-            {id: "W002", name: "Worker 2"},
-            {id: "W003", name: "Worker 3"}
+        workers: [
+            { id: "W001", name: "Worker 1" },
+            { id: "W002", name: "Worker 2" },
+            { id: "W003", name: "Worker 3" }
         ],
         manpower: [
             {
                 id: "REQ001",
                 indentId: "IND001",
                 date: "2023-10-01",
-                bill: 1000
+                bill: 1000,
+                action: "added",
+                users: [
+                    { id: "U001", name: "User 1", role: "Scientist" },
+                    { id: "U002", name: "User 2", role: "Developer" }
+                ]
             },
             {
                 id: "REQ002",
                 indentId: "IND002",
                 date: "2023-10-02",
-                bill: 2000
+                bill: 2000,
+                action: "removed",
+                users: [
+                    { id: "U001", name: "User 1", role: "Manager" },
+                    { id: "U002", name: "User 2", role: "Admin" }
+                ]
             },
             {
                 id: "REQ003",
                 indentId: "IND003",
                 date: "2023-10-03",
-                bill: 3000
+                bill: 3000,
+                billLink: "http://example.com/bill/REQ003",
+                action: "added",
+                users: [
+                    { id: "U001", name: "User 1", role: "Manager" },
+                    { id: "U002", name: "User 2", role: "Admin" }
+                ]
             }
         ],
         travels: [
@@ -175,19 +191,22 @@ let data = {
                 id: "REQ101",
                 indentId: "IND101",
                 date: "2023-10-11",
-                bill: 1100
+                bill: 1100,
+                billLink: "http://example.com/bill/REQ101"
             },
             {
                 id: "REQ102",
                 indentId: "IND102",
                 date: "2023-10-12",
-                bill: 2200
+                bill: 2200,
+                billLink: "http://example.com/bill/REQ102"
             },
             {
                 id: "REQ103",
                 indentId: "IND103",
                 date: "2023-10-13",
-                bill: 3300
+                bill: 3300,
+                billLink: "http://example.com/bill/REQ103"
             }
         ],
         consumables: [
@@ -195,19 +214,22 @@ let data = {
                 id: "REQ201",
                 indentId: "IND201",
                 date: "2023-10-21",
-                bill: 2100
+                bill: 2100,
+                billLink: "http://example.com/bill/REQ201"
             },
             {
                 id: "REQ202",
                 indentId: "IND202",
                 date: "2023-10-22",
-                bill: 2200
+                bill: 2200,
+                billLink: "http://example.com/bill/REQ202"
             },
             {
                 id: "REQ203",
                 indentId: "IND203",
                 date: "2023-10-23",
-                bill: 2300
+                bill: 2300,
+                billLink: "http://example.com/bill/REQ203"
             }
         ],
         equipments: [
@@ -215,19 +237,22 @@ let data = {
                 id: "REQ301",
                 indentId: "IND301",
                 date: "2023-10-31",
-                bill: 3100
+                bill: 3100,
+                billLink: "http://example.com/bill/REQ301"
             },
             {
                 id: "REQ302",
                 indentId: "IND302",
                 date: "2023-11-01",
-                bill: 3200
+                bill: 3200,
+                billLink: "http://example.com/bill/REQ302"
             },
             {
                 id: "REQ303",
                 indentId: "IND303",
                 date: "2023-11-02",
-                bill: 3300
+                bill: 3300,
+                billLink: "http://example.com/bill/REQ303"
             }
         ],
         contingency: [
@@ -235,19 +260,22 @@ let data = {
                 id: "REQ401",
                 indentId: "IND401",
                 date: "2023-11-11",
-                bill: 4100
+                bill: 4100,
+                billLink: "http://example.com/bill/REQ401"
             },
             {
                 id: "REQ402",
                 indentId: "IND402",
                 date: "2023-11-12",
-                bill: 4200
+                bill: 4200,
+                billLink: "http://example.com/bill/REQ402"
             },
             {
                 id: "REQ403",
                 indentId: "IND403",
                 date: "2023-11-13",
-                bill: 4300
+                bill: 4300,
+                billLink: "http://example.com/bill/REQ403"
             }
         ],
         overhead: [
@@ -255,21 +283,25 @@ let data = {
                 id: "REQ501",
                 indentId: "IND501",
                 date: "2023-11-21",
-                bill: 5100
+                bill: 5100,
+                billLink: "http://example.com/bill/REQ501"
             },
             {
                 id: "REQ502",
                 indentId: "IND502",
                 date: "2023-11-22",
-                bill: 5200
+                bill: 5200,
+                billLink: "http://example.com/bill/REQ502"
             },
             {
                 id: "REQ503",
                 indentId: "IND503",
                 date: "2023-11-23",
-                bill: 5300
+                bill: 5300,
+                billLink: "http://example.com/bill/REQ503"
             }
         ],
+
         projectManager: "Mr. X"
     }
 }
@@ -278,16 +310,30 @@ async function fetchData(url) {
         // const response = await fetch(mainUrl + url, {method: 'POST', headers: 'application/json', credentials: 'include'});
         // const data = await response.json();
         await new Promise((resolve) => setTimeout(resolve, 1000));
+        if (url.includes('projects/')) {
+            return data.projects_1;
+        }
+        return data[url];
+    } catch (error) {
+        console.log('There has been a problem with your fetch operation:');
+        return null;
+    }
+}
+
+async function fetchDataWithParams(url, data) {
+    try {
+        // const response = await fetch(mainUrl + url, {method: 'POST', headers: 'application/json', credentials: 'include', body: JSON.stringify(data)});
+        // const data = await response.json();
+        await new Promise((resolve) => setTimeout(resolve, 1000));
         return data[url.replace('/', '_')];
     } catch (error) {
-        // console.error('There has been a problem with your fetch operation:', error);
         console.log('There has been a problem with your fetch operation:');
         return null;
     }
 }
 let userProfile = {
     username: 'rudra',
-    rank: 'superadmin',
+    role: 'superadmin',
     projects: {
         active: ['Project A', 'Project B', 'Project C'],
         completed: ['Project D', 'Project E', 'Project F']
@@ -297,7 +343,6 @@ let userProfile = {
 // let userProfile = null;
 async function login(setProfile) {
     // const userProfile = await fetchData('login');
-    // console.log(userProfile);
     if (!userProfile) {
         return false;
     }
@@ -305,4 +350,4 @@ async function login(setProfile) {
     return true;
 }
 
-export { fetchData, login };
+export { fetchData, login, fetchDataWithParams };

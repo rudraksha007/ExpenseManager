@@ -14,6 +14,8 @@ import AllProfiles from './mainComponents/AllProfiles';
 import { login } from './assets/scripts.js';
 import { ProfileContext } from './assets/UserProfile';
 import { Oval } from 'react-loader-spinner';
+import FingerprintJS from '@fingerprintjs/fingerprintjs';
+import NewProject from './mainComponents/NewProject.jsx';
 // import LoadingScreen from './sideComponents/LoadingScreen.jsx';
 
 function App() {
@@ -48,6 +50,7 @@ function App() {
               <Route exact path='/purchaseorders' element={<PurchaseOrders />} />
               <Route path='/projects/:id' element={<Project />} />
               <Route path='/profiles' element={<AllProfiles />} />
+              <Route path='/newproject' element={<NewProject/>}/>
 
               {/* <Route path='/addproject' element={<ExpenseForm />} /> */}
               {/* <Route path='/editproject/:id' element={<Editproject />} /> */}

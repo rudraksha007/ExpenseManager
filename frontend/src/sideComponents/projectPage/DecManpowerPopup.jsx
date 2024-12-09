@@ -1,13 +1,14 @@
 import React, { useEffect, useState } from 'react';
-import '../css/Popup.css';
+import '../../css/Popup.css';
 import { FaTimes } from 'react-icons/fa';
-import { fetchData } from '../assets/scripts';
+import { fetchData, fetchDataWithParams } from '../../assets/scripts';
 import { Oval } from 'react-loader-spinner';
 
 function DecManpowerPopup({ reset, proj }) {
     const today = new Date().toISOString().split('T')[0];
     const [profiles, setProfiles] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [ind, setInd] = useState('Dummy Indent');
     useEffect(() => {
         async function getProfiles() {
             if (proj.workers) {
@@ -21,6 +22,7 @@ function DecManpowerPopup({ reset, proj }) {
                         </React.Fragment>
                     )
                 ));
+                // setInd(fetchDataWithParams('projects', {projectId: proj.id, action: 'dec'}).indentId);
                 setProfiles(l);
             }
             setLoading(false);
@@ -29,7 +31,7 @@ function DecManpowerPopup({ reset, proj }) {
     }, []);
     return (
         <div className='projectPopup'>
-            <div className="projectPopupCont" id='manpowerPopupCont'>
+            <div className="projectPopupCont" id='largePopupCont'>
                 <>
                     {loading ? <Oval color='black' height={80} strokeWidth={5} /> :
                         <>
@@ -37,7 +39,7 @@ function DecManpowerPopup({ reset, proj }) {
                             <h2>Decrease Manpower</h2>
                             <form id='decManpowerForm'>
                                 <label htmlFor="date">Date: <input type="date" id="date" name="date" max={today} required /></label>
-                                <label htmlFor="indentId">Indent ID: <input type="text" id="indentId" name="indentId" required /></label>
+                                <label htmlFor="indentId">Indent ID: <input type="text" id="indentId" name="indentId" disabled value={ind}/></label>
                                 <div id="decManpowerPopupProfileTable">
                                     <div className="tableTitle">Tick</div>
                                     <div className="tableTitle">Name</div>

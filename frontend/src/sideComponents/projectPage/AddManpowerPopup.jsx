@@ -1,15 +1,17 @@
 import React, { useEffect, useState } from 'react';
-import '../css/Popup.css';
+import '../../css/Popup.css';
 import { FaTimes } from 'react-icons/fa';
-import { fetchData } from '../assets/scripts';
+import { fetchData } from '../../assets/scripts';
 import { Oval } from 'react-loader-spinner';
 
-function ManpowerPopup({ reset }) {
+function ManpowerPopup({ reset, proj }) {
     const today = new Date().toISOString().split('T')[0];
     const [profiles, setProfiles] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [ind, setInd] = useState('Dummy Indent');
     useEffect(() => {
         async function getProfiles() {
+            // const data = await fetchDataWithParams('profiles', {projectId: proj.id, action: add});
             const data = await fetchData('profiles');
             if (data) {
                 let l = [];
@@ -22,6 +24,7 @@ function ManpowerPopup({ reset }) {
                         </React.Fragment>
                     )
                 ));
+                setInd('IND-Dummy');
                 setProfiles(l);
             }
             setLoading(false);
@@ -30,7 +33,7 @@ function ManpowerPopup({ reset }) {
     }, []);
     return (
         <div className='projectPopup'>
-            <div className="projectPopupCont" id='manpowerPopupCont'>
+            <div className="projectPopupCont" id='largePopupCont'>
                 <>
                     {loading ? <Oval color='black' height={80} strokeWidth={5} /> :
                         <>
@@ -38,7 +41,7 @@ function ManpowerPopup({ reset }) {
                             <h2>Add Manpower</h2>
                             <form id='addManpowerForm'>
                                 <label htmlFor="date">Date: <input type="date" id="date" name="date" max={today} required /></label>
-                                <label htmlFor="indentId">Indent ID: <input type="text" id="indentId" name="indentId" required /></label>
+                                <label htmlFor="indentId">Indent ID: <input type="text" id="indentId" name="indentId" disabled value={ind}/></label>
                                 <div id="addManpowerPopupProfileTable">
                                     <div className="tableTitle">Tick</div>
                                     <div className="tableTitle">Name</div>

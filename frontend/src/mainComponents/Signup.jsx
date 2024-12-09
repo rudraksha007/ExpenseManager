@@ -26,7 +26,7 @@ function Signup() {
                     </label>
                 </div>
                 <div id="submitDiv">
-                    <label id="loginNewAcct">Don't have an account? <Link to={"/signin"}>Create New Account</Link></label>
+                    <label id="loginNewAcct">Don't have an account? <Link to={"/login"}>Create New Account</Link></label>
                     <input type="submit" className="hoverable" />
                 </div>
             </form >

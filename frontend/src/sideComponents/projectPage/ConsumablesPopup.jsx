@@ -1,5 +1,5 @@
 import React from 'react';
-import '../css/Popup.css';
+import '../../css/Popup.css';
 import { FaTimes } from 'react-icons/fa';
 
 function ConsumablesPopup({ reset }) {

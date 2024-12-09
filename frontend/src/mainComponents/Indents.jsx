@@ -1,6 +1,6 @@
 import React, { useEffect, useRef } from 'react';
 import '../css/Requests.css';
-import IndentPopup from '../sideComponents/IndentPopup';
+import IndentPopup from '../sideComponents/projectPage/IndentPopup';
 import { FaPlus } from 'react-icons/fa';
 import { Oval } from 'react-loader-spinner';
 import PageControls from '../sideComponents/PageControls';

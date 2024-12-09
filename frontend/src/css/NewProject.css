@@ -1,0 +1,23 @@
+#newProjectDiv{
+    height: 90dvh;
+    width: 100dvw;
+    display: grid;
+    grid-template-columns: 1fr 4fr 1fr 4fr;
+    grid-auto-rows: max-content;
+    padding: 10px 100px;
+    gap: 20px;
+    box-sizing: border-box;
+    /* background-color: black; */
+}
+#newProjectDiv>label{
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+#newProjectDiv>input{
+    width: 70%;
+    height: 25px;
+    outline: none;
+    border: none;
+    background-color: rgb(222, 222, 222);
+}
