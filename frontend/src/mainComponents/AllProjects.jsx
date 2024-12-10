@@ -1,20 +1,22 @@
 import '../css/AllProjects.css';
 import { data, Link } from 'react-router-dom';
 import { FaInfoCircle, FaEdit } from 'react-icons/fa';
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useContext } from 'react';
 import { fetchData, fetchDataWithParams } from '../assets/scripts.js';
 import React from 'react';
 import { Oval } from 'react-loader-spinner';
 import PageControls from '../sideComponents/PageControls';
+import { ProfileContext } from '../assets/UserProfile.jsx';
 
 function AllProjects() {
 
     const [projects, setProjects] = useState([]);
     const [toDate, setToDate] = useState(new Date().toISOString().split("T")[0]);
-    const [fromDate, setFromDate] = useState(null);
+    const [fromDate, setFromDate] = useState('');
     const total = useRef(0);
     const [loading, setLoading] = useState(true);
-    const [filter, setFilter] = useState({page:1, name:'', status:'all', fundedBy:'all', fromDate:'', toDate:''});
+    const [filter, setFilter] = useState({page:1, name:'', status:'all', fundedBy:'all', fromDate:fromDate, toDate:toDate});
+    const {profile} = useContext(ProfileContext);
     const filterData = (e)=>{
 
     }
@@ -23,20 +25,20 @@ function AllProjects() {
         document.title = 'All Projects';
         async function getProjects() {
             // const data = await fetchDataWithParams(`projects`, { page: filter.page, count: 25 });
-            const data = await fetchData('projects');
+            let data = (await fetchDataWithParams('projects', 'post', {id: profile.id, fields: ['ProjectNo','ProjectTitle','ProjectStartDate', 'ProjectEndDate', 'TotalSanctionamount'], filter: filter}));
             console.log(data);
             
-            if (data) {
+            if (data.status == 'success') {
                 let l = [];
                 data.projects.map((project, index) => (
                     l.push(
-                        <React.Fragment key={project.id}>
+                        <React.Fragment key={project.ProjectNo}>
                             <div>{index + 1}</div>
-                            <div>{project.title}</div>
-                            <div>{project.capital}</div>
+                            <div>{project.ProjectTitle}</div>
+                            <div>{project.TotalSanctionamount}</div>
                             <div>{project.fundedBy}</div>
-                            <div>{project.startDate}</div>
-                            <div>{project.endDate}</div>
+                            <div>{project.ProjectStartDate}</div>
+                            <div>{project.ProjectEndDate}</div>
                             <div className='allProjectsActions'>
                                 <Link to={`/projects/${project.id}`} title="View Project Details"><FaEdit size={20} /></Link>
                             </div>

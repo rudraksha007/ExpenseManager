@@ -77,7 +77,7 @@ function addUser(req, res) {
 
 function getProjects(req, res) {
   getFromDb('projects', req.body.fields).then((results) => {
-    res.status(200).json({ projects: results }).end();
+    res.status(200).json({ projects: results, total: results.length }).end();
   }).catch((err) => {
     res.status(500).json({ message: 'Error fetching projects', err: err.message }).end();
   });
