@@ -27,11 +27,11 @@ function Login() {
         const data = await fetchDataWithParams('login', 'post', {...formData, password: CryptoJS.SHA256(formData.password).toString(), fingerPrint: fingerPrint });
         console.log(data);
         
-        if(data){
+        if(data.status=='success'){
             setProfile(data.profile);
         }
         else{
-            alert('Failed to Login');
+            alert('Failed to Login: '+data.message);
             console.log('Failed to Login');
         }
         ele.style.backgroundImage = '';        

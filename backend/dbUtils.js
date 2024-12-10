@@ -174,9 +174,9 @@ async function connectDb() {
                 definition: `
                 id INT PRIMARY KEY,
                 name VARCHAR(255),
-                email VARCHAR(255),
+                email VARCHAR(255) UNIQUE KEY,
                 password VARCHAR(255),
-                designation VARCHAR(255),
+                projects JSON,
                 active INT,
                 role VARCHAR(255)
             `
@@ -206,7 +206,7 @@ function authenticate(req, res, next) {
     const token = req.cookies.token;
     if (!token && req.path !== '/api/login')
         return res.status(401).json({ message: 'Access denied' }); // If token is not present and path is not for login
-    if (!token && req.path === '/api/login') return next(); // If token is not present and path is for login
+    if (!token && req.path === '/api/login' ) return next(); // If token is not present and path is for login
     jwt.verify(decrypt(token, req.body.fingerPrint), process.env.SECRET_KEY, (err, decoded) => {
         if (err) {
             // If token is invalid=> delete token from client side since it's probably expired
@@ -220,8 +220,8 @@ function authenticate(req, res, next) {
 
 function authorize(allowedRoles) {
     return (req, res, next) => {
-        console.log(req.body.role);
-        if (!allowedRoles.includes(req.body.role)) {
+        console.log(req.processed.token.role);
+        if (!allowedRoles.includes(req.processed.token.role)) {
             return res.status(403).json({ message: 'Permission denied' });
         }
         next();

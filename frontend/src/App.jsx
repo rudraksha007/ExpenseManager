@@ -15,7 +15,6 @@ import { autoLogin } from './assets/scripts.js';
 import { ProfileContext } from './assets/UserProfile';
 import { Oval } from 'react-loader-spinner';
 import NewProject from './mainComponents/NewProject.jsx';
-// import LoadingScreen from './sideComponents/LoadingScreen.jsx';
 
 function App() {
   const { profile, setProfile } = useContext(ProfileContext);
@@ -24,8 +23,11 @@ function App() {
   useEffect(() => {
     document.title = 'Project Management System';
     async function login() {
-      if (!(await autoLogin(setProfile))) {
+      let prof = await autoLogin();
+      if (!(prof)) {
         navigate('/login');
+      }else{
+        setProfile(prof);
       }
       setLoading(false);
     }

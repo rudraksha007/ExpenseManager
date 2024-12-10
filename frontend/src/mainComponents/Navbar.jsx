@@ -30,8 +30,8 @@ function Navbar() {
                         <NavLink to='/'>Home</NavLink>
                         <NavLink to='/projects'>Projects</NavLink>
                         <NavLink to='/indents/'>Indents</NavLink>
-                        {profile.role == 'superadmin' || profile.role == 'admin' ? <NavLink to='/purchasereqs/'>Purchase Reqs</NavLink> : <></>}
-                        {(profile.role == 'superadmin') ? <NavLink to='/purchaseorders/'>Purchase Orders</NavLink> : <></>}
+                        {profile.role == 'superadmin' || profile.role == 'pme' || profile.role=='root'? <NavLink to='/purchasereqs/'>Purchase Reqs</NavLink> : <></>}
+                        {(profile.role == 'superadmin' || profile.role=='root') ? <NavLink to='/purchaseorders/'>Purchase Orders</NavLink> : <></>}
                     </>
                 }
 
@@ -41,7 +41,7 @@ function Navbar() {
                     <FaTimes size={40} color='black' style={{ position: 'absolute', top: 20, right: 20 }} className='hoverable' onClick={() => document.getElementById('sideBar').style.transform = 'translateX(0)'} />
                     <div>
                         <Link to='/newproject' className='hoverable'> <FaPlus size={40} style={{ marginRight: 8 }} /> Create New Project</Link>
-                        {profile && (profile.role == 'admin' || profile.role == 'superadmin') ?
+                        {profile && (profile.role == 'admin' || profile.role == 'superadmin' || profile.role=='root') ?
                             <>
                                 <Link to='/signup' className='hoverable'> <FaUserPlus size={40} style={{ marginRight: 8 }} /> Create New User</Link>
                                 <Link to='/profiles' className='hoverable'> <FaUser size={40} style={{ marginRight: 8 }} /> All Users</Link>

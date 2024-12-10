@@ -315,7 +315,7 @@ async function fetchData(url, method) {
             credentials: 'include',
             body: JSON.stringify({ fingerPrint: fingerPrint })
         }
-        const response = await fetch('/api/' + url, options);        
+        const response = await fetch('/api/' + url, options);
         // const data = await response.json();
         return data;
     } catch (error) {
@@ -332,14 +332,14 @@ async function fetchDataWithParams(url, method, data) {
                 method: method,
                 headers: { 'Content-Type': 'application/json' },
                 credentials: 'include',
-                body: JSON.stringify({...data, fingerPrint: fingerPrint})
+                body: JSON.stringify({ ...data, fingerPrint: fingerPrint })
             });
+        const res = await response.json();
         if (!response.ok) {
             console.log('Fetch Failed');
-            return null;
+            return { status: 'failed', message: res.message };
         }
-        const res = await response.json();
-        return res;
+        return {...res, status: 'success'};
     } catch (error) {
         console.log('There has been a problem with your fetch operation:');
         console.log(error);
@@ -347,19 +347,17 @@ async function fetchDataWithParams(url, method, data) {
         return null;
     }
 }
-async function autoLogin(setProfile) {
+async function autoLogin() {
     const fpPromise = await FingerprintJS.load();
     fingerPrint = (await fpPromise.get()).visitorId;
-
-    const userProfile = await fetchDataWithParams('autoLogin', 'post', { fingerPrint: fingerPrint });
-    if (!userProfile) {
+    const res = await fetchDataWithParams('autoLogin', 'post', { fingerPrint: fingerPrint });
+    if (res.status!='success') {
         return false;
     }
-    setProfile(userProfile);
-    return true;
+    return res;
 }
 async function login(setProfile) {
-    if (!fingerPrint){
+    if (!fingerPrint) {
         const fpPromise = await FingerprintJS.load();
         fingerPrint = (await fpPromise.get()).visitorId;
     }
