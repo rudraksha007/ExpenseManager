@@ -1,4 +1,4 @@
-import { db } from "../dbUtils.js";
+import { db, getFromDb } from "../dbUtils.js";
 const compare = import('bcryptjs').compare;  // Normal import was not working so i imported it like this
 // const 
 import jwt from 'jsonwebtoken';
@@ -9,9 +9,9 @@ import { log } from "../utils.js";
 // autoLogin function is there in dbUtils, this is meant for manual signin page
 async function login(req, res) {
   const { email, password, fingerPrint, autoLogin } = req.body;
-  if(autoLogin) return res.status(200).json(null).end();
+  if (autoLogin) return res.status(200).json(null).end();
   if (!email || !password || !fingerPrint) return res.status(200).json(null).end();
-  let rootPass =  Hash(process.env.ROOT_PASSWORD);
+  let rootPass = Hash(process.env.ROOT_PASSWORD);
   if (email === process.env.ROOT_ID && password === rootPass) {
     let token = jwt.sign({ id: 'root', role: 'root' }, process.env.SECRET_KEY, { expiresIn: '30m' });
     log('Root login successful');
@@ -45,7 +45,7 @@ async function login(req, res) {
 
 function autoLogin(req, res) {
   const token = req.processed.token;
-  if (token.id==='root') return res.status(200).json({ message: 'Auto login successful', role: 'root' }).end();
+  if (token.id === 'root') return res.status(200).json({ message: 'Auto login successful', role: 'root' }).end();
   db.query('SELECT * FROM users WHERE id = ?', [token.id], (err, results) => {
     if (err) return res.status(500).json({ message: 'Database error' }).end();
     if (results.length === 0) {
@@ -75,4 +75,19 @@ function addUser(req, res) {
     res.status(201).json({ message: 'Profile added successfully' }).end();
   });
 }
-export { login, addUser, autoLogin };
+
+function getProjects(req, res) {
+  // const query = 'SELECT * FROM projects';
+
+  // db.query(query).then((results) => {
+  //   res.status(200).json({ projects: results }).end();
+  // }).catch((err) => {
+  //   res.status(500).json({ message: 'Error fetching projects', err: err.message }).end();
+  // });
+  getFromDb('projects', req.body.fields).then((results) => {
+    res.status(200).json({ projects: results }).end();
+  }).catch((err) => {
+    res.status(500).json({ message: 'Error fetching projects', err: err.message }).end();
+  });
+}
+export { login, addUser, autoLogin, getProjects };

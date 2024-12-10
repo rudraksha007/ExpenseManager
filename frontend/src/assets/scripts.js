@@ -1,6 +1,7 @@
 import FingerprintJS from '@fingerprintjs/fingerprintjs';
 
 const mainUrl = '/api/';
+let fingerPrint = null;
 
 let data = {
     profiles: {
@@ -308,18 +309,15 @@ let data = {
 }
 async function fetchData(url, method) {
     try {
-        const response = await fetch('/api/' + url, {
+        let options = {
             method: method,
             headers: { 'Content-Type': 'application/json' },
-            credentials: 'include'
-        });
-        const data = await response.json();
+            credentials: 'include',
+            body: JSON.stringify({ fingerPrint: fingerPrint })
+        }
+        const response = await fetch('/api/' + url, options);        
+        // const data = await response.json();
         return data;
-        // await new Promise((resolve) => setTimeout(resolve, 1000));
-        // if (url.includes('projects/')) {
-        //     return data.projects_1;
-        // }
-        // return data[url];
     } catch (error) {
         console.log('There has been a problem with your fetch operation:');
         console.log(error);
@@ -334,7 +332,7 @@ async function fetchDataWithParams(url, method, data) {
                 method: method,
                 headers: { 'Content-Type': 'application/json' },
                 credentials: 'include',
-                body: JSON.stringify(data)
+                body: JSON.stringify({...data, fingerPrint: fingerPrint})
             });
         if (!response.ok) {
             console.log('Fetch Failed');
@@ -351,7 +349,7 @@ async function fetchDataWithParams(url, method, data) {
 }
 async function autoLogin(setProfile) {
     const fpPromise = await FingerprintJS.load();
-    const fingerPrint = (await fpPromise.get()).visitorId;
+    fingerPrint = (await fpPromise.get()).visitorId;
 
     const userProfile = await fetchDataWithParams('autoLogin', 'post', { fingerPrint: fingerPrint });
     if (!userProfile) {
@@ -361,11 +359,13 @@ async function autoLogin(setProfile) {
     return true;
 }
 async function login(setProfile) {
-    const fpPromise = await FingerprintJS.load();
-    const fingerPrint = (await fpPromise.get()).visitorId;
+    if (!fingerPrint){
+        const fpPromise = await FingerprintJS.load();
+        fingerPrint = (await fpPromise.get()).visitorId;
+    }
     console.log(fingerPrint);
 
-    const userProfile = await fetchDataWithParams('login', 'post', { fingerPrint: fingerPrint, type: 'autoLogin' });
+    const userProfile = await fetchData('login', 'post');
     if (!userProfile) {
         return false;
     }

@@ -168,6 +168,18 @@ async function connectDb() {
                     FOREIGN KEY (ProjectTitle) REFERENCES Projects(ProjectTitle),
                     FOREIGN KEY (IndentID) REFERENCES Indents(IndentID)
                 `
+            },
+            {
+                tableName: 'users',
+                definition: `
+                id INT PRIMARY KEY,
+                name VARCHAR(255),
+                email VARCHAR(255),
+                password VARCHAR(255),
+                designation VARCHAR(255),
+                active INT,
+                role VARCHAR(255)
+            `
             }
         ];
         // Queries to create tables if they don't exist
@@ -194,9 +206,7 @@ function authenticate(req, res, next) {
     const token = req.cookies.token;
     if (!token && req.path !== '/api/login')
         return res.status(401).json({ message: 'Access denied' }); // If token is not present and path is not for login
-    if(!token && req.path === '/api/login') return next(); // If token is not present and path is for login
-    log('body 1');
-    console.log(req.body);
+    if (!token && req.path === '/api/login') return next(); // If token is not present and path is for login
     jwt.verify(decrypt(token, req.body.fingerPrint), process.env.SECRET_KEY, (err, decoded) => {
         if (err) {
             // If token is invalid=> delete token from client side since it's probably expired
@@ -217,5 +227,10 @@ function authorize(allowedRoles) {
         next();
     };
 };
+async function getFromDb(table, fields, where) {
+    let query = `SELECT ${fields.join(',')} FROM ${table}`;
+    if (where) query += ` WHERE ${where}`;
+    return db.query(query).then(([rows]) => rows);
 
-export { db, authenticate, authorize, connectDb };
+}
+export { db, authenticate, authorize, connectDb,getFromDb };

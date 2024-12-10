@@ -9,7 +9,7 @@ function Dash() {
     },[]);
     return (
         <div id='dashBody'>
-            {/* <div className="dashSection" id="dashUserProjects"  style={{height:'90%', width:'50%'}}><UserProjects/></div> */}
+            <div className="dashSection" id="dashUserProjects"  style={{height:'90%', width:'50%'}}><UserProjects/></div>
             {/* <div className="dashSection" id='dashUserInfo' style={{height:'fit-content'}}><Userinfobar /></div> */}
         </div>
     );
