@@ -3,6 +3,7 @@ import react from '@vitejs/plugin-react-swc'
 
 // https://vite.dev/config/
 export default defineConfig({
+  root: './',
   plugins: [react()],
   server: {
     proxy: {
@@ -13,4 +14,7 @@ export default defineConfig({
       },
     },
   },
+  // optimizeDeps: {
+  //   exclude: ['bcryptjs', 'jsonwebtoken', 'mysql2/promise'],  // Exclude problematic dependencies
+  // },
 })

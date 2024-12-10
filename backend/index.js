@@ -1,7 +1,7 @@
 import { log } from './utils.js';
 import express from 'express';
 import dotenv from 'dotenv';
-import { login, addUser } from './callbacks/postReqs.js';
+import { login, addUser, autoLogin } from './callbacks/postReqs.js';
 import cookieParser from 'cookie-parser';
 import { db, authenticate, authorize, connectDb } from './dbUtils.js';
 import cors from 'cors';
@@ -15,6 +15,7 @@ await connectDb();
 
 //Post requests (right click on supplied function-> goto source definition to view the code)
 app.post('/api/login', (req, res) => login(req, res)); 
+app.post('/api/autoLogin', (req, res) => autoLogin(req, res)); 
 app.post('/api/users', authorize(['Super Admin']), (req, res) => addUser(req, res));
 
 // --- Profiles CRUD Operations ---

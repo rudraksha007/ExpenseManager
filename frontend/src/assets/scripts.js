@@ -1,4 +1,3 @@
-import { log } from "../../../backend/utils";
 import FingerprintJS from '@fingerprintjs/fingerprintjs';
 
 const mainUrl = '/api/';
@@ -323,7 +322,7 @@ async function fetchData(url, method) {
         // return data[url];
     } catch (error) {
         console.log('There has been a problem with your fetch operation:');
-        log(error);
+        console.log(error);
         return null;
     }
 }
@@ -337,6 +336,10 @@ async function fetchDataWithParams(url, method, data) {
                 credentials: 'include',
                 body: JSON.stringify(data)
             });
+        if (!response.ok) {
+            console.log('Fetch Failed');
+            return null;
+        }
         const res = await response.json();
         return res;
     } catch (error) {
@@ -346,22 +349,23 @@ async function fetchDataWithParams(url, method, data) {
         return null;
     }
 }
-// let userProfile = {
-//     username: 'rudra',
-//     role: 'superadmin',
-//     projects: {
-//         active: ['Project A', 'Project B', 'Project C'],
-//         completed: ['Project D', 'Project E', 'Project F']
-//     }
+async function autoLogin(setProfile) {
+    const fpPromise = await FingerprintJS.load();
+    const fingerPrint = (await fpPromise.get()).visitorId;
 
-// }
-// let userProfile = null;
-async function login(setProfile, method) {
+    const userProfile = await fetchDataWithParams('autoLogin', 'post', { fingerPrint: fingerPrint });
+    if (!userProfile) {
+        return false;
+    }
+    setProfile(userProfile);
+    return true;
+}
+async function login(setProfile) {
     const fpPromise = await FingerprintJS.load();
     const fingerPrint = (await fpPromise.get()).visitorId;
     console.log(fingerPrint);
 
-    const userProfile = await fetchDataWithParams('login', 'post', { fingerPrint: fingerPrint });
+    const userProfile = await fetchDataWithParams('login', 'post', { fingerPrint: fingerPrint, type: 'autoLogin' });
     if (!userProfile) {
         return false;
     }
@@ -369,4 +373,4 @@ async function login(setProfile, method) {
     return true;
 }
 
-export { fetchData, login, fetchDataWithParams };
+export { fetchData, login, fetchDataWithParams, autoLogin };

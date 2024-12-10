@@ -1,8 +1,7 @@
 import mysql from 'mysql2/promise';
-import crypto from 'crypto';
 import jwt from 'jsonwebtoken';
 import { log } from './utils.js';
-import { autoLogin } from './callbacks/postReqs.js';
+import { decrypt } from './crypt.js';
 let db = null;
 async function connectDb() {
     try {
@@ -190,40 +189,23 @@ async function connectDb() {
         process.exit(1);
     }
 }
-function encrypt(token, fingerPrint) {
-    const key = crypto.createHash('sha256').update(fingerPrint).digest();   // 32-byte key for AES-256
-    const cipher = crypto.createCipheriv(algorithm, key, process.env.SECRET_IV);
-    return cipher.update(token, 'utf8', 'hex') + cipher.final('hex');
-}
-
-function decrypt(text, fingerPrint) {
-    const key = crypto.createHash('sha256').update(fingerPrint).digest();
-    const decipher = crypto.createDecipheriv(algorithm, key, process.env.SECRET_IV);
-    return decipher.update(text, 'hex', 'utf8') + decipher.final('utf8');
-}
 
 function authenticate(req, res, next) {
-    log(`Authenticating ${req.ip} for ${req.path}`);
     const token = req.cookies.token;
-    log(`Token: ${token}`);
     if (!token && req.path !== '/api/login')
         return res.status(401).json({ message: 'Access denied' }); // If token is not present and path is not for login
-    if (token && req.path === '/api/login') {
-        //Auto login since token is already present (client can't access login page if token is present, so this is only client side autoLogin script)
-        autoLogin(req, res);
-    }
-    else{
-        res.status(200).json(null).end();
-    }
-    try {
-        const decoded = jwt.decode(token, process.env.SECRET_KEY);
-        if (!decoded) return res.status(400).json({ message: 'Invalid token' }).end();
-        req.user = decoded;
+    if(!token && req.path === '/api/login') return next(); // If token is not present and path is for login
+    log('body 1');
+    console.log(req.body);
+    jwt.verify(decrypt(token, req.body.fingerPrint), process.env.SECRET_KEY, (err, decoded) => {
+        if (err) {
+            // If token is invalid=> delete token from client side since it's probably expired
+            res.clearCookie('token');
+            return res.status(401).json({ message: 'Access denied' });
+        }
+        req.processed = { token: decoded };
         next();
-    } catch (err) {
-        console.log(err);
-        return res.status(400).json({ message: 'Invalid token' });
-    }
+    });
 };
 
 function authorize(allowedRoles) {
@@ -236,4 +218,4 @@ function authorize(allowedRoles) {
     };
 };
 
-export { db, authenticate, authorize, encrypt, decrypt, connectDb };
+export { db, authenticate, authorize, connectDb };

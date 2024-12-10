@@ -11,10 +11,9 @@ import Indents from './mainComponents/Indents';
 import PurchaseReqs from './mainComponents/PurchaseReqs';
 import PurchaseOrders from './mainComponents/PurchaseOrders';
 import AllProfiles from './mainComponents/AllProfiles';
-import { login } from './assets/scripts.js';
+import { autoLogin } from './assets/scripts.js';
 import { ProfileContext } from './assets/UserProfile';
 import { Oval } from 'react-loader-spinner';
-import FingerprintJS from '@fingerprintjs/fingerprintjs';
 import NewProject from './mainComponents/NewProject.jsx';
 // import LoadingScreen from './sideComponents/LoadingScreen.jsx';
 
@@ -24,13 +23,13 @@ function App() {
   const navigate = useNavigate();
   useEffect(() => {
     document.title = 'Project Management System';
-    async function autoLogin() {
-      if (!(await login(setProfile, 'post'))) {
+    async function login() {
+      if (!(await autoLogin(setProfile))) {
         navigate('/login');
       }
       setLoading(false);
     }
-    autoLogin();
+    login();
   }, []);
   return (
     <>
