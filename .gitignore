@@ -23,3 +23,7 @@ frontend/!.vscode/extensions.json
 *.njsproj
 *.sln
 *.sw?
+
+backend/.vscode/*
+backend/!.vscode/extensions.json
+backend/node_modules

@@ -4,8 +4,14 @@
   "description": "This is a web based expense manager app, currently designed for ILS",
   "main": "index.js",
   "scripts": {
-    "start": "cd frontend && npm start"
+    "start": "concurrently \"cd backend && npm start\" \"cd frontend && npm run dev\"",
+    "server": "cd backend && npm start",
+    "client": "cd frontend && npm start"
   },
   "author": "rudraksha007",
-  "license": "ISC"
+  "license": "ISC",
+  "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "concurrently": "^9.1.0"
+  }
 }

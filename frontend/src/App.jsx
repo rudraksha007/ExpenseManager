@@ -25,7 +25,7 @@ function App() {
   useEffect(() => {
     document.title = 'Project Management System';
     async function autoLogin() {
-      if (!(await login(setProfile))) {
+      if (!(await login(setProfile, 'post'))) {
         navigate('/login');
       }
       setLoading(false);

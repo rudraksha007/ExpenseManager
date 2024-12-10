@@ -1,5 +1,7 @@
+import { log } from "../../../backend/utils";
+import FingerprintJS from '@fingerprintjs/fingerprintjs';
 
-const mainUrl = 'http://localhost:8000/api/';
+const mainUrl = '/api/';
 
 let data = {
     profiles: {
@@ -305,44 +307,61 @@ let data = {
         projectManager: "Mr. X"
     }
 }
-async function fetchData(url) {
+async function fetchData(url, method) {
     try {
-        // const response = await fetch(mainUrl + url, {method: 'POST', headers: 'application/json', credentials: 'include'});
-        // const data = await response.json();
-        await new Promise((resolve) => setTimeout(resolve, 1000));
-        if (url.includes('projects/')) {
-            return data.projects_1;
-        }
-        return data[url];
+        const response = await fetch('/api/' + url, {
+            method: method,
+            headers: { 'Content-Type': 'application/json' },
+            credentials: 'include'
+        });
+        const data = await response.json();
+        return data;
+        // await new Promise((resolve) => setTimeout(resolve, 1000));
+        // if (url.includes('projects/')) {
+        //     return data.projects_1;
+        // }
+        // return data[url];
     } catch (error) {
         console.log('There has been a problem with your fetch operation:');
+        log(error);
         return null;
     }
 }
 
-async function fetchDataWithParams(url, data) {
+async function fetchDataWithParams(url, method, data) {
     try {
-        // const response = await fetch(mainUrl + url, {method: 'POST', headers: 'application/json', credentials: 'include', body: JSON.stringify(data)});
-        // const data = await response.json();
-        await new Promise((resolve) => setTimeout(resolve, 1000));
-        return data[url.replace('/', '_')];
+        const response = await fetch('/api/' + url,
+            {
+                method: method,
+                headers: { 'Content-Type': 'application/json' },
+                credentials: 'include',
+                body: JSON.stringify(data)
+            });
+        const res = await response.json();
+        return res;
     } catch (error) {
         console.log('There has been a problem with your fetch operation:');
+        console.log(error);
+
         return null;
     }
 }
-let userProfile = {
-    username: 'rudra',
-    role: 'superadmin',
-    projects: {
-        active: ['Project A', 'Project B', 'Project C'],
-        completed: ['Project D', 'Project E', 'Project F']
-    }
+// let userProfile = {
+//     username: 'rudra',
+//     role: 'superadmin',
+//     projects: {
+//         active: ['Project A', 'Project B', 'Project C'],
+//         completed: ['Project D', 'Project E', 'Project F']
+//     }
 
-}
+// }
 // let userProfile = null;
-async function login(setProfile) {
-    // const userProfile = await fetchData('login');
+async function login(setProfile, method) {
+    const fpPromise = await FingerprintJS.load();
+    const fingerPrint = (await fpPromise.get()).visitorId;
+    console.log(fingerPrint);
+
+    const userProfile = await fetchDataWithParams('login', 'post', { fingerPrint: fingerPrint });
     if (!userProfile) {
         return false;
     }
