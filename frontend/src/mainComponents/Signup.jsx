@@ -35,7 +35,7 @@ function Signup() {
                     <label className="loginInput hoverable">Employee Id:;<input type='number' name='id' placeholder="Enter Employee Id" required /></label>
                     <label className="loginInput hoverable">Password: &#128274;<input type='password' name='password' placeholder="Enter Password" required pattern="^(?=.*[a-z])(?=.*[A-Z])(?=.*\W).{6,}$" title="Password must be 6 characters long and contain an Upper case, smaller case and a special character" /></label>
                     <label className="loginInput hoverable">Designation:
-                        <select name='role' required defaultValue={"1"}>
+                        <select name='role' required defaultValue={"Pi"}>
                             <option value="" disabled>Select</option>
                             <option value="Pi">PI</option>
                             <option value="Scientist">Scientist</option>

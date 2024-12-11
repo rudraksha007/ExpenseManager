@@ -25,7 +25,7 @@ function AllProjects() {
         document.title = 'All Projects';
         async function getProjects() {
             // const data = await fetchDataWithParams(`projects`, { page: filter.page, count: 25 });
-            let data = (await fetchDataWithParams('projects', 'post', {id: profile.id, fields: ['ProjectNo','ProjectTitle','ProjectStartDate', 'ProjectEndDate', 'TotalSanctionamount'], filter: filter}));
+            let data = (await fetchDataWithParams('projects', 'post', {id: profile.id, fields: ['ProjectNo','ProjectTitle','ProjectStartDate', 'ProjectEndDate', 'TotalSanctionamount'], filters: filter}));
             console.log(data);
             
             if (data.status == 'success') {
@@ -92,14 +92,14 @@ function AllProjects() {
                         </label>
                         <label><input type="button" value="Apply" id='applyFilter' onClick={(e)=>filterData(e)} /></label>
                     </div>
-                    <div id="allProjectsTable">
-                        <div className='allProjectsTableTitle'>Sl.</div>
-                        <div className='allProjectsTableTitle'>Title</div>
-                        <div className='allProjectsTableTitle'>Capital</div>
-                        <div className='allProjectsTableTitle'>Funded By</div>
-                        <div className='allProjectsTableTitle'>Start Date</div>
-                        <div className='allProjectsTableTitle'>End Date</div>
-                        <div className='allProjectsTableTitle'>Action</div>
+                    <div id="allProjectsTable" className='table'>
+                        <div className='tableTitle'>Sl.</div>
+                        <div className='tableTitle'>Title</div>
+                        <div className='tableTitle'>Capital</div>
+                        <div className='tableTitle'>Funded By</div>
+                        <div className='tableTitle'>Start Date</div>
+                        <div className='tableTitle'>End Date</div>
+                        <div className='tableTitle'>Action</div>
                         {projects}
                     </div>
                 </div>

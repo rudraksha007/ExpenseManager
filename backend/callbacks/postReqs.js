@@ -72,7 +72,6 @@ function autoLogin(req, res) {
   return res.status(200).json({ message: 'Auto login successful', role: token.role });
 }
 
-
 function getProjects(req, res) {
   getFromDb('projects', req.body.fields).then((results) => {
     res.status(200).json({ projects: results, total: results.length }).end();
@@ -84,4 +83,31 @@ function getProjects(req, res) {
 function logout(req, res) {
   res.clearCookie('token').status(200).json({ message: 'Logged out', reqStatus: 'success' }).end();
 }
-export { login, autoLogin, getProjects, logout };
+
+function getUsers(req, res) {
+  getFromDb('users', ['name', 'email', 'id', 'role', 'projects', 'status']).then((results) => {
+    const { text, role } = req.body.filters;
+    if (text || role) {
+      let actual = []
+      results.forEach(user => {
+        if (text && role) {
+          if (user.name.startsWith(text) && user.role === role) {
+            log('both');
+            actual.push(user);
+          }
+        }
+        else if (text && (user.name.startsWith(text) || user.email.startsWith(text))) {
+          log('text');
+          actual.push(user);
+        }
+        else if ((role && user.role === role)) {
+          actual.push(user);
+          log('role');
+        }
+      });
+      results = actual;
+    }
+    res.status(200).json({ users: results, total: results.length });
+  }).catch(err => sendFailedResponse(res, err.message, 500));
+}
+export { login, autoLogin, getProjects, logout, getUsers };

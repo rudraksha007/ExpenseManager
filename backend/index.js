@@ -1,7 +1,7 @@
 import { log } from './utils.js';
 import express from 'express';
 import dotenv from 'dotenv';
-import { login, autoLogin, getProjects, logout } from './callbacks/postReqs.js';
+import { login, autoLogin, getProjects, logout, getUsers } from './callbacks/postReqs.js';
 import cookieParser from 'cookie-parser';
 import { db, authenticate, authorize, connectDb } from './dbUtils.js';
 import cors from 'cors';
@@ -19,10 +19,11 @@ app.post('/api/login', (req, res) => login(req, res));
 app.post('/api/logout', (req, res) => logout(req, res)); 
 app.post('/api/autoLogin', (req, res) => autoLogin(req, res)); 
 app.post('/api/projects', (req, res) => getProjects(req, res));
+app.post('/api/users', authorize(['Super Admin','root']), (req, res) => getUsers(req, res));
 
 //Put requests (right click on supplied function-> goto source definition to view the code)
-app.put('/api/projects', authorize(['Super Admin','root']), (req, res) => addProject(req, res));
-app.put('/api/users', authorize(['Super Admin','root']), (req, res) => addUser(req, res));
+app.put('/api/projects', authorize(['SuperAdmin','root']), (req, res) => addProject(req, res));
+app.put('/api/users', authorize(['SuperAdmin','root']), (req, res) => addUser(req, res));
 
 
 // --- Profiles CRUD Operations ---
@@ -35,7 +36,7 @@ app.get('/api/users', (req, res) => {
 });
 
 
-app.put('/api/users', authorize(['Super Admin']), (req, res) => {
+app.put('/api/users', authorize(['SuperAdmin']), (req, res) => {
   // const { id }  = req.params;
   const { id, name, email, password, designation, status } = req.body;
   db.query('UPDATE users SET id = ?, name = ?, email = ?, password = ?, designation = ?, status = ? WHERE id = ?', [id, name, email, password, designation, status, id], (err, result) => {
@@ -44,7 +45,7 @@ app.put('/api/users', authorize(['Super Admin']), (req, res) => {
   });
 });
 
-app.delete('/api/users/', authorize(['Super Admin']), (req, res) => {
+app.delete('/api/users/', authorize(['SuperAdmin']), (req, res) => {
   const { id } = req.body;
   const query = 'DELETE FROM users WHERE id = ?';
   db.query(query, [id], (err, result) => {
@@ -55,7 +56,7 @@ app.delete('/api/users/', authorize(['Super Admin']), (req, res) => {
 
 // --- Projects CRUD Operations ---
 
-app.put('/api/projects/:id', authorize(['Super Admin', 'Admin(PME)']), (req, res) => {
+app.put('/api/projects/:id', authorize(['SuperAdmin', 'Admin(PME)']), (req, res) => {
   const { id } = req.body;
   const { ProjectTitle, ProjectNo, ProjectStartDate, ProjectEndDate, SanctionOrderNo, TotalSanctionamount, PIname, CoPIs, ManpowerAllocationAmt, ConsumablesAllocationAmt, ContingencyAllocationAmt, OverheadAllocationAmt, EquipmentAllocationAmt, TravelAllocationAmt } = req.body;
   const query = 'UPDATE projects SET ProjectTitle = ?, ProjectNo = ?, ProjectStartDate = ?, ProjectEndDate = ?, SanctionOrderNo = ?, TotalSanctionamount = ?, PIname = ?, CoPIs = ?, ManpowerAllocationAmt = ?, ConsumablesAllocationAmt = ?, ContingencyAllocationAmt = ?, OverheadAllocationAmt = ?, EquipmentAllocationAmt = ?, TravelAllocationAmt = ? WHERE id = ?';

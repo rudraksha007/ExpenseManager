@@ -4,11 +4,11 @@
 }
 #allProfilesTable, #allProjectsTable{
     display: grid;
-    grid-template-columns: 1fr 6fr 2fr 3fr 2fr 2fr 2fr;
+    grid-template-columns: 1fr 5fr 2fr 3fr 2fr 2fr 2fr;
     gap: 2px;
     grid-auto-rows: max-content;
 }
-.allProfilesTableTitle, .allProjectsTableTitle, .tableTitle{
+.allProjectsTableTitle, .tableTitle{
     background-color: green;
     color: white;
     font-size: large;
@@ -18,7 +18,7 @@
     padding: 5px 10px;
     box-sizing: border-box;
 }
-#allProjectsTable>div:not(.allProjectsTableTitle), #allProfilesTable>div:not(.allProfilesTableTitle), .table>div:not(.tableTitle){
+.table>div:not(.tableTitle){
     background-color: rgb(222, 222, 222);
 }
 .allProjectsActions, .allProfilesActions{
@@ -33,13 +33,14 @@
     padding: 10px 0;
     gap: 10px;
 }
-#filters> label> input:not([type="button"]), #filters> label>select{
+#filters> label> input:not([type="submit"]), #filters> label>select{
     margin-right: 5px;
     width: 200px;
     height: 25px;
 }
 #applyFilter{
     width:80px; 
+    height: 25px;
     background-color:green; 
     color:white;
 }
