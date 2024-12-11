@@ -37,8 +37,8 @@ function AllProjects() {
                             <div>{project.ProjectTitle}</div>
                             <div>{project.TotalSanctionamount}</div>
                             <div>{project.fundedBy}</div>
-                            <div>{project.ProjectStartDate}</div>
-                            <div>{project.ProjectEndDate}</div>
+                            <div>{project.ProjectStartDate.split('T')[0]}</div>
+                            <div>{project.ProjectEndDate.split('T')[0]}</div>
                             <div className='allProjectsActions'>
                                 <Link to={`/projects/${project.id}`} title="View Project Details"><FaEdit size={20} /></Link>
                             </div>
@@ -47,6 +47,8 @@ function AllProjects() {
                 ));
                 setProjects(l);
                 total.current = data.total;
+                setLoading(false);
+            }else{
                 setLoading(false);
             }
         }

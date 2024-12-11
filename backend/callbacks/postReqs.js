@@ -2,7 +2,7 @@ import { db, getFromDb } from "../dbUtils.js";
 const compare = import('bcryptjs').compare;  // Normal import was not working so i imported it like this
 import jwt from 'jsonwebtoken';
 import { encrypt, Hash } from "../crypt.js";
-import { log } from "../utils.js";
+import { log, sendFailedResponse } from "../utils.js";
 
 
 // autoLogin function is there in dbUtils, this is meant for manual signin page
@@ -16,37 +16,41 @@ async function login(req, res) {
     log('Root login successful');
     return res.cookie('token', encrypt(token, fingerPrint), { httpOnly: true }).json(
       {
-        message: 'Login successful',
-        role: 'root',
-        name: 'root',
-        id: 'root',
-        email: 'root',
+        profile: {
+          role: 'root',
+          name: 'root',
+          id: 'root',
+          email: 'root'
+        }
       }).status(200).end();
   }
-  db.query('SELECT * FROM users WHERE email = ?', [email], (err, results) => {
-    if (err) return res.status(500).json({ message: 'Database error' }).end();
-    if (results.length === 0) return res.status(404).json({ message: 'User not found' }).end();
-    const user = results[0];
-    compare(password, user.password, (err, isValid) => {
-      if (!isValid) return res.status(401).json({ message: 'Invalid password' }).end();
+  db.query('SELECT * FROM users WHERE email = ?', [email]).then(results => {
+    if (results.length === 0) return sendFailedResponse(res, 'User not found', 404);
+    const user = results[0][0];
+    if (password == user.password) {
+      log('logged in')
       let token = jwt.sign({ id: user.id, role: user.role }, process.env.SECRET_KEY, { expiresIn: '45m' });
-      return res.cookie('token', encrypt(token, fingerPrint), { httpOnly: true }).status(200).json(
-        {
-          message: 'Login successful',
+      return res.cookie('token', encrypt(token, fingerPrint), { httpOnly: true }).status(200).json({
+        profile: {
           role: user.role,
           name: user.name,
           id: user.id,
           email: user.email,
-        }).end();
-    });
+        }
+      }).end();
+    } else {
+      return sendFailedResponse(res, 'Invalid password', 401);
+    }
+  }).catch(err => {
+    return sendFailedResponse(res, err.message, 500);
   });
 }
 
 function autoLogin(req, res) {
   const token = req.processed.token;
-  if (token.id === 'root') return res.status(200).json({ message: 'Auto login successful', role: 'root', name: 'root', id:'root',email:'root' }).end();
-  db.query('SELECT * FROM users WHERE id = ?', [token.id], (err, results) => {
-    if (err) return res.status(500).json({ message: 'Database error' }).end();
+  if (token.id === 'root') return res.status(200).json({ message: 'Auto login successful', role: 'root', name: 'root', id: 'root', email: 'root' }).end();
+  db.query('SELECT * FROM users WHERE id = ?', [token.id]).then(results => {
+
     if (results.length === 0) {
       return res.status(404).res.clearCookie('token').json({ message: 'User not found' }).end();
     }
@@ -62,18 +66,12 @@ function autoLogin(req, res) {
           email: user.email,
         }).end();
     });
+  }).catch(err => {
+    return sendFailedResponse(res, err.message);
   });
   return res.status(200).json({ message: 'Auto login successful', role: token.role });
 }
 
-function addUser(req, res) {
-  const { id, name, email, password, designation, status } = req.body;
-  const query = 'INSERT INTO users(id,name,email,password,designation,status) VALUES (?, ?, ?, ?, ?, ?)';
-  db.query(query, [id, name, email, password, designation, status], (err, result) => {
-    if (err) return res.status(500).json({ message: 'Error adding profile', err: err.message });
-    res.status(201).json({ message: 'Profile added successfully' }).end();
-  });
-}
 
 function getProjects(req, res) {
   getFromDb('projects', req.body.fields).then((results) => {
@@ -82,4 +80,8 @@ function getProjects(req, res) {
     res.status(500).json({ message: 'Error fetching projects', err: err.message }).end();
   });
 }
-export { login, addUser, autoLogin, getProjects };
+
+function logout(req, res) {
+  res.clearCookie('token').status(200).json({ message: 'Logged out', reqStatus: 'success' }).end();
+}
+export { login, autoLogin, getProjects, logout };

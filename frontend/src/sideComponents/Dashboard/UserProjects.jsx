@@ -22,7 +22,7 @@ function UserProjects() {
                     <React.Fragment key={project.ProjectNo}>
                         <div>{index + 1}</div>
                         <div>{project.ProjectTitle}</div>
-                        <div>{project.ProjectStartDate}</div>
+                        <div>{project.ProjectStartDate.split('T')[0]}</div>
                         <div className='hoverable' onClick={()=>navigate(`/projects/${project.id}`)}><Link to={`/projects/${project.id}`} title="View Project Details"><FaEdit size={20} /></Link></div>
                     </React.Fragment>
                 )

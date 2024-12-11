@@ -1,37 +1,55 @@
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import '../css/Login.css';
 import { useEffect } from "react";
+import { fetchDataWithParams } from "../assets/scripts";
+import CryptoJS from "crypto-js";
 
 function Signup() {
+    const navigate = useNavigate()
     useEffect(() => {
         document.title = 'Add New User';
     }, []);
+
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        if (!e.currentTarget.checkValidity()) return;
+        const formData = Object.fromEntries( new FormData(e.currentTarget));
+        const json = {...formData, password: CryptoJS.SHA256(formData.password).toString()}
+        let res = await fetchDataWithParams('users', 'put', json);
+        console.log(json);
+        
+        if (res.reqStatus === 'success') {
+            navigate('/');
+        } else {
+            alert(`Failed: ${res.message}`);
+
+        }
+    }
     return (
         <div id="loginMainDiv">
-            <form>
+            <form onSubmit={(e) => handleSubmit(e)}>
                 <h1>Signup</h1>
                 <div id="inputDiv">
-                    <label className="loginInput hoverable">Name:<input type='text' placeholder='Enter your name' required /></label>
-                    <label className="loginInput hoverable">Email: &#9993;<input type='email' placeholder='mayank@gmail.com' required /></label>
-                    <label className="loginInput hoverable">Employee Id:;<input type='text' placeholder="Enter Employee Id" required /></label>
-                    <label className="loginInput hoverable">Password: &#128274;<input type='password' placeholder="Enter Password" required pattern=".{6,}" title="Password must be 6 characters long" /></label>
+                    <label className="loginInput hoverable">Name:<input type='text' name='name' placeholder='Enter your name' required /></label>
+                    <label className="loginInput hoverable">Email: &#9993;<input type='email' name='email' placeholder='mayank@gmail.com' required /></label>
+                    <label className="loginInput hoverable">Employee Id:;<input type='number' name='id' placeholder="Enter Employee Id" required /></label>
+                    <label className="loginInput hoverable">Password: &#128274;<input type='password' name='password' placeholder="Enter Password" required pattern="^(?=.*[a-z])(?=.*[A-Z])(?=.*\W).{6,}$" title="Password must be 6 characters long and contain an Upper case, smaller case and a special character" /></label>
                     <label className="loginInput hoverable">Designation:
-                        <select required>
-                            <option value="" disabled selected>Select</option>
-                            <option value="1">PI</option>
-                            <option value="2">Scientist</option>
-                            <option value="3">Admin</option>
-                            <option value="4">Super Admin</option>
+                        <select name='role' required defaultValue={"1"}>
+                            <option value="" disabled>Select</option>
+                            <option value="Pi">PI</option>
+                            <option value="Scientist">Scientist</option>
+                            <option value="Admin">Admin</option>
+                            <option value="SuperAdmin">Super Admin</option>
                         </select>
                     </label>
                 </div>
                 <div id="submitDiv">
-                    <label id="loginNewAcct">Don't have an account? <Link to={"/login"}>Create New Account</Link></label>
-                    <input type="submit" className="hoverable" />
+                    <label id="loginNewAcct">Have an account? <Link to={"/login"}>Login</Link></label>
+                    <input type="submit" className="hoverable" style={{ color: "white" }} />
                 </div>
             </form >
         </div >
-
     )
 }
 

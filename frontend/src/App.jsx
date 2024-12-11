@@ -23,16 +23,17 @@ function App() {
   useEffect(() => {
     document.title = 'Project Management System';
     async function login() {
+      if(profile){return;}
       let prof = await autoLogin();
-      if (!(prof)) {
-        navigate('/login');
-      }else{
-        setProfile(prof);
-      }
+      setProfile(prof);
       setLoading(false);
     }
     login();
   }, []);
+  useEffect(() => {
+    if (profile) {navigate('/');}
+    else {navigate('/login');}
+  }, [profile]);
   return (
     <>
       {loading ? <Oval color='black' height={80} /> :

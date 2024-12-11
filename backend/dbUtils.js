@@ -177,7 +177,7 @@ async function connectDb() {
                 email VARCHAR(255) UNIQUE KEY,
                 password VARCHAR(255),
                 projects JSON,
-                active INT,
+                status INT,
                 role VARCHAR(255)
             `
             }

@@ -1,11 +1,11 @@
 import { log } from './utils.js';
 import express from 'express';
 import dotenv from 'dotenv';
-import { login, addUser, autoLogin, getProjects } from './callbacks/postReqs.js';
+import { login, autoLogin, getProjects, logout } from './callbacks/postReqs.js';
 import cookieParser from 'cookie-parser';
 import { db, authenticate, authorize, connectDb } from './dbUtils.js';
 import cors from 'cors';
-import { addProject } from './callbacks/putReqs.js';
+import { addProject,addUser } from './callbacks/putReqs.js';
 
 const hash = import('bcryptjs').hash;
 log('Starting Expense Manager Server');
@@ -16,12 +16,13 @@ await connectDb();
 
 //Post requests (right click on supplied function-> goto source definition to view the code)
 app.post('/api/login', (req, res) => login(req, res)); 
+app.post('/api/logout', (req, res) => logout(req, res)); 
 app.post('/api/autoLogin', (req, res) => autoLogin(req, res)); 
-app.post('/api/users', authorize(['Super Admin','root']), (req, res) => addUser(req, res));
 app.post('/api/projects', (req, res) => getProjects(req, res));
 
 //Put requests (right click on supplied function-> goto source definition to view the code)
 app.put('/api/projects', authorize(['Super Admin','root']), (req, res) => addProject(req, res));
+app.put('/api/users', authorize(['Super Admin','root']), (req, res) => addUser(req, res));
 
 
 // --- Profiles CRUD Operations ---

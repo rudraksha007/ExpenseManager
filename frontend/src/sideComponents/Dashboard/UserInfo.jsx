@@ -13,7 +13,7 @@ function UserInfo() {
         <img src={person} alt="" width='40%' />
         <h3>Welcome back! {profile?profile.name:""}</h3>
       </div>
-      <p>Userame: {profile?profile.id:""}</p>
+      <p>Employee ID: {profile?profile.id:""}</p>
       {/* <p>Ongoing Projects: {profile?profile.projects.active.length:0}</p> */}
       <p>LoggedIn As: {profile?profile.role:""}</p>
     </>

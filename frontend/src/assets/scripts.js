@@ -1,8 +1,8 @@
 import FingerprintJS from '@fingerprintjs/fingerprintjs';
 
 const mainUrl = '/api/';
-let fingerPrint = null;
-
+const fpPromise = await FingerprintJS.load();
+const fingerPrint = (await fpPromise.get()).visitorId;
 let data = {
     profiles: {
         profiles: [
@@ -308,21 +308,7 @@ let data = {
     }
 }
 async function fetchData(url, method) {
-    try {
-        let options = {
-            method: method,
-            headers: { 'Content-Type': 'application/json' },
-            credentials: 'include',
-            body: JSON.stringify({ fingerPrint: fingerPrint })
-        }
-        const response = await fetch('/api/' + url, options);
-        // const data = await response.json();
-        return data;
-    } catch (error) {
-        console.log('There has been a problem with your fetch operation:');
-        console.log(error);
-        return null;
-    }
+    return (await fetchDataWithParams(url, method, {}));
 }
 
 async function fetchDataWithParams(url, method, data) {
@@ -337,9 +323,9 @@ async function fetchDataWithParams(url, method, data) {
         const res = await response.json();
         if (!response.ok) {
             console.log('Fetch Failed');
-            return { status: 'failed', message: res.message };
+            return { reqStatus: 'failed', message: res.message };
         }
-        return {...res, status: 'success'};
+        return {...res, reqStatus: 'success'};
     } catch (error) {
         console.log('There has been a problem with your fetch operation:');
         console.log(error);
@@ -348,10 +334,9 @@ async function fetchDataWithParams(url, method, data) {
     }
 }
 async function autoLogin() {
-    const fpPromise = await FingerprintJS.load();
-    fingerPrint = (await fpPromise.get()).visitorId;
+    
     const res = await fetchDataWithParams('autoLogin', 'post', { fingerPrint: fingerPrint });
-    if (res.status!='success') {
+    if (res.reqStatus!='success') {
         return false;
     }
     return res;
