@@ -324,7 +324,6 @@ async function fetchDataWithParams(url, method, data) {
         if (!response.ok) {
             console.log('Fetch Failed');
             console.log(res.message);
-            
             return { reqStatus: 'failed', message: res.message };
         }
         return {...res, reqStatus: 'success'};

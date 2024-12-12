@@ -1,6 +1,6 @@
 import { fileTypeFromBuffer } from "file-type";
 import { db } from "../dbUtils.js";
-import { log, sendFailedResponse } from "../utils.js";
+import { log, parseBill, sendFailedResponse } from "../utils.js";
 
 async function addProject(req, res) {
     const { ProjectTitle, ProjectNo, ProjectStartDate, ProjectEndDate, SanctionOrderNo, TotalSanctionamount, PIname, CoPIs, ManpowerAllocationAmt, ConsumablesAllocationAmt, ContingencyAllocationAmt, OverheadAllocationAmt, EquipmentAllocationAmt, TravelAllocationAmt, FundedBy } = req.body;
@@ -29,28 +29,21 @@ function addUser(req, res) {
     });
 }
 
-async function addTravel(req, res) {
-    const { ProjectNo, ProjectTitle, TravelRequestedAmt, IndentID, Reason, RequestedDate } = req.body;
-    const BillCopy = req.files?.BillCopy[0];
-    if (!BillCopy || !BillCopy.data) {
-        return sendFailedResponse(res, 'Bill copy not found', 400);
-    }
-    const buffer = BillCopy.data;
-
-    // Use the file-type library to get the actual file type
-    const type = await fileTypeFromBuffer(buffer);
-
-    if (!type || type.mime !== 'application/pdf') {
-        return sendFailedResponse(res, 'Invalid file type', 400);
-    }
-    console.log(req.body);
+async function addProjectIndent(req, res) {
+    const { ProjectNo, ProjectTitle, RequestedAmt, IndentID, Reason, RequestedDate } = req.body;
+    if(!parseBill(req)) return;
+    const BillCopy = req.files.BillCopy[0]
     let query = 'INSERT INTO indents (IndentID, IndentCategory, ProjectNo, IndentAmount, IndentDate, IndentedPersonID, IndentStatus) VALUES (?, ?, ?, ?, ?, ?, ?)';
-    db.query(query, [parseInt(IndentID), 'Travel', parseInt(ProjectNo), parseInt(TravelRequestedAmt), RequestedDate, req.processed.id, 'Pending']).then(result => {
-        query = 'INSERT INTO travel (ProjectNo, ProjectTitle, RequestedAmt, IndentID, RequestID, Reason, EmployeeID, RequestedDate, BillCopy) VALUES (?, ?, ?, ?, ?, ?, ?, ?,?)';
-        db.query(query, [parseInt(ProjectNo), ProjectTitle, parseInt(TravelRequestedAmt), parseInt(IndentID), parseInt(IndentID), Reason, req.processed.id, RequestedDate, BillCopy.data]).then(result => {
+    log([parseInt(IndentID), req.path.split('/').at(-1), parseInt(ProjectNo), parseInt(RequestedAmt), RequestedDate, req.processed.token.id, 'Pending']);
+    db.query(query, [parseInt(IndentID), req.path.split('/').at(-1), parseInt(ProjectNo), parseInt(RequestedAmt), RequestedDate, req.processed.token.id, 'Pending']).then(result => {
+        query = `INSERT INTO ${req.path.split('/').at(-1)} (ProjectNo, ProjectTitle, RequestedAmt, IndentID, RequestID, Reason, EmployeeID, RequestedDate, BillCopy) VALUES (?, ?, ?, ?, ?, ?, ?, ?,?)`;
+        db.query(query, [parseInt(ProjectNo), ProjectTitle, parseInt(RequestedAmt), parseInt(IndentID), parseInt(IndentID), Reason, req.processed.id, RequestedDate, BillCopy.data]).then(result => {
             res.status(201).json({ message: 'Travel added successfully' }).end();
         }).catch(err => {sendFailedResponse(res, err.message, 500);});
     }).catch(err => { sendFailedResponse(res, err.message, 500); });
 
 }
-export { addProject, addUser, addTravel };
+
+
+
+export { addProject, addUser, addProjectIndent };

@@ -61,6 +61,113 @@ async function connectDb() {
                 `
             },
             {
+                tableName: 'Manpower',
+                definition: `
+                    RequestID INTEGER PRIMARY KEY,
+                    ProjectNo INTEGER,
+                    ProjectTitle VARCHAR(255),
+                    RequestedAmt DOUBLE,
+                    EmployeeID INT,
+                    Reason VARCHAR(255),
+                    IndentID INTEGER,
+                    RequestedDate DATE,
+                    BillCopyManpower LONGBLOB,
+                    FOREIGN KEY (EmployeeID) REFERENCES users(id),
+                    FOREIGN KEY (ProjectNo) REFERENCES Projects(ProjectNo),
+                    FOREIGN KEY (ProjectTitle) REFERENCES Projects(ProjectTitle),
+                    FOREIGN KEY (IndentID) REFERENCES Indents(IndentID)
+                `
+            },
+            {
+                tableName: 'Travel',
+                definition: `
+                    RequestID INTEGER PRIMARY KEY,
+                    ProjectNo INTEGER,
+                    ProjectTitle VARCHAR(255),
+                    RequestedAmt DOUBLE,
+                    EmployeeID INT,
+                    Reason VARCHAR(255),
+                    IndentID INTEGER,
+                    RequestedDate DATE,
+                    BillCopy LONGBLOB,
+                    FOREIGN KEY (EmployeeID) REFERENCES users(id),
+                    FOREIGN KEY (ProjectNo) REFERENCES Projects(ProjectNo),
+                    FOREIGN KEY (ProjectTitle) REFERENCES Projects(ProjectTitle),
+                    FOREIGN KEY (IndentID) REFERENCES Indents(IndentID)
+                `
+            },
+            {
+                tableName: 'Consumables',
+                definition: `
+                    RequestID INTEGER PRIMARY KEY,
+                    ProjectNo INTEGER,
+                    ProjectTitle VARCHAR(255),
+                    RequestedAmt DOUBLE,
+                    EmployeeID INT,
+                    Reason VARCHAR(255),
+                    IndentID INTEGER,
+                    RequestedDate DATE,
+                    BillCopy LONGBLOB,
+                    FOREIGN KEY (EmployeeID) REFERENCES users(id),
+                    FOREIGN KEY (ProjectNo) REFERENCES Projects(ProjectNo),
+                    FOREIGN KEY (ProjectTitle) REFERENCES Projects(ProjectTitle),
+                    FOREIGN KEY (IndentID) REFERENCES Indents(IndentID)
+                `
+            },
+            {
+                tableName: 'Overhead',
+                definition: `
+                    RequestID INTEGER PRIMARY KEY,
+                    ProjectNo INTEGER,
+                    ProjectTitle VARCHAR(255),
+                    RequestedAmt DOUBLE,
+                    EmployeeID INT,
+                    Reason VARCHAR(255),
+                    IndentID INTEGER,
+                    RequestedDate DATE,
+                    BillCopy LONGBLOB,
+                    FOREIGN KEY (EmployeeID) REFERENCES users(id),
+                    FOREIGN KEY (ProjectNo) REFERENCES Projects(ProjectNo),
+                    FOREIGN KEY (ProjectTitle) REFERENCES Projects(ProjectTitle),
+                    FOREIGN KEY (IndentID) REFERENCES Indents(IndentID)
+                `
+            },
+            {
+                tableName: 'Equipment',
+                definition: `
+                    RequestID INTEGER PRIMARY KEY,
+                    ProjectNo INTEGER,
+                    ProjectTitle VARCHAR(255),
+                    RequestedAmt DOUBLE,
+                    EmployeeID INT,
+                    Reason VARCHAR(255),
+                    IndentID INTEGER,
+                    RequestedDate DATE,
+                    BillCopy LONGBLOB,
+                    FOREIGN KEY (EmployeeID) REFERENCES users(id),
+                    FOREIGN KEY (ProjectNo) REFERENCES Projects(ProjectNo),
+                    FOREIGN KEY (ProjectTitle) REFERENCES Projects(ProjectTitle),
+                    FOREIGN KEY (IndentID) REFERENCES Indents(IndentID)
+                `
+            },
+            {
+                tableName: 'Contingency',
+                definition: `
+                    RequestID INTEGER PRIMARY KEY,
+                    ProjectNo INTEGER,
+                    ProjectTitle VARCHAR(255),
+                    RequestedAmt DOUBLE,
+                    EmployeeID INT,
+                    Reason VARCHAR(255),
+                    IndentID INTEGER,
+                    RequestedDate DATE,
+                    BillCopy LONGBLOB,
+                    FOREIGN KEY (EmployeeID) REFERENCES users(id),
+                    FOREIGN KEY (ProjectNo) REFERENCES Projects(ProjectNo),
+                    FOREIGN KEY (ProjectTitle) REFERENCES Projects(ProjectTitle),
+                    FOREIGN KEY (IndentID) REFERENCES Indents(IndentID)
+                `
+            },{
                 tableName: 'PurchaseRequests',
                 definition: `
                     PurchaseReqID INT PRIMARY KEY,
@@ -87,99 +194,6 @@ async function connectDb() {
                     FOREIGN KEY (ProjectNo) REFERENCES Projects(ProjectNo),
                     FOREIGN KEY (PurchaseReqID) REFERENCES PurchaseRequests(PurchaseReqID)
                 `
-            },
-            {
-                tableName: 'Manpower',
-                definition: `
-                    RequestID INT PRIMARY KEY,
-                    ProjectNo INT,
-                    ProjectTitle VARCHAR(255),
-                    RequestedAmt DOUBLE,
-                    IndentID INT,
-                    RequestedDate Date,
-                    BillCopyManpower LONGBLOB,
-                    FOREIGN KEY (ProjectNo) REFERENCES Projects(ProjectNo),
-                    FOREIGN KEY (ProjectTitle) REFERENCES Projects(ProjectTitle),
-                    FOREIGN KEY (IndentID) REFERENCES Indents(IndentID)
-                `
-            },
-            {
-                tableName: 'Consumables',
-                definition: `
-                    RequestID INT PRIMARY KEY,
-                    ProjectNo INT,
-                    ProjectTitle VARCHAR(255),
-                    RequestedAmt DOUBLE,
-                    IndentID INT,
-                    RequestedDate Date,
-                    BillCopy LONGBLOB,
-                    FOREIGN KEY (ProjectNo) REFERENCES Projects(ProjectNo),
-                    FOREIGN KEY (ProjectTitle) REFERENCES Projects(ProjectTitle),
-                    FOREIGN KEY (IndentID) REFERENCES Indents(IndentID)
-                `
-            },
-            {
-                tableName: 'Travel',
-                definition: `
-                    RequestID INTEGER PRIMARY KEY,
-                    ProjectNo INTEGER,
-                    ProjectTitle VARCHAR(255),
-                    RequestedAmt DOUBLE,
-                    EmployeeID INT,
-                    Reason VARCHAR(255),
-                    IndentID INTEGER,
-                    RequestedDate Date,
-                    BillCopy LONGBLOB,
-                    FOREIGN KEY (EmployeeID) REFERENCES users(id),
-                    FOREIGN KEY (ProjectNo) REFERENCES Projects(ProjectNo),
-                    FOREIGN KEY (ProjectTitle) REFERENCES Projects(ProjectTitle),
-                    FOREIGN KEY (IndentID) REFERENCES Indents(IndentID)
-                `
-            },
-            {
-                tableName: 'Overhead',
-                definition: `
-                    RequestID INTEGER PRIMARY KEY,
-                    ProjectNo INTEGER,
-                    ProjectTitle VARCHAR(255),
-                    RequestedAmt DOUBLE,
-                    IndentID INTEGER,
-                    RequestedDate Date,
-                    BillCopy LONGBLOB,
-                    FOREIGN KEY (ProjectNo) REFERENCES Projects(ProjectNo),
-                    FOREIGN KEY (ProjectTitle) REFERENCES Projects(ProjectTitle),
-                    FOREIGN KEY (IndentID) REFERENCES Indents(IndentID)
-                `
-            },
-            {
-                tableName: 'Equipment',
-                definition: `
-                    RequestID INTEGER PRIMARY KEY,
-                    ProjectNo INTEGER,
-                    ProjectTitle VARCHAR(255),
-                    RequestedAmt DOUBLE,
-                    IndentID INTEGER,
-                    RequestedDate Date,
-                    BillCopy LONGBLOB,
-                    FOREIGN KEY (ProjectNo) REFERENCES Projects(ProjectNo),
-                    FOREIGN KEY (ProjectTitle) REFERENCES Projects(ProjectTitle),
-                    FOREIGN KEY (IndentID) REFERENCES Indents(IndentID)
-                `
-            },
-            {
-                tableName: 'Contingency',
-                definition: `
-                    RequestID INTEGER PRIMARY KEY,
-                    ProjectNo INTEGER,
-                    ProjectTitle VARCHAR(255),
-                    RequestedAmt DOUBLE,
-                    IndentID INTEGER,
-                    RequestedDate Date,
-                    BillCopy LONGBLOB,
-                    FOREIGN KEY (ProjectNo) REFERENCES Projects(ProjectNo),
-                    FOREIGN KEY (ProjectTitle) REFERENCES Projects(ProjectTitle),
-                    FOREIGN KEY (IndentID) REFERENCES Indents(IndentID)
-                `
             }
             
         ];
@@ -196,6 +210,7 @@ async function connectDb() {
                     process.exit(1);
                 }
             }
+            await db.query(`INSERT IGNORE INTO users (id, name, email, password, projects, status, role) VALUES (0, 'root', '${process.env.ROOT_ID}', '${process.env.ROOT_PASSWORD}', '[]', 1, 'root')`);
             log('SQL Binding Complete');
         })();
         return db;

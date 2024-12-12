@@ -1,11 +1,11 @@
 import { log } from './utils.js';
 import express from 'express';
 import dotenv from 'dotenv';
-import { login, autoLogin, getProjects, logout, getUsers, getProjectInfo, getIndents } from './callbacks/postReqs.js';
+import { login, autoLogin, getProjects, logout, getUsers, getProjectInfo, getIndents, getBillCopy } from './callbacks/postReqs.js';
 import cookieParser from 'cookie-parser';
 import { db, authenticate, authorize, connectDb, projectWiseAuthorisation } from './dbUtils.js';
 import cors from 'cors';
-import { addProject,addTravel,addUser } from './callbacks/putReqs.js';
+import { addProject,addProjectIndent,addUser } from './callbacks/putReqs.js';
 import fileUpload from 'express-fileupload';
 
 const hash = import('bcryptjs').hash;
@@ -22,12 +22,16 @@ app.post('/api/autoLogin', (req, res) => autoLogin(req, res));
 app.post('/api/projects', (req, res) => getProjects(req, res));
 app.post('/api/users', authorize(['Super Admin']), (req, res) => getUsers(req, res));
 app.post('/api/projects/*', (req, res)=>getProjectInfo(req, res));
+app.post('/api/pdf/*', (req, res)=>getBillCopy(req, res));
 app.post('/api/indents', projectWiseAuthorisation, (req, res) => getIndents(req, res));
 
 //Put requests (right click on supplied function-> goto source definition to view the code)
 app.put('/api/projects', authorize(['SuperAdmin']), (req, res) => addProject(req, res));
 app.put('/api/users', authorize(['SuperAdmin']), (req, res) => addUser(req, res));
-app.put('/api/travels', (req, res) => addTravel(req, res));
+app.put('/api/travel', (req, res) => addProjectIndent(req, res));
+app.put('/api/consumables', (req, res) => addProjectIndent(req, res));
+app.put('/api/contingency', (req, res) => addProjectIndent(req, res));
+app.put('/api/equipment', (req, res) => addProjectIndent(req, res));
 
 
 
@@ -334,45 +338,45 @@ app.delete('/api/manpower/:id', (req, res) => {
 // --- Consumables CRUD Operations ---
 
 // Get all consumables records
-app.get('/api/consumables', (req, res) => {
-  const query = 'SELECT * FROM consumables';
-  db.query(query, (err, results) => {
-    if (err) return res.status(500).json({ message: 'Database error' });
-    res.status(200).json({ consumables: results });
-  });
-});
+// app.get('/api/consumables', (req, res) => {
+//   const query = 'SELECT * FROM consumables';
+//   db.query(query, (err, results) => {
+//     if (err) return res.status(500).json({ message: 'Database error' });
+//     res.status(200).json({ consumables: results });
+//   });
+// });
 
 // Get a specific consumables record by ID
-app.get('/api/consumables/:id', (req, res) => {
-  const { id } = req.params;
-  const query = 'SELECT * FROM consumables WHERE ConsumablesId = ?';
-  db.query(query, [id], (err, results) => {
-    if (err) return res.status(500).json({ message: 'Database error' });
-    if (results.length === 0) return res.status(404).json({ message: 'Consumables record not found' });
-    res.status(200).json({ consumables: results[0] });
-  });
-});
+// app.get('/api/consumables/:id', (req, res) => {
+//   const { id } = req.params;
+//   const query = 'SELECT * FROM consumables WHERE ConsumablesId = ?';
+//   db.query(query, [id], (err, results) => {
+//     if (err) return res.status(500).json({ message: 'Database error' });
+//     if (results.length === 0) return res.status(404).json({ message: 'Consumables record not found' });
+//     res.status(200).json({ consumables: results[0] });
+//   });
+// });
 
 // Create a new consumables record
-app.post('/api/consumables', (req, res) => {
-  const { ProjectNo, ProjectTitle, ConsumablesRequestedAmt, IndentID, RequestedMonth, RequestedYear, BillCopy } = req.body;
-  const query = 'INSERT INTO consumables (ProjectNo, ProjectTitle, ConsumablesRequestedAmt, IndentID, RequestedMonth, RequestedYear, BillCopy) VALUES (?, ?, ?, ?, ?, ?, ?)';
-  db.query(query, [ProjectNo, ProjectTitle, ConsumablesRequestedAmt, IndentID, RequestedMonth, RequestedYear, BillCopy], (err, result) => {
-    if (err) return res.status(500).json({ message: 'Error adding consumables record' });
-    res.status(201).json({ message: 'Consumables record added successfully' });
-  });
-});
+// app.post('/api/consumables', (req, res) => {
+//   const { ProjectNo, ProjectTitle, ConsumablesRequestedAmt, IndentID, RequestedMonth, RequestedYear, BillCopy } = req.body;
+//   const query = 'INSERT INTO consumables (ProjectNo, ProjectTitle, ConsumablesRequestedAmt, IndentID, RequestedMonth, RequestedYear, BillCopy) VALUES (?, ?, ?, ?, ?, ?, ?)';
+//   db.query(query, [ProjectNo, ProjectTitle, ConsumablesRequestedAmt, IndentID, RequestedMonth, RequestedYear, BillCopy], (err, result) => {
+//     if (err) return res.status(500).json({ message: 'Error adding consumables record' });
+//     res.status(201).json({ message: 'Consumables record added successfully' });
+//   });
+// });
 
 // Update a consumables record by ID
-app.put('/api/consumables/:id', (req, res) => {
-  const { id } = req.params;
-  const { ProjectNo, ProjectTitle, ConsumablesRequestedAmt, IndentID, RequestedMonth, RequestedYear, BillCopy } = req.body;
-  const query = 'UPDATE consumables SET ProjectNo = ?, ProjectTitle = ?, ConsumablesRequestedAmt = ?, IndentID = ?, RequestedMonth = ?, RequestedYear = ?, BillCopy = ? WHERE ConsumablesId = ?';
-  db.query(query, [ProjectNo, ProjectTitle, ConsumablesRequestedAmt, IndentID, RequestedMonth, RequestedYear, BillCopy, id], (err, result) => {
-    if (err) return res.status(500).json({ message: 'Error updating consumables record' });
-    res.status(200).json({ message: 'Consumables record updated successfully' });
-  });
-});
+// app.put('/api/consumables/:id', (req, res) => {
+//   const { id } = req.params;
+//   const { ProjectNo, ProjectTitle, ConsumablesRequestedAmt, IndentID, RequestedMonth, RequestedYear, BillCopy } = req.body;
+//   const query = 'UPDATE consumables SET ProjectNo = ?, ProjectTitle = ?, ConsumablesRequestedAmt = ?, IndentID = ?, RequestedMonth = ?, RequestedYear = ?, BillCopy = ? WHERE ConsumablesId = ?';
+//   db.query(query, [ProjectNo, ProjectTitle, ConsumablesRequestedAmt, IndentID, RequestedMonth, RequestedYear, BillCopy, id], (err, result) => {
+//     if (err) return res.status(500).json({ message: 'Error updating consumables record' });
+//     res.status(200).json({ message: 'Consumables record updated successfully' });
+//   });
+// });
 
 // Delete a consumables record by ID
 app.delete('/api/consumables/:id', (req, res) => {

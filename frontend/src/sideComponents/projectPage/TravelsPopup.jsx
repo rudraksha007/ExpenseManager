@@ -9,7 +9,7 @@ function TravelsPopup({ reset, projectNo, projectTitle }) {
     const handleSubmit = async (e) => {
         e.preventDefault();
         if(!e.currentTarget.checkValidity())return;
-        const res = await fetchDataWithFileUpload('travels', 'put', e.currentTarget);
+        const res = await fetchDataWithFileUpload('travel', 'put', e.currentTarget);
         if(res.reqStatus === 'success'){
             alert('Travel Added Successfully');
             reset();
@@ -36,8 +36,8 @@ function TravelsPopup({ reset, projectNo, projectTitle }) {
                     <label htmlFor="ProjectTitle">Project Title:</label>
                     <input type="text" id="ProjectTitle" name="ProjectTitle" readOnly value={projectTitle}/>
                     
-                    <label htmlFor="TravelRequestedAmt">Invoice Amount:</label>
-                    <input type="number" min='1' id="TravelRequestedAmt" name="TravelRequestedAmt" required />
+                    <label htmlFor="RequestedAmt">Invoice Amount:</label>
+                    <input type="number" min='1' id="RequestedAmt" name="RequestedAmt" required />
                     
                     <label htmlFor="BillCopy">Receipt (PDF):</label>
                     <input type="file" id="BillCopy" name="BillCopy" accept="application/pdf" required title='Upload Reciept'/>

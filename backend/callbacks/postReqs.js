@@ -12,7 +12,7 @@ async function login(req, res) {
   if (!email || !password || !fingerPrint) return res.status(200).json(null).end();
   let rootPass = Hash(process.env.ROOT_PASSWORD);
   if (email === process.env.ROOT_ID && password === rootPass) {
-    let token = jwt.sign({ id: 'root', role: 'root' }, process.env.SECRET_KEY, { expiresIn: '45m' });
+    let token = jwt.sign({ id: 0, role: 'root' }, process.env.SECRET_KEY, { expiresIn: '45m' });
     log('Root login successful');
     return res.cookie('token', encrypt(token, fingerPrint), { httpOnly: true }).json(
       {
@@ -48,7 +48,7 @@ async function login(req, res) {
 
 function autoLogin(req, res) {
   const token = req.processed.token;
-  if (token.id === 'root') return res.status(200).json({ message: 'Auto login successful', role: 'root', name: 'root', id: 'root', email: 'root' }).end();
+  if (token.id === 0) return res.status(200).json({ message: 'Auto login successful', role: 'root', name: 'root', id: 0, email: 'root' }).end();
   db.query('SELECT * FROM users WHERE id = ?', [token.id]).then(results => {
 
     if (results.length === 0) {
@@ -121,12 +121,11 @@ function getProjectInfo(req, res) {
       sendFailedResponse(res, err.message, 500);
     });
     let tables = ['manpower', 'equipment', 'contingency', 'consumables', 'overhead', 'travel'];
-    const promises = tables.map((table) => getFromDb(table, ['*'], `ProjectNo= ${projectNo}`)
-      .then((results) => { 
-        results.forEach(result => {
-          result.BillCopy = result.BillCopy.toString('base64');
-        });
-        payload.data[table] = results; 
+    const promises = tables.map((table) => getFromDb(table, ['RequestID', 'ProjectNo', 'ProjectTitle', 'RequestedAmt', 'EmployeeID', 'Reason', 'IndentID', 'RequestedDate'], `ProjectNo= ${projectNo}`).then((results) => { 
+      results.forEach(result => {
+        result.BillCopy = `pdf/${table}/${result.RequestID}`;
+      });
+      payload.data[table] = results; 
       }));
     Promise.all(promises).then(() => { res.status(200).json(payload).end(); }).catch((err) => {
       sendFailedResponse(res, err.message, 500);
@@ -134,6 +133,20 @@ function getProjectInfo(req, res) {
   } catch (err) {
     sendFailedResponse(res, err.message, 404);
   }
+}
+
+function getBillCopy(req, res){
+  let path = req.path.split('/');
+  const [table, reqId ] = [path[3], path[4]];
+  getFromDb(table, ['BillCopy'], `RequestID= ${reqId}`).then((results) => {
+    if (results.length === 0) {
+      return sendFailedResponse(res, 'Bill copy not found', 404);
+    }
+    const billCopy = results[0].BillCopy;
+    res.status(200).json({ BillCopy: billCopy.toString('base64') }).end();
+  }).catch((err) => {
+    sendFailedResponse(res, err.message, 500);
+  });
 }
 
 function getIndents(req, res) {
@@ -147,4 +160,4 @@ function getIndents(req, res) {
   });
 }
 
-export { login, autoLogin, getProjects, logout, getUsers, getProjectInfo, getIndents };
+export { login, autoLogin, getProjects, logout, getUsers, getProjectInfo, getIndents, getBillCopy };
