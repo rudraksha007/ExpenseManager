@@ -151,7 +151,7 @@ function getBillCopy(req, res){
 
 function getIndents(req, res) {
   const query = 'SELECT * FROM indents';
-  db.query(query).then ( results => {
+  getFromDb('indents', ['*']).then(results => {
     const allowedProjects = req.processed.allowedProjects;
     const filteredResults = results.filter(indent => allowedProjects.includes(indent.ProjectNo));
     res.status(200).json({ indents: filteredResults, total: filteredResults.length }).end();

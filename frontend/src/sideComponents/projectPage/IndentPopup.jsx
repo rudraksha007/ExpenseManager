@@ -10,7 +10,7 @@ function IndentPopup({ reset, id }) {
 
     React.useEffect(() => {
         async function fetchRequestDetails() {
-            const data = await fetchData(`/api/requests/${id}`);
+            const data = await fetchData(`/api/indents/${id}`, 'post');
             if (data) setRequestDetails(data);
             else setRequestDetails({
                 requestNo: 'N/A',

@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import '../css/Requests.css';
 import IndentPopup from '../sideComponents/projectPage/IndentPopup';
 import { FaPlus } from 'react-icons/fa';
@@ -10,28 +10,29 @@ function Indents() {
     const [popup, setPopup] = React.useState(<></>);
     const [indents, setIndents] = React.useState([]);
     const [loading, setLoading] = React.useState(true);
+    const [filter, setFilter] = useState({page:1, name:'', status:'all', fundedBy:'all', fromDate:'', toDate:''});
+
     const total = useRef(0);
     const[page, setPage] = React.useState(1);
     useEffect(() => {
         document.title = 'All Indents';
         async function fetchIndents() {
             try {
-                
-                const data = await fetchDataWithParams('indents', 'post', {page: page, count: 25});
+                const data = await fetchDataWithParams('indents', 'post', {filters:filter, count: 25});
                 total.current = data.indents.length;
                 let l = [];
                 console.log(data.indents);
                 
                 data.indents.map((indent, index) => (
                     l.push(
-                        <React.Fragment key={indent.id}>
+                        <React.Fragment key={indent.IndentID}>
                             <div>{index + 1}</div>
-                            <div>{indent.projectNo}</div>
-                            <div>{indent.title}</div>
-                            <div>{indent.amount}</div>
-                            <div>{indent.status}</div>
-                            <div title='Click to view Details' className='indentId hoverable' onClick={() => setPopup(<IndentPopup id={indent.id} reset={() => setPopup(<></>)} />)}>
-                                {indent.id}
+                            <div>{indent.ProjectNo}</div>
+                            <div>{indent.IndentCategory}</div>
+                            <div>{indent.IndentAmount}</div>
+                            <div>{indent.IndentStatus}</div>
+                            <div title='Click to view Details' className='indentId hoverable' onClick={() => setPopup(<IndentPopup id={indent.IndentID} reset={() => setPopup(<></>)} />)}>
+                                {indent.IndentID}
                             </div>
                         </React.Fragment>
                     )

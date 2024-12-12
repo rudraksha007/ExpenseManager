@@ -247,7 +247,7 @@ function authorize(allowedRoles) {
 };
 
 const projectWiseAuthorisation = (req, res, next) => {
-    if (req.processed.token.role != 'root'||req.processed.token.role != 'SuperAdmin') {
+    if (req.processed.token.role != 'root'&&req.processed.token.role != 'SuperAdmin') {
         getFromDb('users', ['projects'], `id=${req.processed.token.id}`).then((projects) => {
             if (projects.length == 0) {
                 return sendFailedResponse(res, 'Permission denied', 403);
@@ -264,15 +264,18 @@ const projectWiseAuthorisation = (req, res, next) => {
         });
     }
     else {
+
         getFromDb('Projects', ['ProjectNo']).then((projects) => {
-            req.processed.allowedProjects = projects.map(project => project.ProjectNo);
+            let arr = [];
+            projects.forEach(project => {
+                arr.push(project.ProjectNo);
+            });
+            req.processed.allowedProjects = arr;
             next();
         }).catch((err) => {
             return sendFailedResponse(res, err.message, 500);
         });
     }
-    next();
-
 
 };
 async function getFromDb(table, fields, where) {
