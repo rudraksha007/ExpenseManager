@@ -25,7 +25,7 @@ function AllProjects() {
         document.title = 'All Projects';
         async function getProjects() {
             // const data = await fetchDataWithParams(`projects`, { page: filter.page, count: 25 });
-            let data = (await fetchDataWithParams('projects', 'post', {id: profile.id, fields: ['ProjectNo','ProjectTitle','ProjectStartDate', 'ProjectEndDate', 'TotalSanctionamount'], filters: filter}));
+            let data = (await fetchDataWithParams('projects', 'post', {id: profile.id, fields: ['ProjectNo','ProjectTitle','ProjectStartDate', 'ProjectEndDate', 'TotalSanctionamount', 'FundedBy'], filters: filter}));
             console.log(data);
             
             if (data.reqStatus == 'success') {
@@ -36,7 +36,7 @@ function AllProjects() {
                             <div>{index + 1}</div>
                             <div>{project.ProjectTitle}</div>
                             <div>{project.TotalSanctionamount}</div>
-                            <div>{project.fundedBy}</div>
+                            <div>{project.FundedBy}</div>
                             <div>{project.ProjectStartDate.split('T')[0]}</div>
                             <div>{project.ProjectEndDate.split('T')[0]}</div>
                             <div className='allProjectsActions'>

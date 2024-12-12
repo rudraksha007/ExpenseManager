@@ -11,30 +11,33 @@ import { fetchData } from '../assets/scripts';
 import { Oval } from 'react-loader-spinner';
 import DecManpowerPopup from '../sideComponents/projectPage/DecManpowerPopup';
 import ManpowerEditDetailsPopup from '../sideComponents/projectPage/ManpowerDetailsPopup';
+import PDFPopup from '../sideComponents/PDFPopup';
 
 function Project() {
     let { id } = useParams();
     const [activeTab, setActiveTab] = useState('Manpower');
     const [table, setTable] = useState([]);
     const [data, setData] = useState({});
-    const [popup, setPopup] = useState(<></>);
+    const [popup, setPopup] = useState(null);
     const [loading, setLoading] = useState(true);
     const tabNames = ['Manpower', 'Travels', 'Consumables', 'Equipments', 'Contingency'];
+    const fillData = async () => {
+        setLoading(true);
+        let response = await fetchData(`projects/${id}`, 'post');
+        if(response.reqStatus != 'success'){alert('Error: '+response.message); setLoading(false);return;}
+        console.log(response.data);
+        
+        setTable(compileDate(response.data, setPopup));
+        let { manpower, travels, consumables, equipments, contingency, overhead, ...filtered } = response.data;
+        setData(filtered);
+        document.title = `Project: ${filtered.ProjectTitle}`;
+        setLoading(false);
+    }
     useEffect(() => {
-        async function fillData() {
-            let response = await fetchData(`projects/${id}`, 'post');
-            if(response.reqStatus != 'success'){alert('Error: '+response.message); setLoading(false);return;}
-            // let response = 
-            console.log(response.data);
-            
-            setTable(compileDate(response.data, setPopup));
-            let { manpower, travels, consumables, equipments, contingency, overhead, ...filtered } = response.data;
-            setData(filtered);
-            document.title = `Project: ${filtered.ProjectTitle}`;
-            setLoading(false);
-        }
+        if(popup)return;
         fillData();
-    }, [id]);
+        setActiveTab('Manpower');
+    }, [popup]);
 
     useEffect(() => {
         const tabContentElements = document.querySelectorAll('.projectTabContentData');
@@ -86,8 +89,8 @@ function Project() {
                             <span className="tableTitle">Details</span>
                             {table[0]}
                             <div className="add">
-                                <div className='hoverable inherit'><FaEdit size={20} onClick={() => setPopup(<DecManpowerPopup reset={() => setPopup(<></>)} proj={data} />)} /></div>
-                                <div className='hoverable inherit'><FaPlus size={20} onClick={() => setPopup(<AddManpowerPopup reset={() => setPopup(<></>)} />)} proj={data} /></div>
+                                <div className='hoverable inherit'><FaEdit size={20} onClick={() => setPopup(<DecManpowerPopup reset={() => setPopup(null)} proj={data} projectNo={id} />)} /></div>
+                                <div className='hoverable inherit'><FaPlus size={20} onClick={() => setPopup(<AddManpowerPopup reset={() => setPopup(null)} proj={data} projectNo={id}/>)} /></div>
                             </div>
                         </div>
                         <div className="projectTabContentData">
@@ -97,7 +100,7 @@ function Project() {
                             <span className="projectTabDataHeading">Date</span>
                             <span className="projectTabDataHeading">Bill</span>
                             {table[1]}
-                            <div className="add hoverable" onClick={() => setPopup(<TravelsPopup reset={() => setPopup(<></>)} />)}><FaPlus /></div>
+                            <div className="add hoverable" onClick={() => setPopup(<TravelsPopup reset={() => setPopup(null)} projectNo={id} projectTitle={data.ProjectTitle} />)} ><FaPlus /></div>
                         </div>
                         <div className="projectTabContentData">
                             <span className="projectTabDataHeading">Sl.</span>
@@ -106,7 +109,7 @@ function Project() {
                             <span className="projectTabDataHeading">Date</span>
                             <span className="projectTabDataHeading">Bill</span>
                             {table[2]}
-                            <div className="add hoverable" onClick={() => setPopup(<ConsumablesPopup reset={() => setPopup(<></>)} />)}><FaPlus /></div>
+                            <div className="add hoverable" onClick={() => setPopup(<ConsumablesPopup reset={() => setPopup(null)} projectNo={id} projectTitle={data.ProjectTitle} />)}><FaPlus /></div>
                         </div>
                         <div className="projectTabContentData">
                             <span className="projectTabDataHeading">Sl.</span>
@@ -115,7 +118,7 @@ function Project() {
                             <span className="projectTabDataHeading">Date</span>
                             <span className="projectTabDataHeading">Bill</span>
                             {table[3]}
-                            <div className="add hoverable" onClick={() => setPopup(<EquipmentsPopup reset={() => setPopup(<></>)} />)}><FaPlus /></div>
+                            <div className="add hoverable" onClick={() => setPopup(<EquipmentsPopup reset={() => setPopup(null)} projectNo={id} projectTitle={data.ProjectTitle} />)}><FaPlus /></div>
                         </div>
                         <div className="projectTabContentData">
                             <span className="projectTabDataHeading">Sl.</span>
@@ -124,7 +127,7 @@ function Project() {
                             <span className="projectTabDataHeading">Date</span>
                             <span className="projectTabDataHeading">Bill</span>
                             {table[4]}
-                            <div className="add hoverable" onClick={() => setPopup(<ContingencyPopup reset={() => setPopup(<></>)} />)}><FaPlus /></div>
+                            <div className="add hoverable" onClick={() => setPopup(<ContingencyPopup reset={() => setPopup(null)} projectNo={id} projectTitle={data.ProjectTitle} />)}><FaPlus /></div>
                         </div>
                     </div>
                 </div>
@@ -148,7 +151,7 @@ function compileDate(response, setPopup) {
             <div key={`${item.id}-requestId`} style={style}>{item.id}</div>,
             <div key={`${item.id}-indentId`} style={style}>{item.indentId}</div>,
             <div key={`${item.id}-date`} style={style}>{item.date}</div>,
-            <div key={`${item.id}-bill`} style={style} className='hoverable' onClick={() => setPopup(<ManpowerEditDetailsPopup reset={() => setPopup(<></>)} entry={item} />)}> <b><u>{item.action=='added'? "Added":"Removed"}</u></b> </div>
+            <div key={`${item.id}-bill`} style={style} className='hoverable' onClick={() => setPopup(<ManpowerEditDetailsPopup reset={() => setPopup(null)} entry={item} />)}> <b><u>{item.action=='added'? "Added":"Removed"}</u></b> </div>
         ])
     });
     arr.push(manpowerContent);
@@ -156,13 +159,14 @@ function compileDate(response, setPopup) {
     tables.forEach((table) => {
         let temp = [];
         if (response[table]) {
-            response[table].map((item, index) => (
+            console.log(response[table][0]);
+            Object.keys(response[table]).forEach((key) => (
                 temp.push([
-                    <div key={`${item.id}-sl`}>{index + 1}</div>,
-                    <div key={`${item.id}-requestId`}>{item.id}</div>,
-                    <div key={`${item.id}-indentId`}>{item.indentId}</div>,
-                    <div key={`${item.id}-date`}>{item.date}</div>,
-                    <div key={`${item.id}-bill`}><Link to={item.billLink}>${item.bill}</Link></div>
+                    <div key={`${key}-sl`}>{key + 1}</div>,
+                    <div key={`${key}-requestId`}>{response[table][key].RequestID}</div>,
+                    <div key={`${key}-indentId`}>{response[table][key].IndentID}</div>,
+                    <div key={`${key}-date`}>{response[table][key].RequestedDate.split('T')[0]}</div>,
+                    <div key={`${key}-bill`} className='hoverable' onClick={()=>setPopup(<PDFPopup reset={() => setPopup(null)} pdf={response[table][key].BillCopy}/>)}>${response[table][key].RequestedAmt}</div>
                 ])
             ));
         }

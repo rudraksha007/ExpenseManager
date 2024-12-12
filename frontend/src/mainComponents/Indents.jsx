@@ -4,7 +4,7 @@ import IndentPopup from '../sideComponents/projectPage/IndentPopup';
 import { FaPlus } from 'react-icons/fa';
 import { Oval } from 'react-loader-spinner';
 import PageControls from '../sideComponents/PageControls';
-import { fetchData } from '../assets/scripts';
+import { fetchData, fetchDataWithParams } from '../assets/scripts';
 
 function Indents() {
     const [popup, setPopup] = React.useState(<></>);
@@ -17,7 +17,7 @@ function Indents() {
         async function fetchIndents() {
             try {
                 
-                const data = await fetchData('indents');
+                const data = await fetchDataWithParams('indents', 'post', {page: page, count: 25});
                 total.current = data.indents.length;
                 let l = [];
                 console.log(data.indents);

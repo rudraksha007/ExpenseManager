@@ -3,6 +3,7 @@ import '../../css/Popup.css';
 import { FaTimes } from 'react-icons/fa';
 import { fetchData, fetchDataWithParams } from '../../assets/scripts';
 import { Oval } from 'react-loader-spinner';
+import { closePopup } from '../../assets/popup';
 
 function DecManpowerPopup({ reset, proj }) {
     const today = new Date().toISOString().split('T')[0];
@@ -35,12 +36,21 @@ function DecManpowerPopup({ reset, proj }) {
                 <>
                     {loading ? <Oval color='black' height={80} strokeWidth={5} /> :
                         <>
-                            <FaTimes size={30} style={{ position: 'absolute', right: 10, top: 10, cursor: 'pointer' }} onClick={() => close(reset)} />
+                            <FaTimes size={30} style={{ position: 'absolute', right: 10, top: 10, cursor: 'pointer' }} onClick={(e) => closePopup(e, reset)} />
                             <h2>Decrease Manpower</h2>
-                            <form id='decManpowerForm'>
-                                <label htmlFor="date">Date: <input type="date" id="date" name="date" max={today} required /></label>
-                                <label htmlFor="indentId">Indent ID: <input type="text" id="indentId" name="indentId" disabled value={ind}/></label>
-                                <div id="decManpowerPopupProfileTable">
+                            <form className='largePopupForm'>
+                                <div className='largePopupDetails'>
+                                    <label htmlFor="date">Date:</label>
+                                    <input type="date" id="date" name="date" max={today} required />
+                                    <label htmlFor="ProjectNo">Project No:</label>
+                                    <input type="number" id="ProjectNo" name="ProjectNo" disabled value={proj.ProjectNo} />
+
+                                    <label htmlFor="ProjectTitle">Project Title:</label>
+                                    <input type="text" id="ProjectTitle" name="ProjectTitle" disabled value={proj.ProjectTitle} />
+                                    <label htmlFor="indentId">Indent ID:</label>
+                                    <input type="text" id="indentId" name="indentId" disabled value={ind} />
+                                </div>
+                                <div className='largePopupOptions'>
                                     <div className="tableTitle">Tick</div>
                                     <div className="tableTitle">Name</div>
                                     <div className="tableTitle">Emp ID</div>
@@ -51,16 +61,9 @@ function DecManpowerPopup({ reset, proj }) {
                         </>
                     }
                 </>
-
             </div>
         </div>
     );
 };
-
-function close(reset) {
-    document.getElementById('decManpowerForm').reset();
-    console.log('closed');
-    reset();
-}
 
 export default DecManpowerPopup;

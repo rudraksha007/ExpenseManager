@@ -66,7 +66,10 @@ function NewProject() {
                 Total Sanction amount:<span style={{ color: 'red' }}>*</span>
             </label>
             <input type="number" name="TotalSanctionamount" placeholder="Enter total sanction amount" required min="0" onChange={(e) => setFormData({ ...formData, [e.target.name]: e.target.value })} value={formData.TotalSanctionamount || ''} />
-
+            <label>
+                Funded By:<span style={{ color: 'red' }}>*</span>
+            </label>
+            <input type="text" name="FundedBy" placeholder="Enter funding agency" required onChange={(e) => setFormData({ ...formData, [e.target.name]: e.target.value })} value={formData.FundedBy || ''} />
             <label>
                 PI name:<span style={{ color: 'red' }}>*</span>
             </label>

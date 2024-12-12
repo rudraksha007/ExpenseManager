@@ -19,7 +19,7 @@ async function login(req, res) {
         profile: {
           role: 'root',
           name: 'root',
-          id: 'root',
+          id: 0,
           email: 'root'
         }
       }).status(200).end();
@@ -122,7 +122,12 @@ function getProjectInfo(req, res) {
     });
     let tables = ['manpower', 'equipment', 'contingency', 'consumables', 'overhead', 'travel'];
     const promises = tables.map((table) => getFromDb(table, ['*'], `ProjectNo= ${projectNo}`)
-      .then((results) => { payload.data[table] = results; }));
+      .then((results) => { 
+        results.forEach(result => {
+          result.BillCopy = result.BillCopy.toString('base64');
+        });
+        payload.data[table] = results; 
+      }));
     Promise.all(promises).then(() => { res.status(200).json(payload).end(); }).catch((err) => {
       sendFailedResponse(res, err.message, 500);
     });
@@ -130,4 +135,16 @@ function getProjectInfo(req, res) {
     sendFailedResponse(res, err.message, 404);
   }
 }
-export { login, autoLogin, getProjects, logout, getUsers, getProjectInfo };
+
+function getIndents(req, res) {
+  const query = 'SELECT * FROM indents';
+  db.query(query).then ( results => {
+    const allowedProjects = req.processed.allowedProjects;
+    const filteredResults = results.filter(indent => allowedProjects.includes(indent.ProjectNo));
+    res.status(200).json({ indents: filteredResults, total: filteredResults.length }).end();
+  }).catch(err => {
+    sendFailedResponse(res, err.message, 500);
+  });
+}
+
+export { login, autoLogin, getProjects, logout, getUsers, getProjectInfo, getIndents };

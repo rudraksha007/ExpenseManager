@@ -1,17 +1,18 @@
 import { log } from './utils.js';
 import express from 'express';
 import dotenv from 'dotenv';
-import { login, autoLogin, getProjects, logout, getUsers, getProjectInfo } from './callbacks/postReqs.js';
+import { login, autoLogin, getProjects, logout, getUsers, getProjectInfo, getIndents } from './callbacks/postReqs.js';
 import cookieParser from 'cookie-parser';
-import { db, authenticate, authorize, connectDb } from './dbUtils.js';
+import { db, authenticate, authorize, connectDb, projectWiseAuthorisation } from './dbUtils.js';
 import cors from 'cors';
-import { addProject,addUser } from './callbacks/putReqs.js';
+import { addProject,addTravel,addUser } from './callbacks/putReqs.js';
+import fileUpload from 'express-fileupload';
 
 const hash = import('bcryptjs').hash;
 log('Starting Expense Manager Server');
 dotenv.config();
 const app = express();
-app.use(cors({ origin: 'http://localhost:5173', credentials: true }), express.json(), cookieParser(), authenticate);
+app.use(cors({ origin: 'http://localhost:5173', credentials: true }), express.json(),fileUpload(), cookieParser(), authenticate);
 await connectDb();
 
 //Post requests (right click on supplied function-> goto source definition to view the code)
@@ -21,10 +22,12 @@ app.post('/api/autoLogin', (req, res) => autoLogin(req, res));
 app.post('/api/projects', (req, res) => getProjects(req, res));
 app.post('/api/users', authorize(['Super Admin']), (req, res) => getUsers(req, res));
 app.post('/api/projects/*', (req, res)=>getProjectInfo(req, res));
+app.post('/api/indents', projectWiseAuthorisation, (req, res) => getIndents(req, res));
 
 //Put requests (right click on supplied function-> goto source definition to view the code)
 app.put('/api/projects', authorize(['SuperAdmin']), (req, res) => addProject(req, res));
 app.put('/api/users', authorize(['SuperAdmin']), (req, res) => addUser(req, res));
+app.put('/api/travels', (req, res) => addTravel(req, res));
 
 
 
@@ -69,23 +72,17 @@ app.delete('/api/projects/:id', authorize(['Super Admin', 'Admin(PME)']), (req, 
 });
 
 // --- Indents CRUD Operations ---// --- Indents CRUD Operations ---
-app.get('/api/indents', (req, res) => {
-  const query = 'SELECT * FROM indents';
-  db.query(query, (err, results) => {
-    if (err) return res.status(500).json({ message: 'Database error' });
-    res.status(200).json({ indents: results });
-  });
-});
+
 
 // Endpoint to Add an Indent - Scientists (PIs) are not allowed
-app.post('/api/indents', authorize(['Super Admin', 'Admin(PME)']), (req, res) => {
-  const { title, description, amount } = req.body;
-  const query = 'INSERT INTO indents (title, description, amount) VALUES (?, ?, ?)';
-  db.query(query, [title, description, amount], (err, result) => {
-    if (err) return res.status(500).json({ message: 'Error adding indent' });
-    res.status(201).json({ message: 'Indent added successfully' });
-  });
-});
+// app.post('/api/indents', authorize(['Super Admin', 'Admin(PME)']), (req, res) => {
+//   const { title, description, amount } = req.body;
+//   const query = 'INSERT INTO indents (title, description, amount) VALUES (?, ?, ?)';
+//   db.query(query, [title, description, amount], (err, result) => {
+//     if (err) return res.status(500).json({ message: 'Error adding indent' });
+//     res.status(201).json({ message: 'Indent added successfully' });
+//   });
+// });
 
 // Endpoint to Update an Indent - Scientists (PIs) are not allowed
 app.put('/api/indents/:id', authorize(['Super Admin', 'Admin(PME)']), (req, res) => {
@@ -569,25 +566,18 @@ app.get('/api/travel/:id', (req, res) => {
 });
 
 // Create a new travel record
-app.post('/api/travel', (req, res) => {
-  const { ProjectNo, ProjectTitle, TravelRequestedAmt, IndentID, RequestedMonth, RequestedYear, BillCopy } = req.body;
-  const query = 'INSERT INTO travel (ProjectNo, ProjectTitle, TravelRequestedAmt, IndentID, RequestedMonth, RequestedYear, BillCopy) VALUES (?, ?, ?, ?, ?, ?, ?)';
-  db.query(query, [ProjectNo, ProjectTitle, TravelRequestedAmt, IndentID, RequestedMonth, RequestedYear, BillCopy], (err, result) => {
-    if (err) return res.status(500).json({ message: 'Error adding travel record' });
-    res.status(201).json({ message: 'Travel record added successfully' });
-  });
-});
+
 
 // Update a travel record by ID
-app.put('/api/travel/:id', (req, res) => {
-  const { id } = req.params;
-  const { ProjectNo, ProjectTitle, TravelRequestedAmt, IndentID, RequestedMonth, RequestedYear, BillCopy } = req.body;
-  const query = 'UPDATE travel SET ProjectNo = ?, ProjectTitle = ?, TravelRequestedAmt = ?, IndentID = ?, RequestedMonth = ?, RequestedYear = ?, BillCopy = ? WHERE TravelId = ?';
-  db.query(query, [ProjectNo, ProjectTitle, TravelRequestedAmt, IndentID, RequestedMonth, RequestedYear, BillCopy, id], (err, result) => {
-    if (err) return res.status(500).json({ message: 'Error updating travel record' });
-    res.status(200).json({ message: 'Travel record updated successfully' });
-  });
-});
+// app.put('/api/travel/:id', (req, res) => {
+//   const { id } = req.params;
+//   const { ProjectNo, ProjectTitle, TravelRequestedAmt, IndentID, RequestedMonth, RequestedYear, BillCopy } = req.body;
+//   const query = 'UPDATE travel SET ProjectNo = ?, ProjectTitle = ?, TravelRequestedAmt = ?, IndentID = ?, RequestedMonth = ?, RequestedYear = ?, BillCopy = ? WHERE TravelId = ?';
+//   db.query(query, [ProjectNo, ProjectTitle, TravelRequestedAmt, IndentID, RequestedMonth, RequestedYear, BillCopy, id], (err, result) => {
+//     if (err) return res.status(500).json({ message: 'Error updating travel record' });
+//     res.status(200).json({ message: 'Travel record updated successfully' });
+//   });
+// });
 
 // Delete a travel record by ID
 app.delete('/api/travel/:id', (req, res) => {

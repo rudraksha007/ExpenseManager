@@ -1,6 +1,6 @@
 import mysql from 'mysql2/promise';
 import jwt from 'jsonwebtoken';
-import { log } from './utils.js';
+import { log, sendFailedResponse } from './utils.js';
 import { decrypt } from './crypt.js';
 let db = null;
 async function connectDb() {
@@ -35,15 +35,29 @@ async function connectDb() {
                 `
             },
             {
+                tableName: 'users',
+                definition: `
+                id INT PRIMARY KEY,
+                name VARCHAR(255),
+                email VARCHAR(255) UNIQUE KEY,
+                password VARCHAR(255),
+                projects JSON,
+                status INT,
+                role VARCHAR(255)
+            `
+            },
+            {
                 tableName: 'Indents',
                 definition: `
                     IndentID INTEGER PRIMARY KEY,
                     IndentCategory VARCHAR(255),
                     ProjectNo INTEGER,
                     IndentAmount DOUBLE,
-                    IndentedPerson VARCHAR(255),
+                    IndentedPersonId INT,
+                    IndentDate DATE,
                     IndentStatus VARCHAR(255),
-                    FOREIGN KEY (ProjectNo) REFERENCES Projects(ProjectNo)
+                    FOREIGN KEY (ProjectNo) REFERENCES Projects(ProjectNo),
+                    FOREIGN KEY (IndentedPersonId) REFERENCES users(id)
                 `
             },
             {
@@ -77,13 +91,13 @@ async function connectDb() {
             {
                 tableName: 'Manpower',
                 definition: `
-                    ManpowerID INT PRIMARY KEY,
+                    RequestID INT PRIMARY KEY,
                     ProjectNo INT,
                     ProjectTitle VARCHAR(255),
-                    ManpowerRequestedAmt DOUBLE,
+                    RequestedAmt DOUBLE,
                     IndentID INT,
                     RequestedDate Date,
-                    BillCopyManpower BLOB,
+                    BillCopyManpower LONGBLOB,
                     FOREIGN KEY (ProjectNo) REFERENCES Projects(ProjectNo),
                     FOREIGN KEY (ProjectTitle) REFERENCES Projects(ProjectTitle),
                     FOREIGN KEY (IndentID) REFERENCES Indents(IndentID)
@@ -92,13 +106,13 @@ async function connectDb() {
             {
                 tableName: 'Consumables',
                 definition: `
-                    ConsumablesID INT PRIMARY KEY,
+                    RequestID INT PRIMARY KEY,
                     ProjectNo INT,
                     ProjectTitle VARCHAR(255),
-                    ConsumablesRequestedAmt DOUBLE,
+                    RequestedAmt DOUBLE,
                     IndentID INT,
                     RequestedDate Date,
-                    BillCopy BLOB,
+                    BillCopy LONGBLOB,
                     FOREIGN KEY (ProjectNo) REFERENCES Projects(ProjectNo),
                     FOREIGN KEY (ProjectTitle) REFERENCES Projects(ProjectTitle),
                     FOREIGN KEY (IndentID) REFERENCES Indents(IndentID)
@@ -107,13 +121,16 @@ async function connectDb() {
             {
                 tableName: 'Travel',
                 definition: `
-                    TravelID INTEGER PRIMARY KEY,
+                    RequestID INTEGER PRIMARY KEY,
                     ProjectNo INTEGER,
                     ProjectTitle VARCHAR(255),
-                    TravelRequestedAmt DOUBLE,
+                    RequestedAmt DOUBLE,
+                    EmployeeID INT,
+                    Reason VARCHAR(255),
                     IndentID INTEGER,
                     RequestedDate Date,
-                    BillCopy BLOB,
+                    BillCopy LONGBLOB,
+                    FOREIGN KEY (EmployeeID) REFERENCES users(id),
                     FOREIGN KEY (ProjectNo) REFERENCES Projects(ProjectNo),
                     FOREIGN KEY (ProjectTitle) REFERENCES Projects(ProjectTitle),
                     FOREIGN KEY (IndentID) REFERENCES Indents(IndentID)
@@ -122,13 +139,13 @@ async function connectDb() {
             {
                 tableName: 'Overhead',
                 definition: `
-                    OverheadID INTEGER PRIMARY KEY,
+                    RequestID INTEGER PRIMARY KEY,
                     ProjectNo INTEGER,
                     ProjectTitle VARCHAR(255),
-                    OverheadRequestedAmt DOUBLE,
+                    RequestedAmt DOUBLE,
                     IndentID INTEGER,
                     RequestedDate Date,
-                    BillCopy BLOB,
+                    BillCopy LONGBLOB,
                     FOREIGN KEY (ProjectNo) REFERENCES Projects(ProjectNo),
                     FOREIGN KEY (ProjectTitle) REFERENCES Projects(ProjectTitle),
                     FOREIGN KEY (IndentID) REFERENCES Indents(IndentID)
@@ -137,13 +154,13 @@ async function connectDb() {
             {
                 tableName: 'Equipment',
                 definition: `
-                    EquipmentID INTEGER PRIMARY KEY,
+                    RequestID INTEGER PRIMARY KEY,
                     ProjectNo INTEGER,
                     ProjectTitle VARCHAR(255),
-                    EquipmentRequestedAmt DOUBLE,
+                    RequestedAmt DOUBLE,
                     IndentID INTEGER,
                     RequestedDate Date,
-                    BillCopy BLOB,
+                    BillCopy LONGBLOB,
                     FOREIGN KEY (ProjectNo) REFERENCES Projects(ProjectNo),
                     FOREIGN KEY (ProjectTitle) REFERENCES Projects(ProjectTitle),
                     FOREIGN KEY (IndentID) REFERENCES Indents(IndentID)
@@ -152,30 +169,19 @@ async function connectDb() {
             {
                 tableName: 'Contingency',
                 definition: `
-                    ContingencyID INTEGER PRIMARY KEY,
+                    RequestID INTEGER PRIMARY KEY,
                     ProjectNo INTEGER,
                     ProjectTitle VARCHAR(255),
-                    ContingencyRequestedAmt DOUBLE,
+                    RequestedAmt DOUBLE,
                     IndentID INTEGER,
                     RequestedDate Date,
-                    BillCopy BLOB,
+                    BillCopy LONGBLOB,
                     FOREIGN KEY (ProjectNo) REFERENCES Projects(ProjectNo),
                     FOREIGN KEY (ProjectTitle) REFERENCES Projects(ProjectTitle),
                     FOREIGN KEY (IndentID) REFERENCES Indents(IndentID)
                 `
-            },
-            {
-                tableName: 'users',
-                definition: `
-                id INT PRIMARY KEY,
-                name VARCHAR(255),
-                email VARCHAR(255) UNIQUE KEY,
-                password VARCHAR(255),
-                projects JSON,
-                status INT,
-                role VARCHAR(255)
-            `
             }
+            
         ];
         // Queries to create tables if they don't exist
         await (async () => { // async is required to print the logs in correct order
@@ -186,6 +192,8 @@ async function connectDb() {
                     });
                 } catch (err) {
                     log(`Error binding table: ${err}`);
+                    log('Exiting...');
+                    process.exit(1);
                 }
             }
             log('SQL Binding Complete');
@@ -201,7 +209,7 @@ function authenticate(req, res, next) {
     const token = req.cookies.token;
     if (!token && req.path !== '/api/login')
         return res.status(401).json({ message: 'Access denied' }); // If token is not present and path is not for login
-    if (!token && req.path === '/api/login' ) return next(); // If token is not present and path is for login
+    if (!token && req.path === '/api/login') return next(); // If token is not present and path is for login
     jwt.verify(decrypt(token, req.body.fingerPrint), process.env.SECRET_KEY, (err, decoded) => {
         if (err) {
             // If token is invalid=> delete token from client side since it's probably expired
@@ -216,7 +224,7 @@ function authenticate(req, res, next) {
 function authorize(allowedRoles) {
     return (req, res, next) => {
         console.log(req.processed.token.role);
-        if (!allowedRoles.includes(req.processed.token.role)&& req.processed.token.role!=='root') {
+        if (!allowedRoles.includes(req.processed.token.role) && req.processed.token.role !== 'root') {
             return res.status(403).json({ message: 'Permission denied' });
         }
         next();
@@ -224,11 +232,33 @@ function authorize(allowedRoles) {
 };
 
 const projectWiseAuthorisation = (req, res, next) => {
-    if (req.processed.token.role == 'root') {
-        next();
-        return;
+    if (req.processed.token.role != 'root'||req.processed.token.role != 'SuperAdmin') {
+        getFromDb('users', ['projects'], `id=${req.processed.token.id}`).then((projects) => {
+            if (projects.length == 0) {
+                return sendFailedResponse(res, 'Permission denied', 403);
+            }
+            projects = JSON.parse(projects[0].projects);
+            if (!projects.includes(req.body.ProjectNo)) {
+                return sendFailedResponse(res, 'Permission denied', 403);
+            }
+            req.processed.allowedProjects = projects;
+            next();
+            return;
+        }).catch((err) => {
+            return sendFailedResponse(res, err.message, 500);
+        });
     }
-    
+    else {
+        getFromDb('Projects', ['ProjectNo']).then((projects) => {
+            req.processed.allowedProjects = projects.map(project => project.ProjectNo);
+            next();
+        }).catch((err) => {
+            return sendFailedResponse(res, err.message, 500);
+        });
+    }
+    next();
+
+
 };
 async function getFromDb(table, fields, where) {
     let query = `SELECT ${fields.join(',')} FROM ${table}`;
@@ -236,4 +266,4 @@ async function getFromDb(table, fields, where) {
     return db.query(query).then(([rows]) => rows);
 
 }
-export { db, authenticate, authorize, connectDb,getFromDb };
+export { db, authenticate, authorize, connectDb, getFromDb, projectWiseAuthorisation };

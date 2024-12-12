@@ -3,7 +3,7 @@ import '../../css/Popup.css';
 import { FaTimes } from 'react-icons/fa';
 import { closePopup } from '../../assets/popup';
 
-function EquipmentsPopup({ reset }) {
+function EquipmentsPopup({ reset, projectNo, projectTitle }) {
     const today = new Date().toISOString().split('T')[0];
     let total = 0;
 
@@ -16,6 +16,15 @@ function EquipmentsPopup({ reset }) {
                 <form className='popupForm'>
                     <label htmlFor="date">Date:</label>
                     <input type="date" id="date" name="date" max={today} required />
+
+                    <label htmlFor="ProjectNo">Project No:</label>
+                    <input type="number" id="ProjectNo" name="ProjectNo" disabled value={projectNo} />
+
+                    <label htmlFor="ProjectTitle">Project Title:</label>
+                    <input type="text" id="ProjectTitle" name="ProjectTitle" disabled value={projectTitle} />
+
+                    <label htmlFor="indentId">Indent ID:</label>
+                    <input type="text" id="indentId" name="indentId" required />
                     
                     <label htmlFor="equipmentId">Equipment ID:</label>
                     <input type="text" id="equipmentId" name="equipmentId" required />
