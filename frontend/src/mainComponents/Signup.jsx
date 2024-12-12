@@ -32,7 +32,7 @@ function Signup() {
                 <div id="inputDiv">
                     <label className="loginInput hoverable">Name:<input type='text' name='name' placeholder='Enter your name' required /></label>
                     <label className="loginInput hoverable">Email: &#9993;<input type='email' name='email' placeholder='mayank@gmail.com' required /></label>
-                    <label className="loginInput hoverable">Employee Id:;<input type='number' name='id' placeholder="Enter Employee Id" required /></label>
+                    <label className="loginInput hoverable">Employee Id:;<input type='number' name='id' placeholder="Enter Employee Id" required min={0}/></label>
                     <label className="loginInput hoverable">Password: &#128274;<input type='password' name='password' placeholder="Enter Password" required pattern="^(?=.*[a-z])(?=.*[A-Z])(?=.*\W).{6,}$" title="Password must be 6 characters long and contain an Upper case, smaller case and a special character" /></label>
                     <label className="loginInput hoverable">Designation:
                         <select name='role' required defaultValue={"Pi"}>

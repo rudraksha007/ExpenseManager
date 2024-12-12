@@ -28,7 +28,7 @@ function AllProjects() {
             let data = (await fetchDataWithParams('projects', 'post', {id: profile.id, fields: ['ProjectNo','ProjectTitle','ProjectStartDate', 'ProjectEndDate', 'TotalSanctionamount'], filters: filter}));
             console.log(data);
             
-            if (data.status == 'success') {
+            if (data.reqStatus == 'success') {
                 let l = [];
                 data.projects.map((project, index) => (
                     l.push(
@@ -40,7 +40,7 @@ function AllProjects() {
                             <div>{project.ProjectStartDate.split('T')[0]}</div>
                             <div>{project.ProjectEndDate.split('T')[0]}</div>
                             <div className='allProjectsActions'>
-                                <Link to={`/projects/${project.id}`} title="View Project Details"><FaEdit size={20} /></Link>
+                                <Link to={`/projects/${project.ProjectNo}`} title="View Project Details"><FaEdit size={20} /></Link>
                             </div>
                         </React.Fragment>
                     )

@@ -67,7 +67,7 @@ function autoLogin(req, res) {
         }).end();
     });
   }).catch(err => {
-    return sendFailedResponse(res, err.message);
+    return sendFailedResponse(res, err.message, 500);
   });
   return res.status(200).json({ message: 'Auto login successful', role: token.role });
 }
@@ -110,4 +110,24 @@ function getUsers(req, res) {
     res.status(200).json({ users: results, total: results.length });
   }).catch(err => sendFailedResponse(res, err.message, 500));
 }
-export { login, autoLogin, getProjects, logout, getUsers };
+
+function getProjectInfo(req, res) {
+  try {
+    let projectNo = parseInt(req.path.split('/')[3]);
+    let payload = { data: {} };
+    getFromDb('projects', ['*'], `ProjectNo= ${projectNo}`).then((results) => {
+      payload.data = results[0];
+    }).catch((err) => {
+      sendFailedResponse(res, err.message, 500);
+    });
+    let tables = ['manpower', 'equipment', 'contingency', 'consumables', 'overhead', 'travel'];
+    const promises = tables.map((table) => getFromDb(table, ['*'], `ProjectNo= ${projectNo}`)
+      .then((results) => { payload.data[table] = results; }));
+    Promise.all(promises).then(() => { res.status(200).json(payload).end(); }).catch((err) => {
+      sendFailedResponse(res, err.message, 500);
+    });
+  } catch (err) {
+    sendFailedResponse(res, err.message, 404);
+  }
+}
+export { login, autoLogin, getProjects, logout, getUsers, getProjectInfo };

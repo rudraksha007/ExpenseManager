@@ -1,7 +1,7 @@
 import { log } from './utils.js';
 import express from 'express';
 import dotenv from 'dotenv';
-import { login, autoLogin, getProjects, logout, getUsers } from './callbacks/postReqs.js';
+import { login, autoLogin, getProjects, logout, getUsers, getProjectInfo } from './callbacks/postReqs.js';
 import cookieParser from 'cookie-parser';
 import { db, authenticate, authorize, connectDb } from './dbUtils.js';
 import cors from 'cors';
@@ -19,31 +19,24 @@ app.post('/api/login', (req, res) => login(req, res));
 app.post('/api/logout', (req, res) => logout(req, res)); 
 app.post('/api/autoLogin', (req, res) => autoLogin(req, res)); 
 app.post('/api/projects', (req, res) => getProjects(req, res));
-app.post('/api/users', authorize(['Super Admin','root']), (req, res) => getUsers(req, res));
+app.post('/api/users', authorize(['Super Admin']), (req, res) => getUsers(req, res));
+app.post('/api/projects/*', (req, res)=>getProjectInfo(req, res));
 
 //Put requests (right click on supplied function-> goto source definition to view the code)
-app.put('/api/projects', authorize(['SuperAdmin','root']), (req, res) => addProject(req, res));
-app.put('/api/users', authorize(['SuperAdmin','root']), (req, res) => addUser(req, res));
+app.put('/api/projects', authorize(['SuperAdmin']), (req, res) => addProject(req, res));
+app.put('/api/users', authorize(['SuperAdmin']), (req, res) => addUser(req, res));
 
 
-// --- Profiles CRUD Operations ---
-app.get('/api/users', (req, res) => {
-  const query = 'SELECT * FROM users';
-  db.query(query, (err, results) => {
-    if (err) return res.status(500).json({ message: 'Database error' });
-    res.status(200).json({ profiles: results });
-  });
-});
 
 
-app.put('/api/users', authorize(['SuperAdmin']), (req, res) => {
-  // const { id }  = req.params;
-  const { id, name, email, password, designation, status } = req.body;
-  db.query('UPDATE users SET id = ?, name = ?, email = ?, password = ?, designation = ?, status = ? WHERE id = ?', [id, name, email, password, designation, status, id], (err, result) => {
-    if (err) return res.status(500).json({ message: 'Error updating profile', message: err.message });
-    res.status(200).json({ message: 'Profile updated successfully' });
-  });
-});
+// app.put('/api/users', authorize(['SuperAdmin']), (req, res) => {
+//   // const { id }  = req.params;
+//   const { id, name, email, password, designation, status } = req.body;
+//   db.query('UPDATE users SET id = ?, name = ?, email = ?, password = ?, designation = ?, status = ? WHERE id = ?', [id, name, email, password, designation, status, id], (err, result) => {
+//     if (err) return res.status(500).json({ message: 'Error updating profile', message: err.message });
+//     res.status(200).json({ message: 'Profile updated successfully' });
+//   });
+// });
 
 app.delete('/api/users/', authorize(['SuperAdmin']), (req, res) => {
   const { id } = req.body;
@@ -605,22 +598,6 @@ app.delete('/api/travel/:id', (req, res) => {
     res.status(200).json({ message: 'Travel record deleted successfully' });
   });
 });
-
-
-// --- User Registration & Authentication ---
-app.post('/api/signup', (req, res) => {
-  const { name, email, password, role } = req.body;
-  hash(password, 10, (err, hashedPassword) => {
-    if (err) return res.status(500).json({ message: 'Error hashing password' });
-    const query = 'INSERT INTO users (name, email, password, role) VALUES (?, ?, ?, ?)';
-    db.query(query, [name, email, hashedPassword, role], (err, result) => {
-      if (err) return res.status(500).json({ message: 'Error registering user' });
-      res.status(201).json({ message: 'User registered successfully' });
-    });
-  });
-});
-
-
 
 // Start the server
 app.listen(3000, () => {

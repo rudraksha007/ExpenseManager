@@ -16,14 +16,15 @@ async function connectDb() {
             {
                 tableName: 'Projects',
                 definition: `
-                    ProjectTitle VARCHAR(255),
+                    ProjectTitle VARCHAR(255) NOT NULL,
                     ProjectNo INT PRIMARY KEY,
-                    ProjectStartDate DATE,
+                    FundedBy VARCHAR(255) NOT NULL,
+                    ProjectStartDate DATE NOT NULL,
                     ProjectEndDate DATE,
-                    SanctionOrderNo VARCHAR(255),
+                    SanctionOrderNo VARCHAR(255) NOT NULL,
                     TotalSanctionAmount DOUBLE,
-                    PIName VARCHAR(255),
-                    CoPIs VARCHAR(255),
+                    PIName VARCHAR(255) NOT NULL,
+                    CoPIs VARCHAR(255) NOT NULL,
                     ManpowerAllocationAmt DOUBLE,
                     ConsumablesAllocationAmt DOUBLE,
                     ContingencyAllocationAmt DOUBLE,
@@ -81,8 +82,7 @@ async function connectDb() {
                     ProjectTitle VARCHAR(255),
                     ManpowerRequestedAmt DOUBLE,
                     IndentID INT,
-                    RequestedMonth VARCHAR(255),
-                    RequestedYear VARCHAR(255),
+                    RequestedDate Date,
                     BillCopyManpower BLOB,
                     FOREIGN KEY (ProjectNo) REFERENCES Projects(ProjectNo),
                     FOREIGN KEY (ProjectTitle) REFERENCES Projects(ProjectTitle),
@@ -97,8 +97,7 @@ async function connectDb() {
                     ProjectTitle VARCHAR(255),
                     ConsumablesRequestedAmt DOUBLE,
                     IndentID INT,
-                    RequestedMonth VARCHAR(255),
-                    RequestedYear VARCHAR(255),
+                    RequestedDate Date,
                     BillCopy BLOB,
                     FOREIGN KEY (ProjectNo) REFERENCES Projects(ProjectNo),
                     FOREIGN KEY (ProjectTitle) REFERENCES Projects(ProjectTitle),
@@ -113,8 +112,7 @@ async function connectDb() {
                     ProjectTitle VARCHAR(255),
                     TravelRequestedAmt DOUBLE,
                     IndentID INTEGER,
-                    RequestedMonth VARCHAR(255),
-                    RequestedYear VARCHAR(255),
+                    RequestedDate Date,
                     BillCopy BLOB,
                     FOREIGN KEY (ProjectNo) REFERENCES Projects(ProjectNo),
                     FOREIGN KEY (ProjectTitle) REFERENCES Projects(ProjectTitle),
@@ -129,8 +127,7 @@ async function connectDb() {
                     ProjectTitle VARCHAR(255),
                     OverheadRequestedAmt DOUBLE,
                     IndentID INTEGER,
-                    RequestedMonth VARCHAR(255),
-                    RequestedYear VARCHAR(255),
+                    RequestedDate Date,
                     BillCopy BLOB,
                     FOREIGN KEY (ProjectNo) REFERENCES Projects(ProjectNo),
                     FOREIGN KEY (ProjectTitle) REFERENCES Projects(ProjectTitle),
@@ -145,8 +142,7 @@ async function connectDb() {
                     ProjectTitle VARCHAR(255),
                     EquipmentRequestedAmt DOUBLE,
                     IndentID INTEGER,
-                    RequestedMonth VARCHAR(255),
-                    RequestedYear VARCHAR(255),
+                    RequestedDate Date,
                     BillCopy BLOB,
                     FOREIGN KEY (ProjectNo) REFERENCES Projects(ProjectNo),
                     FOREIGN KEY (ProjectTitle) REFERENCES Projects(ProjectTitle),
@@ -161,8 +157,7 @@ async function connectDb() {
                     ProjectTitle VARCHAR(255),
                     ContingencyRequestedAmt DOUBLE,
                     IndentID INTEGER,
-                    RequestedMonth VARCHAR(255),
-                    RequestedYear VARCHAR(255),
+                    RequestedDate Date,
                     BillCopy BLOB,
                     FOREIGN KEY (ProjectNo) REFERENCES Projects(ProjectNo),
                     FOREIGN KEY (ProjectTitle) REFERENCES Projects(ProjectTitle),
@@ -221,11 +216,19 @@ function authenticate(req, res, next) {
 function authorize(allowedRoles) {
     return (req, res, next) => {
         console.log(req.processed.token.role);
-        if (!allowedRoles.includes(req.processed.token.role)) {
+        if (!allowedRoles.includes(req.processed.token.role)&& req.processed.token.role!=='root') {
             return res.status(403).json({ message: 'Permission denied' });
         }
         next();
     };
+};
+
+const projectWiseAuthorisation = (req, res, next) => {
+    if (req.processed.token.role == 'root') {
+        next();
+        return;
+    }
+    
 };
 async function getFromDb(table, fields, where) {
     let query = `SELECT ${fields.join(',')} FROM ${table}`;

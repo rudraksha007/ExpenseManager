@@ -9,6 +9,12 @@
     display: grid;
     grid-template-columns: 1fr 1fr;
 }
+#projectDetails>div{
+    display: flex;
+    justify-content: space-between;
+    box-sizing: border-box;
+    padding: 0 20%;
+}
 #projectTabs{
     display: grid;
     grid-template-columns: repeat(5, 1fr);

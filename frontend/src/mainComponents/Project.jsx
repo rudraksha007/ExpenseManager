@@ -22,12 +22,15 @@ function Project() {
     const tabNames = ['Manpower', 'Travels', 'Consumables', 'Equipments', 'Contingency'];
     useEffect(() => {
         async function fillData() {
-            let response = await fetchData(`projects/${id}`);
+            let response = await fetchData(`projects/${id}`, 'post');
+            if(response.reqStatus != 'success'){alert('Error: '+response.message); setLoading(false);return;}
             // let response = 
-            setTable(compileDate(response, setPopup));
-            let { manpower, travels, consumables, equipments, contingency, overhead, ...filtered } = response;
+            console.log(response.data);
+            
+            setTable(compileDate(response.data, setPopup));
+            let { manpower, travels, consumables, equipments, contingency, overhead, ...filtered } = response.data;
             setData(filtered);
-            document.title = `Project: ${filtered.title}`;
+            document.title = `Project: ${filtered.ProjectTitle}`;
             setLoading(false);
         }
         fillData();
@@ -35,13 +38,10 @@ function Project() {
 
     useEffect(() => {
         const tabContentElements = document.querySelectorAll('.projectTabContentData');
-        // document.getElementById('projectTabs').children[tabNames.indexOf(activeTab)].style.brightness = 0.8;
         if (document.querySelector('#projectTabsActive')) {
             document.querySelector('#projectTabsActive').id = '';
             document.querySelector('#projectTabs').children[tabNames.indexOf(activeTab)].id = 'projectTabsActive';
         }
-        console.log(document.getElementById('projectTabs'));
-
         tabContentElements.forEach((element) => {
             element.style.transform = `translateX(${-tabNames.indexOf(activeTab) * 100}%)`;
         });
@@ -54,23 +54,28 @@ function Project() {
                     <h1>Project Details <FaEdit size={40} className='hoverable' title='Edit' style={{ position: 'absolute', right: 20 }} /></h1>
 
                     <div id="projectDetails">
-                        <div>Funded By: {data.fundedBy}</div>
-                        <div>Project Id: {id}</div>
-                        <div>Title: {data.title}</div>
-                        <div>Indentation Amt: ${data.totalIndent}</div>
-                        {/* <div>Manpower Allocation Amt: ${data[0].reduce((acc, item) => acc + item.bill, 0)}</div> */}
-                        {/* <div>Consumables Allocation Amt: ${data[2].reduce((acc, item) => acc + item.bill, 0)}</div> */}
-                        {/* <div>Contingency Allocation Amt: ${data[4].reduce((acc, item) => acc + item.bill, 0)}</div> */}
-                        {/* <div>Overhead Allocation Amt: ${data[0].reduce((acc, item) => acc + item.bill, 0)}</div> */}
-                        {/* <div>Equipment Allocation Amt: ${data[3].reduce((acc, item) => acc + item.bill, 0)}</div> */}
-                        {/* <div>Travel Allocation Amt: ${data[1].reduce((acc, item) => acc + item.bill, 0)}</div> */}
+                        <div><b>Funded By:</b> <span>{data.FundedBy}</span></div>
+                        <div><b>Project Id:</b> <span>{id}</span></div>
+                        <div><b>Title:</b> <span>{data.ProjectTitle}</span></div>
+                        <div><b>Sanction Order No:</b> <span>{data.SanctionOrderNo}</span></div>
+                        <div><b>Total Sanction Amount:</b> <span>${data.TotalSanctionAmount}</span></div>
+                        <div><b>Project Start Date:</b> <span>{new Date(data.ProjectStartDate).toLocaleDateString()}</span></div>
+                        <div><b>Project End Date:</b> <span>{new Date(data.ProjectEndDate).toLocaleDateString()}</span></div>
+                        <div><b>PI Name:</b> <span>{data.PIName}</span></div>
+                        <div><b>Co-PIs:</b> <span>{data.CoPIs}</span></div>
+                        <div><b>Manpower Allocation Amt:</b> <span>${data.ManpowerAllocationAmt}</span></div>
+                        <div><b>Consumables Allocation Amt:</b> <span>${data.ConsumablesAllocationAmt}</span></div>
+                        <div><b>Contingency Allocation Amt:</b> <span>${data.ContingencyAllocationAmt}</span></div>
+                        <div><b>Overhead Allocation Amt:</b> <span>${data.OverheadAllocationAmt}</span></div>
+                        <div><b>Equipment Allocation Amt:</b> <span>${data.EquipmentAllocationAmt}</span></div>
+                        <div><b>Travel Allocation Amt:</b> <span>${data.TravelAllocationAmt}</span></div>
                     </div>
                     <div id="projectTabs" style={{ color: 'white' }}>
-                        <div className="hoverable" id='projectTabsActive' onClick={() => setActiveTab('Manpower')}> Manpower</div>
-                        <div className="hoverable" onClick={() => setActiveTab('Travels')}>Travels</div>
-                        <div className="hoverable" onClick={() => setActiveTab('Consumables')}>Consumables</div>
-                        <div className="hoverable" onClick={() => setActiveTab('Equipments')}>Equipments</div>
-                        <div className="hoverable" onClick={() => setActiveTab('Contingency')}>Contingency</div>
+                        <div className="hoverable" id='projectTabsActive' onClick={() => setActiveTab('Manpower')}><b>Manpower</b></div>
+                        <div className="hoverable" onClick={() => setActiveTab('Travels')}><b>Travels</b></div>
+                        <div className="hoverable" onClick={() => setActiveTab('Consumables')}><b>Consumables</b></div>
+                        <div className="hoverable" onClick={() => setActiveTab('Equipments')}><b>Equipments</b></div>
+                        <div className="hoverable" onClick={() => setActiveTab('Contingency')}><b>Contingency</b></div>
                     </div>
                     <div id="projectTabContent">
                         <div className="projectTabContentData">
@@ -131,9 +136,8 @@ function Project() {
 export default Project;
 
 function compileDate(response, setPopup) {
+    let arr = [];
     let manpowerContent = [];
-    console.log(response);
-    
     response.manpower.map((item, index) => {
         let style = {};
         if (item.action === 'added'){
@@ -147,47 +151,22 @@ function compileDate(response, setPopup) {
             <div key={`${item.id}-bill`} style={style} className='hoverable' onClick={() => setPopup(<ManpowerEditDetailsPopup reset={() => setPopup(<></>)} entry={item} />)}> <b><u>{item.action=='added'? "Added":"Removed"}</u></b> </div>
         ])
     });
-    let travelsContent = [];
-    response.travels.map((item, index) => (
-        travelsContent.push([
-            <div key={`${item.id}-sl`}>{index + 1}</div>,
-            <div key={`${item.id}-requestId`}>{item.id}</div>,
-            <div key={`${item.id}-indentId`}>{item.indentId}</div>,
-            <div key={`${item.id}-date`}>{item.date}</div>,
-            <div key={`${item.id}-bill`}><Link to={item.billLink}>${item.bill}</Link></div>
-        ])
-    ));
-    let consumablesContent = [];
-    response.consumables.map((item, index) => (
-        consumablesContent.push([
-            <div key={`${item.id}-sl`}>{index + 1}</div>,
-            <div key={`${item.id}-requestId`}>{item.id}</div>,
-            <div key={`${item.id}-indentId`}>{item.indentId}</div>,
-            <div key={`${item.id}-date`}>{item.date}</div>,
-            <div key={`${item.id}-bill`}><Link to={item.billLink}>${item.bill}</Link></div>
-        ])
-    ));
-
-    let equipmentsContent = [];
-    response.equipments.map((item, index) => (
-        equipmentsContent.push([
-            <div key={`${item.id}-sl`}>{index + 1}</div>,
-            <div key={`${item.id}-requestId`}>{item.id}</div>,
-            <div key={`${item.id}-indentId`}>{item.indentId}</div>,
-            <div key={`${item.id}-date`}>{item.date}</div>,
-            <div key={`${item.id}-bill`}><Link to={item.billLink}>${item.bill}</Link></div>
-        ])
-    ));
-
-    let contingencyContent = [];
-    response.contingency.map((item, index) => (
-        contingencyContent.push([
-            <div key={`${item.id}-sl`}>{index + 1}</div>,
-            <div key={`${item.id}-requestId`}>{item.id}</div>,
-            <div key={`${item.id}-indentId`}>{item.indentId}</div>,
-            <div key={`${item.id}-date`}>{item.date}</div>,
-            <div key={`${item.id}-bill`}><Link to={item.billLink}>${item.bill}</Link></div>
-        ])
-    ));
-    return [manpowerContent, travelsContent, consumablesContent, equipmentsContent, contingencyContent];
+    arr.push(manpowerContent);
+    let tables = ['travel', 'consumables', 'equipment', 'contingency', 'overhead', ];
+    tables.forEach((table) => {
+        let temp = [];
+        if (response[table]) {
+            response[table].map((item, index) => (
+                temp.push([
+                    <div key={`${item.id}-sl`}>{index + 1}</div>,
+                    <div key={`${item.id}-requestId`}>{item.id}</div>,
+                    <div key={`${item.id}-indentId`}>{item.indentId}</div>,
+                    <div key={`${item.id}-date`}>{item.date}</div>,
+                    <div key={`${item.id}-bill`}><Link to={item.billLink}>${item.bill}</Link></div>
+                ])
+            ));
+        }
+        arr.push(temp);
+    });    
+    return arr;
 }
