@@ -149,26 +149,45 @@ function getBillCopy(req, res) {
   });
 }
 
-function getIndents(req, res) {
-  const query = 'SELECT * FROM indents';
-  getFromDb('indents', ['*']).then(results => {
+async function getIndents(req, res) {
+  try {
+    let results = await getFromDb('indents', ['*']);
+    const { text, status, upto, above, fromDate, toDate, fundedBy } = req.body.filters;
     const allowedProjects = req.processed.allowedProjects;
-    const filteredResults = results.filter(indent => allowedProjects.includes(indent.ProjectNo));
-    const projectPromises = filteredResults.map(async indent => {
+
+    const projectPromises = results.map(async indent => {
       const projectResults = await getFromDb('projects', ['ProjectTitle'], `ProjectNo= ${indent.ProjectNo}`);
       if (projectResults.length > 0) {
         indent.ProjectTitle = projectResults[0].ProjectTitle;
       }
+
+    });
+    await Promise.all(projectPromises);
+    const purchaseRequestIndentIds = (await getFromDb('PurchaseRequests', ['IndentID'])).map(pr => pr.IndentID);
+    results = results.filter(indent => {
+      if (!allowedProjects.includes(indent.ProjectNo)) return false;
+      
+      let isValid = true;
+      if (text) isValid = isValid && (indent.ProjectTitle.includes(text) || indent.IndentedPersonId.includes(text));
+      if (status) {
+        if (status == 'PR'){
+          if(purchaseRequestIndentIds.includes(indent.IndentID))return false;
+          else if (indent.IndentStatus=='Approved')return true;
+          else return false;
+        } 
+        isValid = isValid && indent.IndentStatus === status;
+      }
+      if (upto) isValid = isValid && indent.IndentAmount <= upto;
+      if (above) isValid = isValid && indent.IndentAmount >= above;
+      if (fromDate) isValid = isValid && new Date(indent.IndentDate) > new Date(fromDate);
+      if (toDate) isValid = isValid && new Date(indent.IndentDate) < new Date(toDate);
+      return isValid;
     });
 
-    Promise.all(projectPromises).then(() => {
-      res.status(200).json({ indents: filteredResults, total: filteredResults.length }).end();
-    }).catch(err => {
-      sendFailedResponse(res, err.message, 500);
-    });
-  }).catch(err => {
+    res.status(200).json({ indents: results, total: results.length }).end();
+  } catch (err) {
     sendFailedResponse(res, err.message, 500);
-  });
+  }
 }
 
 function getIndentInfo(req, res) {
@@ -207,4 +226,113 @@ function updateIndentStatus(req, res) {
   
 }
 
-export { login, updateIndentStatus, autoLogin, getProjects, logout, getUsers, getProjectInfo, getIndents, getBillCopy, getIndentInfo };
+function getPR(req, res){
+  getFromDb('PurchaseRequests', ['*']).then((results) => {
+    const { text, status, upto, above, fromDate, toDate } = req.body.filter;
+    if (text || status || upto || above || fromDate || toDate) {
+      results = results.filter(pr => {
+        let isValid = true;
+        if (text) {
+          isValid = isValid && (pr.ProjectTitle.includes(text) || pr.PRRequestor.includes(text));
+        }
+        if (status) {
+          isValid = isValid && pr.PRStatus === status;
+        }
+        if (upto) {
+          isValid = isValid && pr.PurchaseRequestAmount <= upto;
+        }
+        if (above) {
+          isValid = isValid && pr.PurchaseRequestAmount >= above;
+        }
+        if (fromDate) {
+          isValid = isValid && new Date(pr.PRDate) > new Date(fromDate);
+        }
+        if (toDate) {
+          isValid = isValid && new Date(pr.PRDate) < new Date(toDate);
+        }
+        return isValid;
+      });
+    }
+    res.status(200).json({ purchaseReqs: results, total: results.length }).end();
+  }).catch((err) => {
+    sendFailedResponse(res, err.message, 500);
+  });
+}
+
+function getPRInfo(req, res) {
+  let prId = parseInt(req.path.split('/').at(-1));
+
+  let payload = { data: {} };
+  getFromDb('PurchaseRequests', ['*'], `PurchaseReqID= ${prId}`).then((results) => {
+    payload.data = results[0];
+    const projectNo = results[0].ProjectNo;
+    const allowedProjects = req.processed.allowedProjects;
+    if (!allowedProjects.includes(projectNo)) {
+      return sendFailedResponse(res, 'Not authorized to view this project', 403);
+    }
+    getFromDb('projects', ['ProjectTitle'], `ProjectNo= ${projectNo}`).then((projectResults) => {
+      if (projectResults.length > 0) {
+        payload.data.ProjectTitle = projectResults[0].ProjectTitle;
+      }
+      getFromDb('indents', ['IndentCategory'], `IndentID= ${payload.data.IndentID}`).then((indentResults) => {
+        if (indentResults.length > 0) {
+          payload.data.IndentCategory = indentResults[0].IndentCategory;
+        }
+        res.status(200).json(payload).end();
+      }).catch((err) => {
+        sendFailedResponse(res, err.message, 500);
+      });
+    }).catch((err) => {
+      sendFailedResponse(res, err.message, 500);
+    });
+  }).catch((err) => {
+    sendFailedResponse(res, err.message, 500);
+  });
+}
+
+function updatePRStatus(req, res) {
+  const { Approved, PurchaseReqID } = req.body;
+  console.log(PurchaseReqID);
+  
+  updateAtDb('PurchaseRequests', { PRStatus: Approved ? "Approved" : "Rejected" }, { PurchaseReqID: PurchaseReqID }).then(() => {
+    res.status(200).json({ message: 'Purchase request updated' }).end();
+  }).catch(err => {
+    sendFailedResponse(res, err.message, 500);
+  });
+}
+
+function getPO(req, res) {
+  getFromDb('PurchaseOrders', ['*']).then((results) => {
+    
+    const { text, status, upto, above, fromDate, toDate } = req.body.filter;
+    if (text || status || upto || above || fromDate || toDate) {
+      results = results.filter(po => {
+        let isValid = true;
+        if (text) {
+          isValid = isValid && (po.ProjectTitle.includes(text) || po.PORequestor.includes(text));
+        }
+        if (status) {
+          isValid = isValid && po.POStatus === status;
+        }
+        if (upto) {
+          isValid = isValid && po.PurchaseOrderAmount <= upto;
+        }
+        if (above) {
+          isValid = isValid && po.PurchaseOrderAmount >= above;
+        }
+        if (fromDate) {
+          isValid = isValid && new Date(po.PODate) > new Date(fromDate);
+        }
+        if (toDate) {
+          isValid = isValid && new Date(po.PODate) < new Date(toDate);
+        }
+        return isValid;
+      });
+    }
+    res.status(200).json({ purchaseOrders: results, total: results.length }).end();
+  }).catch((err) => {
+    sendFailedResponse(res, err.message, 500);
+  });
+}
+
+export { login, updateIndentStatus, autoLogin, getProjects, logout, getUsers, getProjectInfo, getIndents, getBillCopy, getIndentInfo, getPR, getPRInfo, getPO, updatePRStatus };

@@ -175,8 +175,9 @@ async function connectDb() {
                     ProjectNo INT,
                     IndentID INT,
                     PurchaseRequestAmount DOUBLE,
-                    PRRequestor VARCHAR(255),
+                    PRRequestor INT,
                     PRStatus VARCHAR(255),
+                    FOREIGN KEY (PRRequestor) REFERENCES users(id),
                     FOREIGN KEY (ProjectNo) REFERENCES Projects(ProjectNo),
                     FOREIGN KEY (IndentID) REFERENCES Indents(IndentID)
                 `
@@ -189,8 +190,9 @@ async function connectDb() {
                     ProjectNo INTEGER,
                     PurchaseReqID INTEGER,
                     PurchaseOrderAmount DOUBLE,
-                    PORequestor VARCHAR(255),
+                    PORequestor INT,
                     POStatus VARCHAR(255),
+                    FOREIGN KEY (PORequestor) REFERENCES users(id),
                     FOREIGN KEY (ProjectNo) REFERENCES Projects(ProjectNo),
                     FOREIGN KEY (PurchaseReqID) REFERENCES PurchaseRequests(PurchaseReqID)
                 `
@@ -238,10 +240,10 @@ function authenticate(req, res, next) {
 
 function authorize(allowedRoles) {
     return (req, res, next) => {
-        console.log(req.processed.token.role);
         if (!allowedRoles.includes(req.processed.token.role) && req.processed.token.role !== 'root') {
             return res.status(403).json({ message: 'Permission denied' });
         }
+        console.log(req.processed.token.role);
         next();
     };
 };

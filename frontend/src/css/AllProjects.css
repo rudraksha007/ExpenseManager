@@ -8,6 +8,20 @@
     gap: 2px;
     grid-auto-rows: max-content;
 }
+.table{
+    display: grid;
+    gap: 2px;
+    grid-auto-rows: max-content;
+    
+}
+.tableCell{
+    background-color: rgb(222, 222, 222);
+}
+.table>div{
+    padding: 5px 10px;
+    box-sizing: border-box;
+    min-height: 30px;
+}
 .allProjectsTableTitle, .tableTitle{
     background-color: green;
     color: white;

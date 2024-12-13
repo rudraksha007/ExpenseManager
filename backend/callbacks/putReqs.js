@@ -1,5 +1,5 @@
 import { fileTypeFromBuffer } from "file-type";
-import { db } from "../dbUtils.js";
+import { db, getFromDb, updateAtDb } from "../dbUtils.js";
 import { log, parseBill, sendFailedResponse } from "../utils.js";
 
 async function addProject(req, res) {
@@ -44,6 +44,48 @@ async function addProjectIndent(req, res) {
 
 }
 
+async function addPurchaseReq(req, res){
+    const {IndentID, PRDate, PRRequestor} = req.body;
+    await getFromDb('indents', ['*'], `IndentID=${IndentID}`).then((results) => {
+        if(results.length === 0) {
+            sendFailedResponse(res, 'Indent not found', 404);
+            return;
+        }
+        const indent = results[0];
+        if(indent.IndentStatus !== 'Approved') {
+            sendFailedResponse(res, 'Indent not approved', 400);
+            return;
+        }
+        const { ProjectNo, IndentAmount } = indent;
+        const query = 'INSERT INTO purchaserequests (PurchaseReqID, PRDate, ProjectNo, IndentID, PurchaseRequestAmount, PRRequestor, PRStatus) VALUES (?, ?, ?, ?, ?, ?, ?)';
+        db.query(query, [parseInt(IndentID), PRDate, parseInt(ProjectNo), parseInt(IndentID), IndentAmount, PRRequestor, 'Pending']).then(result => {
+            res.status(201).json({ message: 'Purchase request added successfully' }).end();
+        }).catch(err => {
+            sendFailedResponse(res, err.message, 500);
+        });
+    }).catch((err) => {
+        sendFailedResponse(res, err.message, 500);
+    });
+}
+
+async function addPOrder(req, res) {
+    const { ExpenseID, ExpenseDate, ExpenseAmount, ExpenseDescription, ProjectNo } = req.body;
+    await getFromDb('projects', ['*'], `ProjectNo=${ProjectNo}`).then((results) => {
+        if (results.length === 0) {
+            sendFailedResponse(res, 'Project not found', 404);
+            return;
+        }
+        const query = 'INSERT INTO expenses (ExpenseID, ExpenseDate, ExpenseAmount, ExpenseDescription, ProjectNo) VALUES (?, ?, ?, ?, ?)';
+        db.query(query, [parseInt(ExpenseID), ExpenseDate, parseInt(ExpenseAmount), ExpenseDescription, parseInt(ProjectNo)]).then(result => {
+            res.status(201).json({ message: 'Expense added successfully' }).end();
+        }).catch(err => {
+            sendFailedResponse(res, err.message, 500);
+        });
+    }).catch((err) => {
+        sendFailedResponse(res, err.message, 500);
+    });
+}
 
 
-export { addProject, addUser, addProjectIndent };
+
+export { addProject, addUser, addProjectIndent,addPurchaseReq, addPOrder };

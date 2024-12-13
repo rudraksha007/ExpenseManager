@@ -10,7 +10,7 @@ function Indents() {
     const [popup, setPopup] = React.useState(null);
     const [indents, setIndents] = React.useState([]);
     const [loading, setLoading] = React.useState(true);
-    const [filter, setFilter] = useState({page:1, name:'', status:'all', fundedBy:'all', fromDate:'', toDate:''});
+    const [filter, setFilter] = useState({page:1, text:'', status:'', fundedBy:'', fromDate:'', toDate:'', upto:0, above:0});
 
     const total = useRef(0);
     const[page, setPage] = React.useState(1);
@@ -69,13 +69,13 @@ function Indents() {
                     {popup}
                     <h1>All Indents</h1>
                     <PageControls page={page} setPage={setPage} total={total.current} max={25}/>
-                    <div id="allInputsTable">
-                        <div className='allInputsTableTitle'>Sl.</div>
-                        <div className='allInputsTableTitle'>Project No</div>
-                        <div className='allInputsTableTitle'>Project Title</div>
-                        <div className='allInputsTableTitle'>Indent Amount</div>
-                        <div className='allInputsTableTitle'>Indent Status</div>
-                        <div className='allInputsTableTitle'>Indent ID (details) </div>
+                    <div id="indentsTable" className='table'>
+                        <div className='tableTitle'>Sl.</div>
+                        <div className='tableTitle'>Project No</div>
+                        <div className='tableTitle'>Project Title</div>
+                        <div className='tableTitle'>Indent Amount</div>
+                        <div className='tableTitle'>Indent Status</div>
+                        <div className='tableTitle'>Indent ID (details) </div>
                         {indents}
                         {/* <div className="add hoverable"><FaPlus /></div> */}
                     </div>

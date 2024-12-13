@@ -21,7 +21,7 @@
 }
 #largePopupCont{
     height: 85%;
-    width: 50%;
+    width: 80%;
 }
 .largePopupForm{
     display: flex;
@@ -99,4 +99,17 @@
     position: relative;
     left: 50%;
     transform: translateX(-50%);
+}
+#newPRFilters{ 
+    display: grid; 
+    grid-template-columns: 1fr 3fr 1fr 3fr;
+    gap: 4px 8px;
+}
+#newPRFilters>label{
+    text-align: left;
+}
+
+#newPRItems{
+    grid-template-columns: 1fr 2fr 4fr 3fr 2fr;
+    
 }

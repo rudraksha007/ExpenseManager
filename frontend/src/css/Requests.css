@@ -3,7 +3,7 @@
 }
 #allInputsTable{
     display: grid;
-    grid-template-columns: 1fr 3fr 5fr 3fr 2fr 2fr;
+    grid-template-columns: 1fr 5fr 3fr 3fr 2fr 2fr 2fr;
     gap: 2px;
     grid-auto-rows: max-content;
 }
@@ -11,7 +11,7 @@
     padding: 5px 10px;
     box-sizing: border-box;
 }
-#allInputsTable>div:not(.allInputsTableTitle){
+#allInputsTable>div:not(.tableTitle){
     background-color: rgb(222, 222, 222);
 }
 .allInputsTableTitle{
@@ -19,4 +19,7 @@
     color: white;
     font-size: large;
     font-weight: bold;
+}
+#indentsTable{
+    grid-template-columns: 1fr 5fr 3fr 3fr 2fr 2fr;
 }
