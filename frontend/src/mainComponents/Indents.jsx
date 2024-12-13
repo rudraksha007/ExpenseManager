@@ -7,7 +7,7 @@ import PageControls from '../sideComponents/PageControls';
 import { fetchData, fetchDataWithParams } from '../assets/scripts';
 
 function Indents() {
-    const [popup, setPopup] = React.useState(<></>);
+    const [popup, setPopup] = React.useState(null);
     const [indents, setIndents] = React.useState([]);
     const [loading, setLoading] = React.useState(true);
     const [filter, setFilter] = useState({page:1, name:'', status:'all', fundedBy:'all', fromDate:'', toDate:''});
@@ -16,27 +16,41 @@ function Indents() {
     const[page, setPage] = React.useState(1);
     useEffect(() => {
         document.title = 'All Indents';
+        if(popup) return;
         async function fetchIndents() {
             try {
+                setLoading(true);
                 const data = await fetchDataWithParams('indents', 'post', {filters:filter, count: 25});
                 total.current = data.indents.length;
                 let l = [];
                 console.log(data.indents);
                 
-                data.indents.map((indent, index) => (
+                data.indents.map((indent, index) => {
+                    let color = {};
+                    switch (indent.IndentStatus) {
+                        case 'Approved':
+                            color = { backgroundColor: 'rgb(200, 250, 200)' };
+                            break;
+                        case 'Rejected':
+                            color = { backgroundColor: 'rgb(250, 200, 200)' };
+                            break;
+                        default:
+                            color = {};
+                            break;
+                    }
                     l.push(
                         <React.Fragment key={indent.IndentID}>
-                            <div>{index + 1}</div>
-                            <div>{indent.ProjectNo}</div>
-                            <div>{indent.IndentCategory}</div>
-                            <div>{indent.IndentAmount}</div>
-                            <div>{indent.IndentStatus}</div>
-                            <div title='Click to view Details' className='indentId hoverable' onClick={() => setPopup(<IndentPopup id={indent.IndentID} reset={() => setPopup(<></>)} />)}>
+                            <div style={color}>{index + 1}</div>
+                            <div style={color}>{indent.ProjectNo}</div>
+                            <div style={color}>{indent.ProjectTitle}</div>
+                            <div style={color}>{indent.IndentAmount}</div>
+                            <div style={color}>{indent.IndentStatus}</div>
+                            <div style={color} title='Click to view Details' className='indentId hoverable' onClick={() => setPopup(<IndentPopup id={indent.IndentID} reset={() => setPopup(null)} />)}>
                                 {indent.IndentID}
                             </div>
                         </React.Fragment>
                     )
-                ));
+            });
                 setIndents(l);
             } catch (error) {
                 console.error('Error fetching indents:', error);
@@ -47,7 +61,7 @@ function Indents() {
         }
 
         fetchIndents();
-    }, []);
+    }, [popup, filter]);
     return (
         <>
             {loading ? <Oval color='black' height={80} strokeWidth={5}/> :
@@ -58,12 +72,12 @@ function Indents() {
                     <div id="allInputsTable">
                         <div className='allInputsTableTitle'>Sl.</div>
                         <div className='allInputsTableTitle'>Project No</div>
-                        <div className='allInputsTableTitle'>Title</div>
+                        <div className='allInputsTableTitle'>Project Title</div>
                         <div className='allInputsTableTitle'>Indent Amount</div>
                         <div className='allInputsTableTitle'>Indent Status</div>
                         <div className='allInputsTableTitle'>Indent ID (details) </div>
                         {indents}
-                        <div className="add hoverable"><FaPlus /></div>
+                        {/* <div className="add hoverable"><FaPlus /></div> */}
                     </div>
                 </div>
             }

@@ -167,7 +167,7 @@ async function connectDb() {
                     FOREIGN KEY (ProjectTitle) REFERENCES Projects(ProjectTitle),
                     FOREIGN KEY (IndentID) REFERENCES Indents(IndentID)
                 `
-            },{
+            }, {
                 tableName: 'PurchaseRequests',
                 definition: `
                     PurchaseReqID INT PRIMARY KEY,
@@ -195,7 +195,7 @@ async function connectDb() {
                     FOREIGN KEY (PurchaseReqID) REFERENCES PurchaseRequests(PurchaseReqID)
                 `
             }
-            
+
         ];
         // Queries to create tables if they don't exist
         await (async () => { // async is required to print the logs in correct order
@@ -247,7 +247,7 @@ function authorize(allowedRoles) {
 };
 
 const projectWiseAuthorisation = (req, res, next) => {
-    if (req.processed.token.role != 'root'&&req.processed.token.role != 'SuperAdmin') {
+    if (req.processed.token.role != 'root' && req.processed.token.role != 'SuperAdmin') {
         getFromDb('users', ['projects'], `id=${req.processed.token.id}`).then((projects) => {
             if (projects.length == 0) {
                 return sendFailedResponse(res, 'Permission denied', 403);
@@ -284,4 +284,11 @@ async function getFromDb(table, fields, where) {
     return db.query(query).then(([rows]) => rows);
 
 }
-export { db, authenticate, authorize, connectDb, getFromDb, projectWiseAuthorisation };
+
+async function updateAtDb(table, fieldsDictionary, where) {
+    let fields = Object.entries(fieldsDictionary).map(([key, value]) => `${key}='${value}'`).join(', ');
+    let wheres = Object.entries(where).map(([key, value]) => `${key}='${value}'`).join(' AND ');
+    console.log(fields+' WHERE '+wheres);
+    return db.query(`UPDATE ${table} SET ${fields} WHERE ${wheres}`);
+}
+export { db, authenticate, authorize, connectDb, getFromDb, projectWiseAuthorisation,updateAtDb };

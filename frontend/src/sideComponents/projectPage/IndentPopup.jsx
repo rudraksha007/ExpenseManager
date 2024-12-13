@@ -1,80 +1,79 @@
 import React from 'react';
 import '../../css/Popup.css';
-import { FaTimes, FaEdit, FaCheck } from 'react-icons/fa';
+import { FaTimes, FaCheck } from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
-import { fetchData } from '../../assets/scripts.js';
+import { fetchData, fetchDataWithParams } from '../../assets/scripts.js';
+import { Oval } from 'react-loader-spinner';
 
 function IndentPopup({ reset, id }) {
     const navigate = useNavigate();
     const [requestDetails, setRequestDetails] = React.useState(null);
+    const [loading, setLoading] = React.useState(true);
 
     React.useEffect(() => {
         async function fetchRequestDetails() {
-            const data = await fetchData(`/api/indents/${id}`, 'post');
-            if (data) setRequestDetails(data);
+            let data = await fetchData(`indents/${id}`, 'post');
+            if (data.reqStatus == 'success') setRequestDetails(data.data);
             else setRequestDetails({
-                requestNo: 'N/A',
-                title: 'N/A',
-                amount: 'N/A',
-                status: 'N/A',
-                category: 'N/A',
-                type: 'N/A',
-                indentNo: 'N/A',
-                indentDate: 'N/A',
-                indentPerson: 'N/A'
+                IndentID: 'N/A',
+                IndentCategory: 'N/A',
+                ProjectNo: 'N/A',
+                ProjectTitle: 'N/A',
+                IndentAmount: 'N/A',
+                IndentedPersonId: 'N/A',
+                IndentDate: 'N/A',
+                IndentStatus: 'N/A'
             });
+            setLoading(false);
         }
 
         fetchRequestDetails();
     }, [id]);
     return (
         <div className='projectPopup'>
-            <div className="projectPopupCont">
-                <FaTimes size={30} style={{ position: 'absolute', right: 10, top: 10, cursor: 'pointer' }} onClick={() => close(reset)} />
-                <h2>Request Details</h2>
-                <div className='requestDetailGroup'>
-                    <div className='requestDetailField'>
-                        <h4>Project No</h4>
-                        <span>{requestDetails?.requestNo}</span>
+            {loading ? <Oval color='white' height={80} strokeWidth={5} /> :
+                <div className="projectPopupCont">
+                    <FaTimes size={30} style={{ position: 'absolute', right: 10, top: 10, cursor: 'pointer' }} onClick={() => close(reset)} />
+                    <h2>Request Details</h2>
+                    <div className='requestDetailGroup'>
+                        <div className='requestDetailField'>
+                            <h4>Project No</h4>
+                            <span>{requestDetails?.ProjectNo}</span>
+                        </div>
+                        <div className='requestDetailField'>
+                            <h4>Title</h4>
+                            <span>{requestDetails?.ProjectTitle}</span>
+                        </div>
+                        <div className='requestDetailField'>
+                            <h4>Indent ID</h4>
+                            <span>{requestDetails?.IndentID}</span>
+                        </div>
+                        <div className='requestDetailField'>
+                            <h4>Indent Date</h4>
+                            <span>{requestDetails?.IndentDate.split('T')[0]}</span>
+                        </div>
+                        <div className='requestDetailField'>
+                            <h4>Indent Status</h4>
+                            <span>{requestDetails?.IndentStatus}</span>
+                        </div>
+                        <div className='requestDetailField'>
+                            <h4>Indent Category</h4>
+                            <span>{requestDetails?.IndentCategory}</span>
+                        </div>
+                        <div className='requestDetailField'>
+                            <h4>Indent Amount</h4>
+                            <span>{requestDetails?.IndentAmount}</span>
+                        </div>
+                        <div className='requestDetailField'>
+                            <h4>Indented Person ID</h4>
+                            <span>{requestDetails?.IndentedPersonId}</span>
+                        </div>
                     </div>
-                    <div className='requestDetailField'>
-                        <h4>Title</h4>
-                        <span>{requestDetails?.title}</span>
+                    <div className="requestPopupActions">
+                        <FaTimes size={30} style={{ marginRight: 5 }} className='hoverable' title='Reject This Request' onClick={() => reject(requestDetails.IndentID, reset)} />
+                        <FaCheck size={30} style={{ marginRight: 5 }} className='hoverable' title='Aproove This Request' onClick={() => aproove(requestDetails.IndentID, reset)} />
                     </div>
-                    <div className='requestDetailField'>
-                        <h4>Request Amount</h4>
-                        <span>{requestDetails?.amount}</span>
-                    </div>
-                    <div className='requestDetailField'>
-                        <h4>Request Status</h4>
-                        <span>{requestDetails?.status}</span>
-                    </div>
-                    <div className='requestDetailField'>
-                        <h4>Request Category</h4>
-                        <span>{requestDetails?.category}</span>
-                    </div>
-                    <div className='requestDetailField'>
-                        <h4>Indent Person</h4>
-                        <span>{requestDetails?.indentPerson}</span>
-                    </div>
-                    <div className='requestDetailField'>
-                        <h4>Request Type</h4>
-                        <span>{requestDetails?.type}</span>
-                    </div>
-                    <div className='requestDetailField'>
-                        <h4>Indent No</h4>
-                        <span>{requestDetails?.indentNo}</span>
-                    </div>
-                    <div className='requestDetailField'>
-                        <h4>Indent Date</h4>
-                        <span>{requestDetails?.indentDate}</span>
-                    </div>
-                </div>
-                <div className="requestPopupActions">
-                    <FaEdit size={30} style={{ marginRight: 5 }} className='hoverable' title='Edit This Project' onClick={() => navigate(`/edit/:${id}`)} />
-                    <FaCheck size={30} style={{ marginRight: 5 }} className='hoverable' title='Aproove This Request' onClick={() => aproove()} />
-                </div>
-            </div>
+                </div>}
         </div >
     );
 };
@@ -84,11 +83,22 @@ function close(reset) {
     reset();
 }
 
-function aproove(){
-
+async function aproove(indent, reset) {
+    let data = await fetchDataWithParams('indentStatus', 'post', { IndentID: indent, Approved: true });
+    if (data.reqStatus == 'success') {
+        alert('Request Aprooved');
+        reset();
+    }
+    else alert('Failed: '+data.message);
 }
 
-function edit(){
+async function reject(IndentID, reset) {
+    let data = (await fetchDataWithParams('indentStatus', 'post', { IndentID: IndentID, Approved: false }));
+    if (data.reqStatus == 'success') {
+        alert('Request Rejected');
+        reset();
+    }
+    else alert('Failed: '+data.message);
 
 }
 

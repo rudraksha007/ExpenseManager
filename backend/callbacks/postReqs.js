@@ -1,4 +1,4 @@
-import { db, getFromDb } from "../dbUtils.js";
+import { db, getFromDb, updateAtDb } from "../dbUtils.js";
 const compare = import('bcryptjs').compare;  // Normal import was not working so i imported it like this
 import jwt from 'jsonwebtoken';
 import { encrypt, Hash } from "../crypt.js";
@@ -121,12 +121,12 @@ function getProjectInfo(req, res) {
       sendFailedResponse(res, err.message, 500);
     });
     let tables = ['manpower', 'equipment', 'contingency', 'consumables', 'overhead', 'travel'];
-    const promises = tables.map((table) => getFromDb(table, ['RequestID', 'ProjectNo', 'ProjectTitle', 'RequestedAmt', 'EmployeeID', 'Reason', 'IndentID', 'RequestedDate'], `ProjectNo= ${projectNo}`).then((results) => { 
+    const promises = tables.map((table) => getFromDb(table, ['RequestID', 'ProjectNo', 'ProjectTitle', 'RequestedAmt', 'EmployeeID', 'Reason', 'IndentID', 'RequestedDate'], `ProjectNo= ${projectNo}`).then((results) => {
       results.forEach(result => {
         result.BillCopy = `pdf/${table}/${result.RequestID}`;
       });
-      payload.data[table] = results; 
-      }));
+      payload.data[table] = results;
+    }));
     Promise.all(promises).then(() => { res.status(200).json(payload).end(); }).catch((err) => {
       sendFailedResponse(res, err.message, 500);
     });
@@ -135,9 +135,9 @@ function getProjectInfo(req, res) {
   }
 }
 
-function getBillCopy(req, res){
+function getBillCopy(req, res) {
   let path = req.path.split('/');
-  const [table, reqId ] = [path[3], path[4]];
+  const [table, reqId] = [path[3], path[4]];
   getFromDb(table, ['BillCopy'], `RequestID= ${reqId}`).then((results) => {
     if (results.length === 0) {
       return sendFailedResponse(res, 'Bill copy not found', 404);
@@ -154,10 +154,57 @@ function getIndents(req, res) {
   getFromDb('indents', ['*']).then(results => {
     const allowedProjects = req.processed.allowedProjects;
     const filteredResults = results.filter(indent => allowedProjects.includes(indent.ProjectNo));
-    res.status(200).json({ indents: filteredResults, total: filteredResults.length }).end();
+    const projectPromises = filteredResults.map(async indent => {
+      const projectResults = await getFromDb('projects', ['ProjectTitle'], `ProjectNo= ${indent.ProjectNo}`);
+      if (projectResults.length > 0) {
+        indent.ProjectTitle = projectResults[0].ProjectTitle;
+      }
+    });
+
+    Promise.all(projectPromises).then(() => {
+      res.status(200).json({ indents: filteredResults, total: filteredResults.length }).end();
+    }).catch(err => {
+      sendFailedResponse(res, err.message, 500);
+    });
   }).catch(err => {
     sendFailedResponse(res, err.message, 500);
   });
 }
 
-export { login, autoLogin, getProjects, logout, getUsers, getProjectInfo, getIndents, getBillCopy };
+function getIndentInfo(req, res) {
+  let indentId = parseInt(req.path.split('/').at(-1));
+
+  let payload = { data: {} };
+  getFromDb('indents', ['*'], `IndentID= ${indentId}`).then((results) => {
+    payload.data = results[0];
+    const projectNo = results[0].ProjectNo;
+    const allowedProjects = req.processed.allowedProjects;
+    if (!allowedProjects.includes(projectNo)) {
+      return sendFailedResponse(res, 'Not authorized to view this project', 403);
+    }
+    getFromDb('projects', ['ProjectTitle'], `ProjectNo= ${projectNo}`).then((projectResults) => {
+      if (projectResults.length > 0) {
+        payload.data.ProjectTitle = projectResults[0].ProjectTitle;
+      }
+      res.status(200).json(payload).end();
+    }).catch((err) => {
+      sendFailedResponse(res, err.message, 500);
+    });
+  }).catch((err) => {
+    sendFailedResponse(res, err.message, 500);
+  });
+}
+
+function updateIndentStatus(req, res) {
+  const { Approved, IndentID } = req.body;
+  console.log(IndentID);
+  
+  updateAtDb('indents', { IndentStatus: Approved?"Approved":"Rejected"}, { IndentID: IndentID }).then(() => {
+    res.status(200).json({ message: 'Indent updated' }).end();
+  }).catch(err => {
+    sendFailedResponse(res, err.message, 500);
+  });
+  
+}
+
+export { login, updateIndentStatus, autoLogin, getProjects, logout, getUsers, getProjectInfo, getIndents, getBillCopy, getIndentInfo };
