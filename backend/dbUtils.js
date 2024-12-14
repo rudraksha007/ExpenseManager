@@ -43,7 +43,8 @@ async function connectDb() {
                 password VARCHAR(255),
                 projects JSON,
                 status INT,
-                role VARCHAR(255)
+                role VARCHAR(255),
+                profile picture longbob
             `
             },
             {
