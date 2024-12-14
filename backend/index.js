@@ -341,58 +341,158 @@ app.delete('/api/manpower/:id', (req, res) => {
   });
 });
 
-// --- Consumables CRUD Operations ---
+app.post('/api/consumables', async (req, res) => {
+  const {
+    ProjectNo,
+    ProjectTitle,
+    ConsumablesRequestedAmt,
+    RequestedMonth,
+    RequestedYear,
+    BillCopy,
+    IndentDate,
+    IndentAmount,
+    PurchaseOrderDate,
+    PurchaseOrderAmount,
+    Remark
+  } = req.body;
 
-// Get all consumables records
-// app.get('/api/consumables', (req, res) => {
-//   const query = 'SELECT * FROM consumables';
-//   db.query(query, (err, results) => {
-//     if (err) return res.status(500).json({ message: 'Database error' });
-//     res.status(200).json({ consumables: results });
-//   });
-// });
+  // Validate required fields
+  if (!ProjectNo || !ProjectTitle || !ConsumablesRequestedAmt || !RequestedMonth || !RequestedYear || !IndentDate || !IndentAmount) {
+    return res.status(400).json({ message: 'Required fields are missing' });
+  }
 
-// Get a specific consumables record by ID
-// app.get('/api/consumables/:id', (req, res) => {
-//   const { id } = req.params;
-//   const query = 'SELECT * FROM consumables WHERE ConsumablesId = ?';
-//   db.query(query, [id], (err, results) => {
-//     if (err) return res.status(500).json({ message: 'Database error' });
-//     if (results.length === 0) return res.status(404).json({ message: 'Consumables record not found' });
-//     res.status(200).json({ consumables: results[0] });
-//   });
-// });
+  const IndentID = generateIndentID();
+  const query = `
+    INSERT INTO consumables (
+      ProjectNo, ProjectTitle, ConsumablesRequestedAmt, IndentID, RequestedMonth, RequestedYear, 
+      BillCopy, IndentDate, IndentAmount, PurchaseOrderDate, PurchaseOrderAmount, Remark
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+  `;
 
-// Create a new consumables record
-// app.post('/api/consumables', (req, res) => {
-//   const { ProjectNo, ProjectTitle, ConsumablesRequestedAmt, IndentID, RequestedMonth, RequestedYear, BillCopy } = req.body;
-//   const query = 'INSERT INTO consumables (ProjectNo, ProjectTitle, ConsumablesRequestedAmt, IndentID, RequestedMonth, RequestedYear, BillCopy) VALUES (?, ?, ?, ?, ?, ?, ?)';
-//   db.query(query, [ProjectNo, ProjectTitle, ConsumablesRequestedAmt, IndentID, RequestedMonth, RequestedYear, BillCopy], (err, result) => {
-//     if (err) return res.status(500).json({ message: 'Error adding consumables record' });
-//     res.status(201).json({ message: 'Consumables record added successfully' });
-//   });
-// });
+  try {
+    const [result] = await db.promise().query(query, [
+      ProjectNo,
+      ProjectTitle,
+      ConsumablesRequestedAmt,
+      IndentID,
+      RequestedMonth,
+      RequestedYear,
+      BillCopy,
+      IndentDate,
+      IndentAmount,
+      PurchaseOrderDate,
+      PurchaseOrderAmount,
+      Remark
+    ]);
+    res.status(201).json({
+      message: 'Consumables record added successfully',
+      indentId: IndentID
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Error adding consumables record' });
+  }
+});
 
-// Update a consumables record by ID
-// app.put('/api/consumables/:id', (req, res) => {
-//   const { id } = req.params;
-//   const { ProjectNo, ProjectTitle, ConsumablesRequestedAmt, IndentID, RequestedMonth, RequestedYear, BillCopy } = req.body;
-//   const query = 'UPDATE consumables SET ProjectNo = ?, ProjectTitle = ?, ConsumablesRequestedAmt = ?, IndentID = ?, RequestedMonth = ?, RequestedYear = ?, BillCopy = ? WHERE ConsumablesId = ?';
-//   db.query(query, [ProjectNo, ProjectTitle, ConsumablesRequestedAmt, IndentID, RequestedMonth, RequestedYear, BillCopy, id], (err, result) => {
-//     if (err) return res.status(500).json({ message: 'Error updating consumables record' });
-//     res.status(200).json({ message: 'Consumables record updated successfully' });
-//   });
-// });
+// --- Get all consumables records ---
+app.get('/api/consumables', async (req, res) => {
+  const query = 'SELECT * FROM consumables';
+  try {
+    const [results] = await db.promise().query(query);
+    res.status(200).json({ consumables: results });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Database error' });
+  }
+});
 
-// Delete a consumables record by ID
-app.delete('/api/consumables/:id', (req, res) => {
+// --- Get a specific consumable record by ID ---
+app.get('/api/consumables/:id', async (req, res) => {
+  const { id } = req.params;
+  const query = 'SELECT * FROM consumables WHERE ConsumablesId = ?';
+  try {
+    const [results] = await db.promise().query(query, [id]);
+    if (results.length === 0) {
+      return res.status(404).json({ message: 'Consumables record not found' });
+    }
+    res.status(200).json({ consumable: results[0] });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Database error' });
+  }
+});
+
+// --- Update a consumable record by ID ---
+app.put('/api/consumables/:id', async (req, res) => {
+  const { id } = req.params;
+  const {
+    ProjectNo,
+    ProjectTitle,
+    ConsumablesRequestedAmt,
+    RequestedMonth,
+    RequestedYear,
+    BillCopy,
+    IndentDate,
+    IndentAmount,
+    PurchaseOrderDate,
+    PurchaseOrderAmount,
+    Remark
+  } = req.body;
+
+  const query = `
+    UPDATE consumables SET 
+      ProjectNo = ?, ProjectTitle = ?, ConsumablesRequestedAmt = ?, 
+      RequestedMonth = ?, RequestedYear = ?, BillCopy = ?, 
+      IndentDate = ?, IndentAmount = ?, PurchaseOrderDate = ?, 
+      PurchaseOrderAmount = ?, Remark = ?
+    WHERE ConsumablesId = ?
+  `;
+
+  try {
+    const [result] = await db.promise().query(query, [
+      ProjectNo,
+      ProjectTitle,
+      ConsumablesRequestedAmt,
+      RequestedMonth,
+      RequestedYear,
+      BillCopy,
+      IndentDate,
+      IndentAmount,
+      PurchaseOrderDate,
+      PurchaseOrderAmount,
+      Remark,
+      id
+    ]);
+
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ message: 'Consumables record not found' });
+    }
+
+    res.status(200).json({ message: 'Consumables record updated successfully' });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Error updating consumables record' });
+  }
+});
+
+// --- Delete a consumable record by ID ---
+app.delete('/api/consumables/:id', async (req, res) => {
   const { id } = req.params;
   const query = 'DELETE FROM consumables WHERE ConsumablesId = ?';
-  db.query(query, [id], (err, result) => {
-    if (err) return res.status(500).json({ message: 'Error deleting consumables record' });
+
+  try {
+    const [result] = await db.promise().query(query, [id]);
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ message: 'Consumables record not found' });
+    }
+
     res.status(200).json({ message: 'Consumables record deleted successfully' });
-  });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Error deleting consumables record' });
+  }
 });
+
 
 // --- Contingency CRUD Operations ---
 
