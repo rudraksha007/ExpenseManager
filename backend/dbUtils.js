@@ -63,15 +63,17 @@ async function connectDb() {
             {
                 tableName: 'Manpower',
                 definition: `
-                    RequestID INTEGER PRIMARY KEY,
+                    IndendID INTEGER PRIMARY KEY,
                     ProjectNo INTEGER,
                     ProjectTitle VARCHAR(255),
-                    RequestedAmt DOUBLE,
                     EmployeeID INT,
-                    Reason VARCHAR(255),
-                    IndentID INTEGER,
-                    RequestedDate DATE,
-                    BillCopyManpower LONGBLOB,
+                    Name VARCHAR(255),
+                    Position ENUM('Techanican', 'JRK', 'SRK', 'RA'),
+                    BasicSalary DECIMAL(10, 2),
+                    HRA_Percentage DECIMAL(5, 2),
+                    TotalSalary AS (BasicSalary + (BasicSalary * HRA_Percentage / 100)), -- Virtual (calculated) column
+                    JoiningDate DATE,
+                    EndDate DATE;
                     FOREIGN KEY (EmployeeID) REFERENCES users(id),
                     FOREIGN KEY (ProjectNo) REFERENCES Projects(ProjectNo),
                     FOREIGN KEY (ProjectTitle) REFERENCES Projects(ProjectTitle),
