@@ -1,17 +1,18 @@
 import { log } from './utils.js';
 import express from 'express';
 import dotenv from 'dotenv';
-import { login, autoLogin, getProjects, logout, getUsers } from './callbacks/postReqs.js';
+import { login, autoLogin, getProjects, logout, getUsers, getProjectInfo, getIndents, getBillCopy, getIndentInfo, updateIndentStatus, getPR, getPO, getPRInfo, updatePRStatus } from './callbacks/postReqs.js';
 import cookieParser from 'cookie-parser';
-import { db, authenticate, authorize, connectDb } from './dbUtils.js';
+import { db, authenticate, authorize, connectDb, projectWiseAuthorisation } from './dbUtils.js';
 import cors from 'cors';
-import { addProject,addUser } from './callbacks/putReqs.js';
+import { addPOrder, addProject,addProjectIndent,addPurchaseReq,addTravel,addUser } from './callbacks/putReqs.js';
+import fileUpload from 'express-fileupload';
 
 const hash = import('bcryptjs').hash;
 log('Starting Expense Manager Server');
 dotenv.config();
 const app = express();
-app.use(cors({ origin: 'http://localhost:5173', credentials: true }), express.json(), cookieParser(), authenticate);
+app.use(cors({ origin: 'http://localhost:5173', credentials: true }), express.json(),fileUpload(), cookieParser(), authenticate);
 await connectDb();
 
 //Post requests (right click on supplied function-> goto source definition to view the code)
@@ -19,31 +20,36 @@ app.post('/api/login', (req, res) => login(req, res));
 app.post('/api/logout', (req, res) => logout(req, res)); 
 app.post('/api/autoLogin', (req, res) => autoLogin(req, res)); 
 app.post('/api/projects', (req, res) => getProjects(req, res));
-app.post('/api/users', authorize(['Super Admin','root']), (req, res) => getUsers(req, res));
+app.post('/api/users', authorize(['Super Admin']), (req, res) => getUsers(req, res));
+app.post('/api/projects/*', (req, res)=>getProjectInfo(req, res));
+app.post('/api/pdf/*', (req, res)=>getBillCopy(req, res));
+app.post('/api/indents', projectWiseAuthorisation, (req, res) => getIndents(req, res));
+app.post('/api/indents/*', projectWiseAuthorisation, (req, res) => getIndentInfo(req, res));
+app.post('/api/purchaseReqs', authorize(['SuperAdmin']), (req,res)=>getPR(req, res));
+app.post('/api/purchaseReqs/*', projectWiseAuthorisation, authorize(['SuperAdmin']), (req,res)=>getPRInfo(req, res));
+app.post('/api/purchaseOrders', authorize(['SuperAdmin']), (req,res)=>getPO(req, res));
 
 //Put requests (right click on supplied function-> goto source definition to view the code)
-app.put('/api/projects', authorize(['SuperAdmin','root']), (req, res) => addProject(req, res));
-app.put('/api/users', authorize(['SuperAdmin','root']), (req, res) => addUser(req, res));
+app.put('/api/projects', authorize(['SuperAdmin']), (req, res) => addProject(req, res));
+app.put('/api/users', authorize(['SuperAdmin']), (req, res) => addUser(req, res));
+app.put('/api/travel', (req, res) => addTravel(req, res));
+app.put('/api/consumables', (req, res) => addProjectIndent(req, res));
+app.put('/api/contingency', (req, res) => addProjectIndent(req, res));
+app.put('/api/equipment', (req, res) => addProjectIndent(req, res));
+app.put('/api/purchaseReqs', authorize(['SuperAdmin']), (req, res) => addPurchaseReq(req, res));
+app.put('/api/purchaseOrders', authorize(['SuperAdmin']), (req, res) => addPOrder(req, res));
 
+app.post('/api/indentStatus', authorize(['SuperAdmin']), (req, res) => updateIndentStatus(req, res));
+app.post('/api/purchaseReqStatus', authorize(['SuperAdmin']), (req, res) => updatePRStatus(req, res));
 
-// --- Profiles CRUD Operations ---
-app.get('/api/users', (req, res) => {
-  const query = 'SELECT * FROM users';
-  db.query(query, (err, results) => {
-    if (err) return res.status(500).json({ message: 'Database error' });
-    res.status(200).json({ profiles: results });
-  });
-});
-
-
-app.put('/api/users', authorize(['SuperAdmin']), (req, res) => {
-  // const { id }  = req.params;
-  const { id, name, email, password, designation, status } = req.body;
-  db.query('UPDATE users SET id = ?, name = ?, email = ?, password = ?, designation = ?, status = ? WHERE id = ?', [id, name, email, password, designation, status, id], (err, result) => {
-    if (err) return res.status(500).json({ message: 'Error updating profile', message: err.message });
-    res.status(200).json({ message: 'Profile updated successfully' });
-  });
-});
+// app.put('/api/users', authorize(['SuperAdmin']), (req, res) => {
+//   // const { id }  = req.params;
+//   const { id, name, email, password, designation, status } = req.body;
+//   db.query('UPDATE users SET id = ?, name = ?, email = ?, password = ?, designation = ?, status = ? WHERE id = ?', [id, name, email, password, designation, status, id], (err, result) => {
+//     if (err) return res.status(500).json({ message: 'Error updating profile', message: err.message });
+//     res.status(200).json({ message: 'Profile updated successfully' });
+//   });
+// });
 
 app.delete('/api/users/', authorize(['SuperAdmin']), (req, res) => {
   const { id } = req.body;
@@ -76,23 +82,17 @@ app.delete('/api/projects/:id', authorize(['Super Admin', 'Admin(PME)']), (req, 
 });
 
 // --- Indents CRUD Operations ---// --- Indents CRUD Operations ---
-app.get('/api/indents', (req, res) => {
-  const query = 'SELECT * FROM indents';
-  db.query(query, (err, results) => {
-    if (err) return res.status(500).json({ message: 'Database error' });
-    res.status(200).json({ indents: results });
-  });
-});
+
 
 // Endpoint to Add an Indent - Scientists (PIs) are not allowed
-app.post('/api/indents', authorize(['Super Admin', 'Admin(PME)']), (req, res) => {
-  const { title, description, amount } = req.body;
-  const query = 'INSERT INTO indents (title, description, amount) VALUES (?, ?, ?)';
-  db.query(query, [title, description, amount], (err, result) => {
-    if (err) return res.status(500).json({ message: 'Error adding indent' });
-    res.status(201).json({ message: 'Indent added successfully' });
-  });
-});
+// app.post('/api/indents', authorize(['Super Admin', 'Admin(PME)']), (req, res) => {
+//   const { title, description, amount } = req.body;
+//   const query = 'INSERT INTO indents (title, description, amount) VALUES (?, ?, ?)';
+//   db.query(query, [title, description, amount], (err, result) => {
+//     if (err) return res.status(500).json({ message: 'Error adding indent' });
+//     res.status(201).json({ message: 'Indent added successfully' });
+//   });
+// });
 
 // Endpoint to Update an Indent - Scientists (PIs) are not allowed
 app.put('/api/indents/:id', authorize(['Super Admin', 'Admin(PME)']), (req, res) => {
@@ -344,45 +344,45 @@ app.delete('/api/manpower/:id', (req, res) => {
 // --- Consumables CRUD Operations ---
 
 // Get all consumables records
-app.get('/api/consumables', (req, res) => {
-  const query = 'SELECT * FROM consumables';
-  db.query(query, (err, results) => {
-    if (err) return res.status(500).json({ message: 'Database error' });
-    res.status(200).json({ consumables: results });
-  });
-});
+// app.get('/api/consumables', (req, res) => {
+//   const query = 'SELECT * FROM consumables';
+//   db.query(query, (err, results) => {
+//     if (err) return res.status(500).json({ message: 'Database error' });
+//     res.status(200).json({ consumables: results });
+//   });
+// });
 
 // Get a specific consumables record by ID
-app.get('/api/consumables/:id', (req, res) => {
-  const { id } = req.params;
-  const query = 'SELECT * FROM consumables WHERE ConsumablesId = ?';
-  db.query(query, [id], (err, results) => {
-    if (err) return res.status(500).json({ message: 'Database error' });
-    if (results.length === 0) return res.status(404).json({ message: 'Consumables record not found' });
-    res.status(200).json({ consumables: results[0] });
-  });
-});
+// app.get('/api/consumables/:id', (req, res) => {
+//   const { id } = req.params;
+//   const query = 'SELECT * FROM consumables WHERE ConsumablesId = ?';
+//   db.query(query, [id], (err, results) => {
+//     if (err) return res.status(500).json({ message: 'Database error' });
+//     if (results.length === 0) return res.status(404).json({ message: 'Consumables record not found' });
+//     res.status(200).json({ consumables: results[0] });
+//   });
+// });
 
 // Create a new consumables record
-app.post('/api/consumables', (req, res) => {
-  const { ProjectNo, ProjectTitle, ConsumablesRequestedAmt, IndentID, RequestedMonth, RequestedYear, BillCopy } = req.body;
-  const query = 'INSERT INTO consumables (ProjectNo, ProjectTitle, ConsumablesRequestedAmt, IndentID, RequestedMonth, RequestedYear, BillCopy) VALUES (?, ?, ?, ?, ?, ?, ?)';
-  db.query(query, [ProjectNo, ProjectTitle, ConsumablesRequestedAmt, IndentID, RequestedMonth, RequestedYear, BillCopy], (err, result) => {
-    if (err) return res.status(500).json({ message: 'Error adding consumables record' });
-    res.status(201).json({ message: 'Consumables record added successfully' });
-  });
-});
+// app.post('/api/consumables', (req, res) => {
+//   const { ProjectNo, ProjectTitle, ConsumablesRequestedAmt, IndentID, RequestedMonth, RequestedYear, BillCopy } = req.body;
+//   const query = 'INSERT INTO consumables (ProjectNo, ProjectTitle, ConsumablesRequestedAmt, IndentID, RequestedMonth, RequestedYear, BillCopy) VALUES (?, ?, ?, ?, ?, ?, ?)';
+//   db.query(query, [ProjectNo, ProjectTitle, ConsumablesRequestedAmt, IndentID, RequestedMonth, RequestedYear, BillCopy], (err, result) => {
+//     if (err) return res.status(500).json({ message: 'Error adding consumables record' });
+//     res.status(201).json({ message: 'Consumables record added successfully' });
+//   });
+// });
 
 // Update a consumables record by ID
-app.put('/api/consumables/:id', (req, res) => {
-  const { id } = req.params;
-  const { ProjectNo, ProjectTitle, ConsumablesRequestedAmt, IndentID, RequestedMonth, RequestedYear, BillCopy } = req.body;
-  const query = 'UPDATE consumables SET ProjectNo = ?, ProjectTitle = ?, ConsumablesRequestedAmt = ?, IndentID = ?, RequestedMonth = ?, RequestedYear = ?, BillCopy = ? WHERE ConsumablesId = ?';
-  db.query(query, [ProjectNo, ProjectTitle, ConsumablesRequestedAmt, IndentID, RequestedMonth, RequestedYear, BillCopy, id], (err, result) => {
-    if (err) return res.status(500).json({ message: 'Error updating consumables record' });
-    res.status(200).json({ message: 'Consumables record updated successfully' });
-  });
-});
+// app.put('/api/consumables/:id', (req, res) => {
+//   const { id } = req.params;
+//   const { ProjectNo, ProjectTitle, ConsumablesRequestedAmt, IndentID, RequestedMonth, RequestedYear, BillCopy } = req.body;
+//   const query = 'UPDATE consumables SET ProjectNo = ?, ProjectTitle = ?, ConsumablesRequestedAmt = ?, IndentID = ?, RequestedMonth = ?, RequestedYear = ?, BillCopy = ? WHERE ConsumablesId = ?';
+//   db.query(query, [ProjectNo, ProjectTitle, ConsumablesRequestedAmt, IndentID, RequestedMonth, RequestedYear, BillCopy, id], (err, result) => {
+//     if (err) return res.status(500).json({ message: 'Error updating consumables record' });
+//     res.status(200).json({ message: 'Consumables record updated successfully' });
+//   });
+// });
 
 // Delete a consumables record by ID
 app.delete('/api/consumables/:id', (req, res) => {
@@ -576,25 +576,18 @@ app.get('/api/travel/:id', (req, res) => {
 });
 
 // Create a new travel record
-app.post('/api/travel', (req, res) => {
-  const { ProjectNo, ProjectTitle, TravelRequestedAmt, IndentID, RequestedMonth, RequestedYear, BillCopy } = req.body;
-  const query = 'INSERT INTO travel (ProjectNo, ProjectTitle, TravelRequestedAmt, IndentID, RequestedMonth, RequestedYear, BillCopy) VALUES (?, ?, ?, ?, ?, ?, ?)';
-  db.query(query, [ProjectNo, ProjectTitle, TravelRequestedAmt, IndentID, RequestedMonth, RequestedYear, BillCopy], (err, result) => {
-    if (err) return res.status(500).json({ message: 'Error adding travel record' });
-    res.status(201).json({ message: 'Travel record added successfully' });
-  });
-});
+
 
 // Update a travel record by ID
-app.put('/api/travel/:id', (req, res) => {
-  const { id } = req.params;
-  const { ProjectNo, ProjectTitle, TravelRequestedAmt, IndentID, RequestedMonth, RequestedYear, BillCopy } = req.body;
-  const query = 'UPDATE travel SET ProjectNo = ?, ProjectTitle = ?, TravelRequestedAmt = ?, IndentID = ?, RequestedMonth = ?, RequestedYear = ?, BillCopy = ? WHERE TravelId = ?';
-  db.query(query, [ProjectNo, ProjectTitle, TravelRequestedAmt, IndentID, RequestedMonth, RequestedYear, BillCopy, id], (err, result) => {
-    if (err) return res.status(500).json({ message: 'Error updating travel record' });
-    res.status(200).json({ message: 'Travel record updated successfully' });
-  });
-});
+// app.put('/api/travel/:id', (req, res) => {
+//   const { id } = req.params;
+//   const { ProjectNo, ProjectTitle, TravelRequestedAmt, IndentID, RequestedMonth, RequestedYear, BillCopy } = req.body;
+//   const query = 'UPDATE travel SET ProjectNo = ?, ProjectTitle = ?, TravelRequestedAmt = ?, IndentID = ?, RequestedMonth = ?, RequestedYear = ?, BillCopy = ? WHERE TravelId = ?';
+//   db.query(query, [ProjectNo, ProjectTitle, TravelRequestedAmt, IndentID, RequestedMonth, RequestedYear, BillCopy, id], (err, result) => {
+//     if (err) return res.status(500).json({ message: 'Error updating travel record' });
+//     res.status(200).json({ message: 'Travel record updated successfully' });
+//   });
+// });
 
 // Delete a travel record by ID
 app.delete('/api/travel/:id', (req, res) => {
@@ -605,22 +598,6 @@ app.delete('/api/travel/:id', (req, res) => {
     res.status(200).json({ message: 'Travel record deleted successfully' });
   });
 });
-
-
-// --- User Registration & Authentication ---
-app.post('/api/signup', (req, res) => {
-  const { name, email, password, role } = req.body;
-  hash(password, 10, (err, hashedPassword) => {
-    if (err) return res.status(500).json({ message: 'Error hashing password' });
-    const query = 'INSERT INTO users (name, email, password, role) VALUES (?, ?, ?, ?)';
-    db.query(query, [name, email, hashedPassword, role], (err, result) => {
-      if (err) return res.status(500).json({ message: 'Error registering user' });
-      res.status(201).json({ message: 'User registered successfully' });
-    });
-  });
-});
-
-
 
 // Start the server
 app.listen(3000, () => {

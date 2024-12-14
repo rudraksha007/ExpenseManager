@@ -23,7 +23,7 @@ function UserProjects() {
                         <div>{index + 1}</div>
                         <div>{project.ProjectTitle}</div>
                         <div>{project.ProjectStartDate.split('T')[0]}</div>
-                        <div className='hoverable' onClick={()=>navigate(`/projects/${project.id}`)}><Link to={`/projects/${project.id}`} title="View Project Details"><FaEdit size={20} /></Link></div>
+                        <div className='hoverable'><Link to={`/projects/${project.ProjectNo}`} title="View Project Details"><FaEdit size={20} /></Link></div>
                     </React.Fragment>
                 )
             ));
@@ -36,11 +36,11 @@ function UserProjects() {
         <>
             {loading ? <Oval color='black' height={80} strokeWidth={5} /> :
                 <>
-                    <h2>Ongoing Projects</h2>
+                    <h2>Projects</h2>
                     <div id="userProjectsTable">
                         <div className='tableTitle'>Sl.</div>
                         <div className='tableTitle'>Title</div>
-                        <div className='tableTitle'>Since</div>
+                        <div className='tableTitle'>Status</div>
                         <div className='tableTitle'>Action</div>
                         {projects}
                     </div>

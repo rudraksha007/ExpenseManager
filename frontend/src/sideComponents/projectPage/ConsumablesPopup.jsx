@@ -1,52 +1,66 @@
 import React from 'react';
 import '../../css/Popup.css';
 import { FaTimes } from 'react-icons/fa';
+import { closePopup } from '../../assets/popup';
+import { fetchDataWithFileUpload } from '../../assets/scripts';
 
-function ConsumablesPopup({ reset }) {
+function ConsumablesPopup({ reset, projectNo, projectTitle }) {
     const today = new Date().toISOString().split('T')[0];
     let total = 0;
-
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        if (!e.currentTarget.checkValidity()) return;
+        const res = await fetchDataWithFileUpload('consumables', 'put', e.currentTarget);
+        if (res.reqStatus === 'success') {
+            alert('Consumable Added Successfully');
+            reset();
+        } else {
+            alert('Failed: ' + res.message);
+        }
+    };
     return (
         <div className='projectPopup'>
             <div className="projectPopupCont">
-                <FaTimes size={30} style={{ position: 'absolute', right: 10, top: 10, cursor: 'pointer' }} onClick={() => close(reset)} />
+                <FaTimes size={30} style={{ position: 'absolute', right: 10, top: 10, cursor: 'pointer' }} onClick={(e) => closePopup(e,reset)} />
                 <h2>Add Consumable</h2>
-                <form id='addConsumableForm'>
-                    <label htmlFor="date">Date: <input type="date" id="date" name="date" max={today} required /></label>
-                    <label htmlFor="consumableId">Consumable ID: <input type="text" id="consumableId" name="consumableId" required /></label>
-                    <label htmlFor="consumableType">Consumable Type:
-                        <select id="consumableType" name="consumableType" required>
-                            <option value="" disabled>Select type</option>
-                            <option value="chemical">Chemical</option>
-                            <option value="glassware">Glassware</option>
-                            <option value="plasticware">Plasticware</option>
-                            <option value="other">Other</option>
-                        </select>
-                    </label>
-                    <label htmlFor="rate">Rate per Piece: <input type="number" id="rate" name="rate" required onInput={() => total = calcInvoice()} /></label>
-                    <label htmlFor="amount">Amount: <input type="number" id="amount" name="amount" required onInput={() => total = calcInvoice()} /></label>
-                    <label htmlFor="invoiceAmount">Invoice Amount: <input type="number" id="invoiceAmount" name="invoiceAmount" disabled value={total} /></label>
-                    <label htmlFor="receipt">Receipt (PDF): <input type="file" id="receipt" name="receipt" accept="application/pdf" required /></label>
+                <form className='popupForm' onSubmit={(e)=> handleSubmit(e)} id='consumableForm'>
+                    <label htmlFor="RequestedDate">Date:</label>
+                    <input type="date" id="RequestedDate" name="RequestedDate" max={today} required />
+
+                    <label htmlFor="ProjectNo">Project No:</label>
+                    <input type="number" id="ProjectNo" name="ProjectNo" readOnly value={projectNo} />
+
+                    <label htmlFor="ProjectTitle">Project Title:</label>
+                    <input type="text" id="ProjectTitle" name="ProjectTitle" readOnly value={projectTitle} />
+
+                    <label htmlFor="IndentID">Indent ID:</label>
+                    <input type="number" id="IndentID" name="IndentID" required />
+                    
+                    <label htmlFor="RequestedAmt">Invoice Amount:</label>
+                    <input type="number" id="RequestedAmt" name="RequestedAmt" value={total} min={1}/>
+
+                    <label htmlFor="Overhead">Overhead:</label>
+                    <input type="number" id="Overhead" name="Overhead" required min={1}/>
+                    
+                    <label htmlFor="EmployeeID">Employee ID:</label>
+                    <input type="number" id="EmployeeID" name="EmployeeID" required min="1" />
+
+                    <label htmlFor="EmployeeName">Employee Name:</label>
+                    <input type="text" id="EmployeeName" name="EmployeeName" required />
+                    
+                    <label htmlFor="Reason">Reason:</label>
+                    <input type="text" id="Reason" name="Reason" required />
+                    
+                    <label htmlFor="Remarks">Remarks:</label>
+                    <textarea id="Remarks" name="Remarks" rows="4" />
+                    
+                    <label htmlFor="BillCopy">Support Document (PDF):</label>
+                    <input type="file" id="BillCopy" name="BillCopy" accept="application/pdf" required multiple />
                 </form>
-                <button type="submit" form='addConsumableForm' className='hoverable'>Submit</button>
+                <button type="submit" form='consumableForm' className='hoverable'>Submit</button>
             </div>
         </div>
     );
 };
-
-function close(reset) {
-    document.getElementById('addConsumableForm').reset();
-    reset();
-}
-
-function calcInvoice() {
-    let rate = document.getElementById('rate').value;
-    let amount = document.getElementById('amount').value;
-    let total = 0;
-    if (rate && amount) {
-        total = rate * amount;
-    }
-    document.getElementById('invoiceAmount').value = total;
-}
 
 export default ConsumablesPopup;

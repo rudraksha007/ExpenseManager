@@ -9,13 +9,9 @@ function UserInfo() {
 
   return (
     <> {/*parent(container) className = 'dash', styling of parent is in dash.css*/}
-      <div id="dashUserInfoDp">
-        <img src={person} alt="" width='40%' />
-        <h3>Welcome back! {profile?profile.name:""}</h3>
-      </div>
-      <p>Employee ID: {profile?profile.id:""}</p>
-      {/* <p>Ongoing Projects: {profile?profile.projects.active.length:0}</p> */}
-      <p>LoggedIn As: {profile?profile.role:""}</p>
+      <h3>Welcome back! {profile ? profile.name : ""}</h3>
+      <p>Employee ID: {profile ? profile.id : ""}</p>
+      <p>LoggedIn As: {profile ? profile.role : ""}</p>
     </>
   )
 }

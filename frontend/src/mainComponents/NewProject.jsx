@@ -26,7 +26,7 @@ function NewProject() {
         if (!e.currentTarget.checkValidity()) return;
         
         let res = await fetchDataWithParams('projects','put', formData);
-        if(res.status=='success'){
+        if(res.reqStatus=='success'){
             alert('Project Created Successfully');
             setFormData({});
             navigate('/');
@@ -38,45 +38,53 @@ function NewProject() {
     return (
         <form id="newProjectDiv" onSubmit={(e) => handleSubmit(e)}>
             <label>
-                Project Title:
+                Project Title:<span style={{ color: 'red' }}>*</span>
             </label>
             <input type="text" name="ProjectTitle" placeholder="Enter project title" required onChange={(e) => setFormData({ ...formData, [e.target.name]: e.target.value })} value={formData.ProjectTitle || ''} />
 
             <label>
-                Project No:
+                Project No:<span style={{ color: 'red' }}>*</span>
             </label>
             <input type="number" name="ProjectNo" placeholder="Enter project number" required min="0" onChange={(e) => setFormData({ ...formData, [e.target.name]: e.target.value })} value={formData.ProjectNo || ''} />
 
             <label>
-                Project Start Date:
+                Project Start Date:<span style={{ color: 'red' }}>*</span>
             </label>
             <input type="date" name="ProjectStartDate" placeholder="Enter start date" required onChange={(e) => setFormData({ ...formData, [e.target.name]: e.target.value })} value={formData.ProjectStartDate || ''} max={formData.ProjectEndDate || ''} />
 
             <label>
-                Project End Date:
+                Project End Date:<span style={{ color: 'red' }}>*</span>
             </label>
             <input type="date" name="ProjectEndDate" placeholder="Enter end date" onChange={(e) => setFormData({ ...formData, [e.target.name]: e.target.value })} value={formData.ProjectEndDate || ''} min={formData.ProjectStartDate || ''} />
 
             <label>
-                Sanction Order No:
+                Sanction Order No:<span style={{ color: 'red' }}>*</span>
             </label>
             <input type="text" name="SanctionOrderNo" placeholder="Enter sanction order number" required onChange={(e) => setFormData({ ...formData, [e.target.name]: e.target.value })} value={formData.SanctionOrderNo || ''} />
 
             <label>
-                Total Sanction amount:
+                Total Sanction amount:<span style={{ color: 'red' }}>*</span>
             </label>
             <input type="number" name="TotalSanctionamount" placeholder="Enter total sanction amount" required min="0" onChange={(e) => setFormData({ ...formData, [e.target.name]: e.target.value })} value={formData.TotalSanctionamount || ''} />
-
             <label>
-                PI name:
+                Funded By:<span style={{ color: 'red' }}>*</span>
+            </label>
+            <input type="text" name="FundedBy" placeholder="Enter funding agency" required onChange={(e) => setFormData({ ...formData, [e.target.name]: e.target.value })} value={formData.FundedBy || ''} />
+            <label>
+                PI name:<span style={{ color: 'red' }}>*</span>
             </label>
             <input type="text" name="PIname" placeholder="Enter PI name" required onChange={(e) => setFormData({ ...formData, [e.target.name]: e.target.value })} value={formData.PIname || ''} />
 
             <label>
-                CoPIs:
+                CoPIs:<span style={{ color: 'red' }}>*</span>
             </label>
             <input type="text" name="CoPIs" placeholder="Enter CoPIs" required onChange={(e) => setFormData({ ...formData, [e.target.name]: e.target.value })} value={formData.CoPIs || ''} />
 
+            <label>
+                Overhead Amount:<span style={{ color: 'red' }}>*</span>
+            </label>
+            <input type="number" name="OverheadAmount" placeholder="Enter overhead amount" required min="0" onChange={(e) => setFormData({ ...formData, [e.target.name]: e.target.value })} value={formData.OverheadAmount || ''} />
+            
             <label>
                 Manpower Allocation Amt:
             </label>

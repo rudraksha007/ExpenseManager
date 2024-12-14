@@ -1,29 +1,30 @@
 import mysql from 'mysql2/promise';
 import jwt from 'jsonwebtoken';
-import { log } from './utils.js';
+import { log, sendFailedResponse } from './utils.js';
 import { decrypt } from './crypt.js';
 let db = null;
 async function connectDb() {
     try {
         db = await mysql.createConnection({
             host: 'localhost',
-            user: 'root',
-            password: 'Aman@2006',
-            database: 'ils_db'
+            user: process.env.DB_USER,
+            password: process.env.DB_PASS,
+            database: process.env.DB_NAME
         });
         log('Connected to MySQL database');
         const tables = [
             {
                 tableName: 'Projects',
                 definition: `
-                    ProjectTitle VARCHAR(255),
+                    ProjectTitle VARCHAR(255) NOT NULL,
                     ProjectNo INT PRIMARY KEY,
-                    ProjectStartDate DATE,
+                    FundedBy VARCHAR(255) NOT NULL,
+                    ProjectStartDate DATE NOT NULL,
                     ProjectEndDate DATE,
-                    SanctionOrderNo VARCHAR(255),
+                    SanctionOrderNo VARCHAR(255) NOT NULL,
                     TotalSanctionAmount DOUBLE,
-                    PIName VARCHAR(255),
-                    CoPIs VARCHAR(255),
+                    PIName VARCHAR(255) NOT NULL,
+                    CoPIs VARCHAR(255) NOT NULL,
                     ManpowerAllocationAmt DOUBLE,
                     ConsumablesAllocationAmt DOUBLE,
                     ContingencyAllocationAmt DOUBLE,
@@ -31,142 +32,6 @@ async function connectDb() {
                     EquipmentAllocationAmt DOUBLE,
                     TravelAllocationAmt DOUBLE,
                     UNIQUE KEY (ProjectTitle)
-                `
-            },
-            {
-                tableName: 'Indents',
-                definition: `
-                    IndentID INTEGER PRIMARY KEY,
-                    IndentCategory VARCHAR(255),
-                    ProjectNo INTEGER,
-                    IndentAmount DOUBLE,
-                    IndentedPerson VARCHAR(255),
-                    IndentStatus VARCHAR(255),
-                    FOREIGN KEY (ProjectNo) REFERENCES Projects(ProjectNo)
-                `
-            },
-            {
-                tableName: 'PurchaseRequests',
-                definition: `
-                    PurchaseReqID INT PRIMARY KEY,
-                    PRDate DATE,
-                    ProjectNo INT,
-                    IndentID INT,
-                    PurchaseRequestAmount DOUBLE,
-                    PRRequestor VARCHAR(255),
-                    PRStatus VARCHAR(255),
-                    FOREIGN KEY (ProjectNo) REFERENCES Projects(ProjectNo),
-                    FOREIGN KEY (IndentID) REFERENCES Indents(IndentID)
-                `
-            },
-            {
-                tableName: 'PurchaseOrders',
-                definition: `
-                    PurchaseOrderID INTEGER PRIMARY KEY,
-                    PODate DATE,
-                    ProjectNo INTEGER,
-                    PurchaseReqID INTEGER,
-                    PurchaseOrderAmount DOUBLE,
-                    PORequestor VARCHAR(255),
-                    POStatus VARCHAR(255),
-                    FOREIGN KEY (ProjectNo) REFERENCES Projects(ProjectNo),
-                    FOREIGN KEY (PurchaseReqID) REFERENCES PurchaseRequests(PurchaseReqID)
-                `
-            },
-            {
-                tableName: 'Manpower',
-                definition: `
-                    ManpowerID INT PRIMARY KEY,
-                    ProjectNo INT,
-                    ProjectTitle VARCHAR(255),
-                    ManpowerRequestedAmt DOUBLE,
-                    IndentID INT,
-                    RequestedMonth VARCHAR(255),
-                    RequestedYear VARCHAR(255),
-                    BillCopyManpower BLOB,
-                    FOREIGN KEY (ProjectNo) REFERENCES Projects(ProjectNo),
-                    FOREIGN KEY (ProjectTitle) REFERENCES Projects(ProjectTitle),
-                    FOREIGN KEY (IndentID) REFERENCES Indents(IndentID)
-                `
-            },
-            {
-                tableName: 'Consumables',
-                definition: `
-                    ConsumablesID INT PRIMARY KEY,
-                    ProjectNo INT,
-                    ProjectTitle VARCHAR(255),
-                    ConsumablesRequestedAmt DOUBLE,
-                    IndentID INT,
-                    RequestedMonth VARCHAR(255),
-                    RequestedYear VARCHAR(255),
-                    BillCopy BLOB,
-                    FOREIGN KEY (ProjectNo) REFERENCES Projects(ProjectNo),
-                    FOREIGN KEY (ProjectTitle) REFERENCES Projects(ProjectTitle),
-                    FOREIGN KEY (IndentID) REFERENCES Indents(IndentID)
-                `
-            },
-            {
-                tableName: 'Travel',
-                definition: `
-                    TravelID INTEGER PRIMARY KEY,
-                    ProjectNo INTEGER,
-                    ProjectTitle VARCHAR(255),
-                    TravelRequestedAmt DOUBLE,
-                    IndentID INTEGER,
-                    RequestedMonth VARCHAR(255),
-                    RequestedYear VARCHAR(255),
-                    BillCopy BLOB,
-                    FOREIGN KEY (ProjectNo) REFERENCES Projects(ProjectNo),
-                    FOREIGN KEY (ProjectTitle) REFERENCES Projects(ProjectTitle),
-                    FOREIGN KEY (IndentID) REFERENCES Indents(IndentID)
-                `
-            },
-            {
-                tableName: 'Overhead',
-                definition: `
-                    OverheadID INTEGER PRIMARY KEY,
-                    ProjectNo INTEGER,
-                    ProjectTitle VARCHAR(255),
-                    OverheadRequestedAmt DOUBLE,
-                    IndentID INTEGER,
-                    RequestedMonth VARCHAR(255),
-                    RequestedYear VARCHAR(255),
-                    BillCopy BLOB,
-                    FOREIGN KEY (ProjectNo) REFERENCES Projects(ProjectNo),
-                    FOREIGN KEY (ProjectTitle) REFERENCES Projects(ProjectTitle),
-                    FOREIGN KEY (IndentID) REFERENCES Indents(IndentID)
-                `
-            },
-            {
-                tableName: 'Equipment',
-                definition: `
-                    EquipmentID INTEGER PRIMARY KEY,
-                    ProjectNo INTEGER,
-                    ProjectTitle VARCHAR(255),
-                    EquipmentRequestedAmt DOUBLE,
-                    IndentID INTEGER,
-                    RequestedMonth VARCHAR(255),
-                    RequestedYear VARCHAR(255),
-                    BillCopy BLOB,
-                    FOREIGN KEY (ProjectNo) REFERENCES Projects(ProjectNo),
-                    FOREIGN KEY (ProjectTitle) REFERENCES Projects(ProjectTitle),
-                    FOREIGN KEY (IndentID) REFERENCES Indents(IndentID)
-                `
-            },
-            {
-                tableName: 'Contingency',
-                definition: `
-                    ContingencyID INTEGER PRIMARY KEY,
-                    ProjectNo INTEGER,
-                    ProjectTitle VARCHAR(255),
-                    ContingencyRequestedAmt DOUBLE,
-                    IndentID INTEGER,
-                    RequestedMonth VARCHAR(255),
-                    RequestedYear VARCHAR(255),
-                    BillCopy BLOB,
-                    FOREIGN KEY (ProjectNo) REFERENCES Projects(ProjectNo),
-                    FOREIGN KEY (ProjectTitle) REFERENCES Projects(ProjectTitle),
-                    FOREIGN KEY (IndentID) REFERENCES Indents(IndentID)
                 `
             },
             {
@@ -180,7 +45,164 @@ async function connectDb() {
                 status INT,
                 role VARCHAR(255)
             `
+            },
+            {
+                tableName: 'Indents',
+                definition: `
+                    IndentID INTEGER PRIMARY KEY,
+                    IndentCategory VARCHAR(255),
+                    ProjectNo INTEGER,
+                    IndentAmount DOUBLE,
+                    IndentedPersonId INT,
+                    IndentDate DATE,
+                    IndentStatus VARCHAR(255),
+                    FOREIGN KEY (ProjectNo) REFERENCES Projects(ProjectNo),
+                    FOREIGN KEY (IndentedPersonId) REFERENCES users(id)
+                `
+            },
+            {
+                tableName: 'Manpower',
+                definition: `
+                    RequestID INTEGER PRIMARY KEY,
+                    ProjectNo INTEGER,
+                    ProjectTitle VARCHAR(255),
+                    RequestedAmt DOUBLE,
+                    EmployeeID INT,
+                    Reason VARCHAR(255),
+                    IndentID INTEGER,
+                    RequestedDate DATE,
+                    BillCopyManpower LONGBLOB,
+                    FOREIGN KEY (EmployeeID) REFERENCES users(id),
+                    FOREIGN KEY (ProjectNo) REFERENCES Projects(ProjectNo),
+                    FOREIGN KEY (ProjectTitle) REFERENCES Projects(ProjectTitle),
+                    FOREIGN KEY (IndentID) REFERENCES Indents(IndentID)
+                `
+            },
+            {
+                tableName: 'Travel',
+                definition: `
+                    RequestID INTEGER PRIMARY KEY,
+                    ProjectNo INTEGER,
+                    IndentID INTEGER,
+                    RequestedAmt DOUBLE,
+                    EmployeeID INT,
+                    Source VARCHAR(255),
+                    FromDate DATE,
+                    Destination VARCHAR(255),
+                    DestinationDate DATE,
+                    Reason VARCHAR(255),
+                    Remark VARCHAR(1000),
+                    RequestedDate DATE,
+                    Traveler INT,
+                    BillCopy JSON, 
+                    FOREIGN KEY (EmployeeID) REFERENCES users(id),
+                    FOREIGN KEY (Traveler) REFERENCES users(id),
+                    FOREIGN KEY (ProjectNo) REFERENCES Projects(ProjectNo),
+                    FOREIGN KEY (IndentID) REFERENCES Indents(IndentID)
+                `
+            },
+            {
+                tableName: 'Consumables',
+                definition: `
+                    RequestID INTEGER PRIMARY KEY,
+                    ProjectNo INTEGER,
+                    ProjectTitle VARCHAR(255),
+                    RequestedAmt DOUBLE,
+                    EmployeeID INT,
+                    Reason VARCHAR(255),
+                    IndentID INTEGER,
+                    RequestedDate DATE,
+                    BillCopy LONGBLOB,
+                    FOREIGN KEY (EmployeeID) REFERENCES users(id),
+                    FOREIGN KEY (ProjectNo) REFERENCES Projects(ProjectNo),
+                    FOREIGN KEY (ProjectTitle) REFERENCES Projects(ProjectTitle),
+                    FOREIGN KEY (IndentID) REFERENCES Indents(IndentID)
+                `
+            },
+            {
+                tableName: 'Overhead',
+                definition: `
+                    RequestID INTEGER PRIMARY KEY,
+                    ProjectNo INTEGER,
+                    ProjectTitle VARCHAR(255),
+                    RequestedAmt DOUBLE,
+                    EmployeeID INT,
+                    Reason VARCHAR(255),
+                    IndentID INTEGER,
+                    RequestedDate DATE,
+                    BillCopy LONGBLOB,
+                    FOREIGN KEY (EmployeeID) REFERENCES users(id),
+                    FOREIGN KEY (ProjectNo) REFERENCES Projects(ProjectNo),
+                    FOREIGN KEY (ProjectTitle) REFERENCES Projects(ProjectTitle),
+                    FOREIGN KEY (IndentID) REFERENCES Indents(IndentID)
+                `
+            },
+            {
+                tableName: 'Equipment',
+                definition: `
+                    RequestID INTEGER PRIMARY KEY,
+                    ProjectNo INTEGER,
+                    ProjectTitle VARCHAR(255),
+                    RequestedAmt DOUBLE,
+                    EmployeeID INT,
+                    Reason VARCHAR(255),
+                    IndentID INTEGER,
+                    RequestedDate DATE,
+                    BillCopy LONGBLOB,
+                    FOREIGN KEY (EmployeeID) REFERENCES users(id),
+                    FOREIGN KEY (ProjectNo) REFERENCES Projects(ProjectNo),
+                    FOREIGN KEY (ProjectTitle) REFERENCES Projects(ProjectTitle),
+                    FOREIGN KEY (IndentID) REFERENCES Indents(IndentID)
+                `
+            },
+            {
+                tableName: 'Contingency',
+                definition: `
+                    RequestID INTEGER PRIMARY KEY,
+                    ProjectNo INTEGER,
+                    ProjectTitle VARCHAR(255),
+                    RequestedAmt DOUBLE,
+                    EmployeeID INT,
+                    Reason VARCHAR(255),
+                    IndentID INTEGER,
+                    RequestedDate DATE,
+                    BillCopy LONGBLOB,
+                    FOREIGN KEY (EmployeeID) REFERENCES users(id),
+                    FOREIGN KEY (ProjectNo) REFERENCES Projects(ProjectNo),
+                    FOREIGN KEY (ProjectTitle) REFERENCES Projects(ProjectTitle),
+                    FOREIGN KEY (IndentID) REFERENCES Indents(IndentID)
+                `
+            }, {
+                tableName: 'PurchaseRequests',
+                definition: `
+                    PurchaseReqID INT PRIMARY KEY,
+                    PRDate DATE,
+                    ProjectNo INT,
+                    IndentID INT,
+                    PurchaseRequestAmount DOUBLE,
+                    PRRequestor INT,
+                    PRStatus VARCHAR(255),
+                    FOREIGN KEY (PRRequestor) REFERENCES users(id),
+                    FOREIGN KEY (ProjectNo) REFERENCES Projects(ProjectNo),
+                    FOREIGN KEY (IndentID) REFERENCES Indents(IndentID)
+                `
+            },
+            {
+                tableName: 'PurchaseOrders',
+                definition: `
+                    PurchaseOrderID INTEGER PRIMARY KEY,
+                    PODate DATE,
+                    ProjectNo INTEGER,
+                    PurchaseReqID INTEGER,
+                    PurchaseOrderAmount DOUBLE,
+                    PORequestor INT,
+                    POStatus VARCHAR(255),
+                    FOREIGN KEY (PORequestor) REFERENCES users(id),
+                    FOREIGN KEY (ProjectNo) REFERENCES Projects(ProjectNo),
+                    FOREIGN KEY (PurchaseReqID) REFERENCES PurchaseRequests(PurchaseReqID)
+                `
             }
+
         ];
         // Queries to create tables if they don't exist
         await (async () => { // async is required to print the logs in correct order
@@ -191,8 +213,11 @@ async function connectDb() {
                     });
                 } catch (err) {
                     log(`Error binding table: ${err}`);
+                    log('Exiting...');
+                    process.exit(1);
                 }
             }
+            await db.query(`INSERT IGNORE INTO users (id, name, email, password, projects, status, role) VALUES (0, 'root', '${process.env.ROOT_ID}', '${process.env.ROOT_PASSWORD}', '[]', 1, 'root')`);
             log('SQL Binding Complete');
         })();
         return db;
@@ -206,7 +231,7 @@ function authenticate(req, res, next) {
     const token = req.cookies.token;
     if (!token && req.path !== '/api/login')
         return res.status(401).json({ message: 'Access denied' }); // If token is not present and path is not for login
-    if (!token && req.path === '/api/login' ) return next(); // If token is not present and path is for login
+    if (!token && req.path === '/api/login') return next(); // If token is not present and path is for login
     jwt.verify(decrypt(token, req.body.fingerPrint), process.env.SECRET_KEY, (err, decoded) => {
         if (err) {
             // If token is invalid=> delete token from client side since it's probably expired
@@ -220,12 +245,45 @@ function authenticate(req, res, next) {
 
 function authorize(allowedRoles) {
     return (req, res, next) => {
-        console.log(req.processed.token.role);
-        if (!allowedRoles.includes(req.processed.token.role)) {
+        if (!allowedRoles.includes(req.processed.token.role) && req.processed.token.role !== 'root') {
             return res.status(403).json({ message: 'Permission denied' });
         }
+        console.log(req.processed.token.role);
         next();
     };
+};
+
+const projectWiseAuthorisation = (req, res, next) => {
+    if (req.processed.token.role != 'root' && req.processed.token.role != 'SuperAdmin') {
+        getFromDb('users', ['projects'], `id=${req.processed.token.id}`).then((projects) => {
+            if (projects.length == 0) {
+                return sendFailedResponse(res, 'Permission denied', 403);
+            }
+            projects = JSON.parse(projects[0].projects);
+            if (!projects.includes(req.body.ProjectNo)) {
+                return sendFailedResponse(res, 'Permission denied', 403);
+            }
+            req.processed.allowedProjects = projects;
+            next();
+            return;
+        }).catch((err) => {
+            return sendFailedResponse(res, err.message, 500);
+        });
+    }
+    else {
+
+        getFromDb('Projects', ['ProjectNo']).then((projects) => {
+            let arr = [];
+            projects.forEach(project => {
+                arr.push(project.ProjectNo);
+            });
+            req.processed.allowedProjects = arr;
+            next();
+        }).catch((err) => {
+            return sendFailedResponse(res, err.message, 500);
+        });
+    }
+
 };
 async function getFromDb(table, fields, where) {
     let query = `SELECT ${fields.join(',')} FROM ${table}`;
@@ -233,4 +291,11 @@ async function getFromDb(table, fields, where) {
     return db.query(query).then(([rows]) => rows);
 
 }
-export { db, authenticate, authorize, connectDb,getFromDb };
+
+async function updateAtDb(table, fieldsDictionary, where) {
+    let fields = Object.entries(fieldsDictionary).map(([key, value]) => `${key}='${value}'`).join(', ');
+    let wheres = Object.entries(where).map(([key, value]) => `${key}='${value}'`).join(' AND ');
+    console.log(fields+' WHERE '+wheres);
+    return db.query(`UPDATE ${table} SET ${fields} WHERE ${wheres}`);
+}
+export { db, authenticate, authorize, connectDb, getFromDb, projectWiseAuthorisation,updateAtDb };

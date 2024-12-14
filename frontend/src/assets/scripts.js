@@ -324,7 +324,6 @@ async function fetchDataWithParams(url, method, data) {
         if (!response.ok) {
             console.log('Fetch Failed');
             console.log(res.message);
-            
             return { reqStatus: 'failed', message: res.message };
         }
         return {...res, reqStatus: 'success'};
@@ -332,6 +331,32 @@ async function fetchDataWithParams(url, method, data) {
         console.log('There has been a problem with your fetch operation:');
         console.log(error);
 
+        return null;
+    }
+}
+
+async function fetchDataWithFileUpload(url, method, form) {
+    const fileInput = Array.from(form.children).find(child => child.type === 'file');
+    const formData = new FormData(form);
+    if (fileInput && fileInput.files.length > 0) {
+        formData.append('BillCopy', fileInput.files[0]);
+    }
+    try {
+        formData.append('fingerPrint', fingerPrint);
+        const response = await fetch('/api/' + url, {
+            method: method,
+            body: formData,
+        });
+        const res = await response.json();
+        if (!response.ok) {
+            console.log('Fetch Failed');
+            console.log(res.message);
+            return { reqStatus: 'failed', message: res.message };
+        }
+        return {...res, reqStatus: 'success'};
+    } catch (error) {
+        console.log('There has been a problem with your fetch operation:');
+        console.log(error);
         return null;
     }
 }
@@ -358,4 +383,4 @@ async function login(setProfile) {
     return true;
 }
 
-export { fetchData, login, fetchDataWithParams, autoLogin };
+export { fetchData, login, fetchDataWithParams, autoLogin, fetchDataWithFileUpload };

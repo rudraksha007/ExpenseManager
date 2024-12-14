@@ -1,5 +1,5 @@
 #newProjectDiv{
-    height: 90dvh;
+    /* height: 90dvh; */
     width: 100dvw;
     display: grid;
     grid-template-columns: 1fr 4fr 1fr 4fr;
@@ -7,12 +7,12 @@
     padding: 10px 100px;
     gap: 20px;
     box-sizing: border-box;
+    overflow-y: auto;
     /* background-color: black; */
 }
 #newProjectDiv>label{
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
+    /* display: flex;
+    align-items: center; */
 }
 #newProjectDiv>input{
     width: 70%;
