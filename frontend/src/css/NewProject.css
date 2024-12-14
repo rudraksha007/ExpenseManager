@@ -11,8 +11,8 @@
     /* background-color: black; */
 }
 #newProjectDiv>label{
-    display: flex;
-    align-items: center;
+    /* display: flex;
+    align-items: center; */
 }
 #newProjectDiv>input{
     width: 70%;

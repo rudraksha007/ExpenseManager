@@ -28,7 +28,7 @@ nav>a{
     color: white;
     background-color: inherit;
 }
-nav>img{
+#navLogo{
     position: absolute;
     left: 10px;
 }

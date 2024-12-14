@@ -13,6 +13,7 @@
     column-gap: 20px;
     background-color: inherit;
     height: 90dvh;
+    box-sizing: border-box;
 }
 #dashUserProjects{
     text-align: center;

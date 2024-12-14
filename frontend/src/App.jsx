@@ -9,7 +9,6 @@ import AllProjects from './mainComponents/AllProjects';
 import Project from './mainComponents/Project';
 import Indents from './mainComponents/Indents';
 import PurchaseReqs from './mainComponents/PurchaseReqs';
-import PurchaseOrders from './mainComponents/PurchaseOrders';
 import AllProfiles from './mainComponents/AllProfiles';
 import { autoLogin } from './assets/scripts.js';
 import { ProfileContext } from './assets/UserProfile';
@@ -39,9 +38,7 @@ function App() {
       {loading ? <Oval color='black' height={80} /> :
         <>
           <Navbar />
-
           <div id="appMainElement" style={{ backgroundColor: 'white' }}>
-
             <Routes>
               <Route exact path='/' element={<Dash />} />
               <Route exact path='/projects' element={<AllProjects />} />
@@ -49,13 +46,9 @@ function App() {
               <Route exact path='/signup' element={<Signup />} />
               <Route exact path='/indents' element={<Indents />} />
               <Route exact path='/purchasereqs' element={<PurchaseReqs />} />
-              <Route exact path='/purchaseorders' element={<PurchaseOrders />} />
               <Route path='/projects/:id' element={<Project />} />
               <Route path='/profiles' element={<AllProfiles />} />
               <Route path='/newproject' element={<NewProject/>}/>
-
-              {/* <Route path='/addproject' element={<ExpenseForm />} /> */}
-              {/* <Route path='/editproject/:id' element={<Editproject />} /> */}
             </Routes>
           </div>
         </>

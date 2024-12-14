@@ -47,15 +47,21 @@ function EquipmentsPopup({ reset, projectNo, projectTitle }) {
                     
                     <label htmlFor="EmployeeID">Employee ID:</label>
                     <input type="number" id="EmployeeID" name="EmployeeID" required />
+
+                    <label htmlFor="EmployeeName">Employee Name:</label>
+                    <input type="text" id="EmployeeName" name="EmployeeName" required />
                     
                     <label htmlFor="Reason">Reason:</label>
                     <input type="text" id="Reason" name="Reason" required />
                     
                     <label htmlFor="RequestedAmt">Invoice Amount:</label>
                     <input type="number" id="RequestedAmt" name="RequestedAmt" readOnly value={total} />
+
+                    <label htmlFor="Remarks">Remarks:</label>
+                    <textarea id="Remarks" name="Remarks" rows="4" />
                     
                     <label htmlFor="BillCopy">Bill Copy (PDF):</label>
-                    <input type="file" id="BillCopy" name="BillCopy" accept="application/pdf" required />
+                    <input type="file" id="BillCopy" name="BillCopy" accept="application/pdf" required multiple/>
                 </form>
                 <button type="submit" form='addEquipmentForm' className='hoverable'>Submit</button>
             </div>

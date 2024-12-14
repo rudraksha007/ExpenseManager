@@ -44,6 +44,51 @@ async function addProjectIndent(req, res) {
 
 }
 
+async function addTravel(req, res) {
+    const {
+      ProjectNo,
+      RequestedAmt,
+      EmployeeID,
+      From,
+      FromDate,
+      Destination,
+      DestinationDate,
+      Reason,
+      Remark,
+      Traveler,
+      BillCopy
+    } = req.body;
+  
+    // Validate required fields
+    if (!ProjectNo || !RequestedAmt || !From || !FromDate || !Destination || !DestinationDate || !Reason || !Traveler) {
+      return res.status(400).json({ message: 'Required fields are missing' });
+    }
+  
+    // Generate a unique IndentID
+    const IndentIDGenerated = generateIndentID();
+  
+    // Set the current date as the RequestedDate
+    const RequestedDate = new Date(); 
+  
+    // SQL query to insert travel record
+    const query = `
+      INSERT INTO travel (
+        ProjectNo, IndentID, RequestedAmt, EmployeeID, From, FromDate,
+        Destination, DestinationDate, Reason, Remark, RequestedDate,
+        Traveler, BillCopy
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    `;
+  
+    // Execute the query
+    db.query(query, [
+      ProjectNo, IndentIDGenerated, RequestedAmt, EmployeeID, From, FromDate,
+      Destination, DestinationDate, Reason, Remark, RequestedDate, Traveler, JSON.stringify(BillCopy)
+    ], (err, result) => {
+      if (err) return res.status(500).json({ message: 'Error adding travel record' });
+      res.status(201).json({ message: 'Travel record added successfully', indentId: IndentIDGenerated });
+    });
+  }
+
 async function addPurchaseReq(req, res){
     const {IndentID, PRDate, PRRequestor} = req.body;
     await getFromDb('indents', ['*'], `IndentID=${IndentID}`).then((results) => {
@@ -88,4 +133,4 @@ async function addPOrder(req, res) {
 
 
 
-export { addProject, addUser, addProjectIndent,addPurchaseReq, addPOrder };
+export { addProject, addUser, addProjectIndent,addPurchaseReq, addPOrder, addTravel };

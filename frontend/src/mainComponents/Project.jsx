@@ -12,15 +12,16 @@ import { Oval } from 'react-loader-spinner';
 import DecManpowerPopup from '../sideComponents/projectPage/DecManpowerPopup';
 import ManpowerEditDetailsPopup from '../sideComponents/projectPage/ManpowerDetailsPopup';
 import PDFPopup from '../sideComponents/PDFPopup';
+import EditProject from '../sideComponents/projectPage/EditProject';
 
 function Project() {
     let { id } = useParams();
-    const [activeTab, setActiveTab] = useState('Manpower');
+    const [activeTab, setActiveTab] = useState('Consumables');
     const [table, setTable] = useState([]);
     const [data, setData] = useState({});
     const [popup, setPopup] = useState(null);
     const [loading, setLoading] = useState(true);
-    const tabNames = ['Manpower', 'Travels', 'Consumables', 'Equipments', 'Contingency'];
+    const tabNames = ['Consumables','Contingency', 'Travels', 'Equipments','Manpower' ];
     const fillData = async () => {
         setLoading(true);
         let response = await fetchData(`projects/${id}`, 'post');
@@ -48,13 +49,13 @@ function Project() {
         tabContentElements.forEach((element) => {
             element.style.transform = `translateX(${-tabNames.indexOf(activeTab) * 100}%)`;
         });
-    }, [activeTab]);// transition to different tabs
+    }, [activeTab]);
     return (
         <>
             {loading ? <Oval color='black' height={80} strokeWidth={5} /> :
                 <div id='projectMainDiv'>
                     {popup}
-                    <h1>Project Details <FaEdit size={40} className='hoverable' title='Edit' style={{ position: 'absolute', right: 20 }} /></h1>
+                    <h1>Project Details <FaEdit size={40} className='hoverable' title='Edit' style={{ position: 'absolute', right: 20 }} onClick={()=>setPopup(<EditProject data={data} reset={()=>setPopup(<></>)}/>)} /></h1>
 
                     <div id="projectDetails">
                         <div><b>Funded By:</b> <span>{data.FundedBy}</span></div>
@@ -74,44 +75,41 @@ function Project() {
                         <div><b>Travel Allocation Amt:</b> <span>${data.TravelAllocationAmt}</span></div>
                     </div>
                     <div id="projectTabs" style={{ color: 'white' }}>
-                        <div className="hoverable" id='projectTabsActive' onClick={() => setActiveTab('Manpower')}><b>Manpower</b></div>
-                        <div className="hoverable" onClick={() => setActiveTab('Travels')}><b>Travels</b></div>
-                        <div className="hoverable" onClick={() => setActiveTab('Consumables')}><b>Consumables</b></div>
-                        <div className="hoverable" onClick={() => setActiveTab('Equipments')}><b>Equipments</b></div>
+                        <div className="hoverable" id='projectTabsActive' onClick={() => setActiveTab('Consumables')}><b>Consumables</b></div>
                         <div className="hoverable" onClick={() => setActiveTab('Contingency')}><b>Contingency</b></div>
+                        <div className="hoverable" onClick={() => setActiveTab('Travels')}><b>Travels</b></div>
+                        <div className="hoverable" onClick={() => setActiveTab('Equipments')}><b>Equipments</b></div>
+                        <div className="hoverable" onClick={() => setActiveTab('Manpower')}><b>Manpower</b></div>
                     </div>
                     <div id="projectTabContent">
-                        <div className="projectTabContentData">
-                            <span className="tableTitle">Sl.</span>
-                            <span className="tableTitle">Request Id</span>
-                            <span className="tableTitle">Indent Id</span>
-                            <span className="tableTitle">Date</span>
-                            <span className="tableTitle">Details</span>
+                        <div className="projectTabContentData" style={{gridTemplateColumns:"1fr 2fr 2fr 2fr 1fr"}}>
+                            <span className="projectTabDataHeading">Sl.</span>
+                            <span className="projectTabDataHeading">Request Id</span>
+                            <span className="projectTabDataHeading">Indent Id</span>
+                            <span className="projectTabDataHeading">Date</span>
+                            <span className="projectTabDataHeading">Bill</span>
                             {table[0]}
-                            <div className="add">
-                                <div className='hoverable inherit'><FaEdit size={20} onClick={() => setPopup(<DecManpowerPopup reset={() => setPopup(null)} proj={data} projectNo={id} />)} /></div>
-                                <div className='hoverable inherit'><FaPlus size={20} onClick={() => setPopup(<AddManpowerPopup reset={() => setPopup(null)} proj={data} projectNo={id}/>)} /></div>
-                            </div>
+                            <div className="add hoverable" onClick={() => setPopup(<ConsumablesPopup reset={() => setPopup(null)} projectNo={id} projectTitle={data.ProjectTitle} />)}><FaPlus /></div>
                         </div>
-                        <div className="projectTabContentData">
+                        <div className="projectTabContentData" style={{gridTemplateColumns:"1fr 2fr 2fr 2fr 1fr"}}>
                             <span className="projectTabDataHeading">Sl.</span>
                             <span className="projectTabDataHeading">Request Id</span>
                             <span className="projectTabDataHeading">Indent Id</span>
                             <span className="projectTabDataHeading">Date</span>
                             <span className="projectTabDataHeading">Bill</span>
                             {table[1]}
-                            <div className="add hoverable" onClick={() => setPopup(<TravelsPopup reset={() => setPopup(null)} projectNo={id} projectTitle={data.ProjectTitle} />)} ><FaPlus /></div>
+                            <div className="add hoverable" onClick={() => setPopup(<ContingencyPopup reset={() => setPopup(null)} projectNo={id} projectTitle={data.ProjectTitle} />)}><FaPlus /></div>
                         </div>
-                        <div className="projectTabContentData">
+                        <div className="projectTabContentData" style={{gridTemplateColumns:"1fr 2fr 2fr 2fr 1fr"}}>
                             <span className="projectTabDataHeading">Sl.</span>
                             <span className="projectTabDataHeading">Request Id</span>
                             <span className="projectTabDataHeading">Indent Id</span>
                             <span className="projectTabDataHeading">Date</span>
                             <span className="projectTabDataHeading">Bill</span>
                             {table[2]}
-                            <div className="add hoverable" onClick={() => setPopup(<ConsumablesPopup reset={() => setPopup(null)} projectNo={id} projectTitle={data.ProjectTitle} />)}><FaPlus /></div>
+                            <div className="add hoverable" onClick={() => setPopup(<TravelsPopup reset={() => setPopup(null)} projectNo={id} projectTitle={data.ProjectTitle} />)} ><FaPlus /></div>
                         </div>
-                        <div className="projectTabContentData">
+                        <div className="projectTabContentData" style={{gridTemplateColumns:"1fr 2fr 2fr 2fr 1fr"}}>
                             <span className="projectTabDataHeading">Sl.</span>
                             <span className="projectTabDataHeading">Request Id</span>
                             <span className="projectTabDataHeading">Indent Id</span>
@@ -120,14 +118,17 @@ function Project() {
                             {table[3]}
                             <div className="add hoverable" onClick={() => setPopup(<EquipmentsPopup reset={() => setPopup(null)} projectNo={id} projectTitle={data.ProjectTitle} />)}><FaPlus /></div>
                         </div>
-                        <div className="projectTabContentData">
-                            <span className="projectTabDataHeading">Sl.</span>
-                            <span className="projectTabDataHeading">Request Id</span>
-                            <span className="projectTabDataHeading">Indent Id</span>
-                            <span className="projectTabDataHeading">Date</span>
-                            <span className="projectTabDataHeading">Bill</span>
+                        <div className="projectTabContentData" style={{gridTemplateColumns:"1fr 2fr 2fr 2fr 1fr"}}>
+                            <span className="tableTitle">Sl.</span>
+                            <span className="tableTitle">Request Id</span>
+                            <span className="tableTitle">Indent Id</span>
+                            <span className="tableTitle">Date</span>
+                            <span className="tableTitle">Details</span>
                             {table[4]}
-                            <div className="add hoverable" onClick={() => setPopup(<ContingencyPopup reset={() => setPopup(null)} projectNo={id} projectTitle={data.ProjectTitle} />)}><FaPlus /></div>
+                            <div className="add">
+                                <div className='hoverable inherit'><FaEdit size={20} onClick={() => setPopup(<DecManpowerPopup reset={() => setPopup(null)} proj={data} projectNo={id} />)} /></div>
+                                <div className='hoverable inherit'><FaPlus size={20} onClick={() => setPopup(<AddManpowerPopup reset={() => setPopup(null)} proj={data} projectNo={id}/>)} /></div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -140,22 +141,7 @@ export default Project;
 
 function compileDate(response, setPopup) {
     let arr = [];
-    let manpowerContent = [];
-    response.manpower.map((item, index) => {
-        let style = {};
-        if (item.action === 'added'){
-            style = {backgroundColor: 'rgb(200, 250, 200)'};
-        }else{ style = {backgroundColor: 'rgb(250, 200, 200)'}; }
-        manpowerContent.push([
-            <div key={`${item.id}-sl`} style={style}>{index + 1}</div>,
-            <div key={`${item.id}-requestId`} style={style}>{item.id}</div>,
-            <div key={`${item.id}-indentId`} style={style}>{item.indentId}</div>,
-            <div key={`${item.id}-date`} style={style}>{item.date}</div>,
-            <div key={`${item.id}-bill`} style={style} className='hoverable' onClick={() => setPopup(<ManpowerEditDetailsPopup reset={() => setPopup(null)} entry={item} />)}> <b><u>{item.action=='added'? "Added":"Removed"}</u></b> </div>
-        ])
-    });
-    arr.push(manpowerContent);
-    let tables = ['travel', 'consumables', 'equipment', 'contingency', 'overhead', ];
+    let tables = ['consumables', 'contingency','travel', 'equipment',  'overhead', ];
     tables.forEach((table) => {
         let temp = [];
         if (response[table]) {
@@ -172,5 +158,20 @@ function compileDate(response, setPopup) {
         }
         arr.push(temp);
     });    
+    let manpowerContent = [];
+    response.manpower.map((item, index) => {
+        let style = {};
+        if (item.action === 'added'){
+            style = {backgroundColor: 'rgb(200, 250, 200)'};
+        }else{ style = {backgroundColor: 'rgb(250, 200, 200)'}; }
+        manpowerContent.push([
+            <div key={`${item.id}-sl`} style={style}>{index + 1}</div>,
+            <div key={`${item.id}-requestId`} style={style}>{item.id}</div>,
+            <div key={`${item.id}-indentId`} style={style}>{item.indentId}</div>,
+            <div key={`${item.id}-date`} style={style}>{item.date}</div>,
+            <div key={`${item.id}-bill`} style={style} className='hoverable' onClick={() => setPopup(<ManpowerEditDetailsPopup reset={() => setPopup(null)} entry={item} />)}> <b><u>{item.action=='added'? "Added":"Removed"}</u></b> </div>
+        ])
+    });
+    arr.splice(4,0, manpowerContent);
     return arr;
 }

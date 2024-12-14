@@ -1,10 +1,9 @@
 import React, { useEffect, useRef, useState } from 'react';
 import '../css/Requests.css';
 import IndentPopup from '../sideComponents/projectPage/IndentPopup';
-import { FaPlus } from 'react-icons/fa';
 import { Oval } from 'react-loader-spinner';
 import PageControls from '../sideComponents/PageControls';
-import { fetchData, fetchDataWithParams } from '../assets/scripts';
+import { fetchDataWithParams } from '../assets/scripts';
 
 function Indents() {
     const [popup, setPopup] = React.useState(null);

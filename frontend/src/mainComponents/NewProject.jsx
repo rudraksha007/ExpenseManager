@@ -81,6 +81,11 @@ function NewProject() {
             <input type="text" name="CoPIs" placeholder="Enter CoPIs" required onChange={(e) => setFormData({ ...formData, [e.target.name]: e.target.value })} value={formData.CoPIs || ''} />
 
             <label>
+                Overhead Amount:<span style={{ color: 'red' }}>*</span>
+            </label>
+            <input type="number" name="OverheadAmount" placeholder="Enter overhead amount" required min="0" onChange={(e) => setFormData({ ...formData, [e.target.name]: e.target.value })} value={formData.OverheadAmount || ''} />
+            
+            <label>
                 Manpower Allocation Amt:
             </label>
             <input type="number" name="ManpowerAllocationAmt" placeholder="Enter manpower allocation amount" min="0" onChange={(e) => setFormData({ ...formData, [e.target.name]: e.target.value })} value={formData.ManpowerAllocationAmt || ''} />

@@ -40,36 +40,24 @@ function ContingencyPopup({ reset, projectNo, projectTitle }) {
                     <input type="number" id="IndentID" name="IndentID" required />
 
                     <label htmlFor="EmployeeID">Employee ID:</label>
-                    <input type="number" id="EmployeeID" name="EmployeeID" required />
+                    <input type="number" id="EmployeeID" name="EmployeeID" required readOnly/>
 
-                    <label htmlFor="Reason">Description:</label>
+                    <label htmlFor="EmployeeName">Employee Name:</label>
+                    <input type="text" id="EmployeeName" name="EmployeeName" required />
+
+                    <label htmlFor="Reason">Purpose:</label>
                     <input type="text" id="Reason" name="Reason" required />
 
                     <label htmlFor="RequestedAmt">Invoice Amount:</label>
                     <input type="number" id="RequestedAmt" name="RequestedAmt" />
 
+                    <label htmlFor="Remarks">Remarks:</label>
+                    <textarea id="Remarks" name="Remarks" rows="4" />
+
                     <label htmlFor="BillCopy">Bill Copy (PDF):</label>
-                    <input type="file" id="BillCopy" name="BillCopy" accept="application/pdf" required />
+                    <input type="file" id="BillCopy" name="BillCopy" accept="application/pdf" required multiple/>
                 </form>
                 <button type="submit" form='addEquipmentForm' className='hoverable'>Submit</button>
-                {/* <form className='popupForm'>
-                    <label htmlFor="date">Date:</label>
-                    <input type="date" id="date" name="date" max={today} required />
-
-                    <label htmlFor="ProjectNo">Project No:</label>
-                    <input type="number" id="ProjectNo" name="ProjectNo" disabled value={projectNo} />
-
-                    <label htmlFor="ProjectTitle">Project Title:</label>
-                    <input type="text" id="ProjectTitle" name="ProjectTitle" disabled value={projectTitle} />
-
-                    <label htmlFor="indentId">Indent ID:</label>
-                    <input type="text" id="indentId" name="indentId" required />
-                    <label htmlFor="contingencyId">Contingency ID:</label>
-                    <input type="text" id="contingencyId" name="contingencyId" required />
-                    <label htmlFor="description">Description:</label>
-                    <input type='text' id="description" name="description" required />
-                </form>
-                <button type="submit" form='addContingencyForm' className='hoverable'>Submit</button> */}
             </div>
         </div>
     );

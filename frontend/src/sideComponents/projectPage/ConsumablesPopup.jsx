@@ -36,38 +36,31 @@ function ConsumablesPopup({ reset, projectNo, projectTitle }) {
                     <label htmlFor="IndentID">Indent ID:</label>
                     <input type="number" id="IndentID" name="IndentID" required />
                     
-                    <label htmlFor="Rate">Rate per Unit:</label>
-                    <input type="number" id="Rate" name="Rate" required min="1" onInput={() => total = calcInvoice()} />
+                    <label htmlFor="RequestedAmt">Invoice Amount:</label>
+                    <input type="number" id="RequestedAmt" name="RequestedAmt" value={total} min={1}/>
 
-                    <label htmlFor="RequestedNumber">Requested Amount:</label>
-                    <input type="number" id="RequestedNumber" name="RequestedNumber" required min="1" onInput={() => total = calcInvoice()} />
+                    <label htmlFor="Overhead">Overhead:</label>
+                    <input type="number" id="Overhead" name="Overhead" required min={1}/>
                     
                     <label htmlFor="EmployeeID">Employee ID:</label>
                     <input type="number" id="EmployeeID" name="EmployeeID" required min="1" />
+
+                    <label htmlFor="EmployeeName">Employee Name:</label>
+                    <input type="text" id="EmployeeName" name="EmployeeName" required />
                     
                     <label htmlFor="Reason">Reason:</label>
                     <input type="text" id="Reason" name="Reason" required />
                     
-                    <label htmlFor="RequestedAmt">Invoice Amount:</label>
-                    <input type="number" id="RequestedAmt" name="RequestedAmt" readOnly value={total} />
+                    <label htmlFor="Remarks">Remarks:</label>
+                    <textarea id="Remarks" name="Remarks" rows="4" />
                     
-                    <label htmlFor="BillCopy">Receipt (PDF):</label>
-                    <input type="file" id="BillCopy" name="BillCopy" accept="application/pdf" required />
+                    <label htmlFor="BillCopy">Support Document (PDF):</label>
+                    <input type="file" id="BillCopy" name="BillCopy" accept="application/pdf" required multiple />
                 </form>
                 <button type="submit" form='consumableForm' className='hoverable'>Submit</button>
             </div>
         </div>
     );
 };
-
-function calcInvoice() {
-    let rate = document.getElementById('Rate').value;
-    let amount = document.getElementById('RequestedNumber').value;
-    let total = 0;
-    if (rate && amount) {
-        total = rate * amount;
-    }
-    document.getElementById('RequestedAmt').value = total;
-}
 
 export default ConsumablesPopup;

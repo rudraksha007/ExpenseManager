@@ -36,11 +36,11 @@ function UserProjects() {
         <>
             {loading ? <Oval color='black' height={80} strokeWidth={5} /> :
                 <>
-                    <h2>Ongoing Projects</h2>
+                    <h2>Projects</h2>
                     <div id="userProjectsTable">
                         <div className='tableTitle'>Sl.</div>
                         <div className='tableTitle'>Title</div>
-                        <div className='tableTitle'>Since</div>
+                        <div className='tableTitle'>Status</div>
                         <div className='tableTitle'>Action</div>
                         {projects}
                     </div>

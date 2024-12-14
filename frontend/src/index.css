@@ -19,13 +19,16 @@
   /* overflow-x: hidden; */
 }
 #appMainElement{
-  height: 90dvh;
+  max-height: 90dvh;
   width: 100dvw;
   z-index: 0;
-  overflow: hidden;
+  overflow: auto;
+  box-sizing: border-box;
 }
 #appMainElement>div{
   padding: 10px 25px;
+  box-sizing: border-box;
+  height: 90dvh;
 }
 a {
   font-weight: 500;
@@ -34,7 +37,7 @@ a {
   text-decoration: none;
   text-decoration: underline;
 }
-input, select{
+input, select, textarea{
   background-color: rgb(222, 222, 222);
   color-scheme: light;
 }
