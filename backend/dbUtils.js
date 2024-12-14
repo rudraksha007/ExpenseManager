@@ -7,9 +7,9 @@ async function connectDb() {
     try {
         db = await mysql.createConnection({
             host: 'localhost',
-            user: 'root',
-            password: 'Aman@2006',
-            database: 'ils_db'
+            user: process.env.DB_USER,
+            password: process.env.DB_PASSWORD,
+            database: process.env.DB_NAME
         });
         log('Connected to MySQL database');
         const tables = [
