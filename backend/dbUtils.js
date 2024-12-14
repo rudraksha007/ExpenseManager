@@ -44,7 +44,7 @@ async function connectDb() {
                 projects JSON,
                 status INT,
                 role VARCHAR(255),
-                profile picture longbob
+                ProfilePic LONGBLOB
             `
             },
             {
@@ -72,7 +72,7 @@ async function connectDb() {
                     Position ENUM('Techanican', 'JRK', 'SRK', 'RA'),
                     BasicSalary DECIMAL(10, 2),
                     HRA_Percentage DECIMAL(5, 2),
-                    TotalSalary AS (BasicSalary + (BasicSalary * HRA_Percentage / 100)), -- Virtual (calculated) column
+                    TotalSalary DECIMAL(10, 2) GENERATED ALWAYS AS (BasicSalary + (BasicSalary * HRA_Percentage / 100)) VIRTUAL,
                     JoiningDate DATE,
                     EndDate DATE;
                     FOREIGN KEY (EmployeeID) REFERENCES users(id),
