@@ -8,7 +8,7 @@ async function connectDb() {
         db = await mysql.createConnection({
             host: 'localhost',
             user: process.env.DB_USER,
-            password: process.env.DB_PASSWORD,
+            password: process.env.DB_PASS,
             database: process.env.DB_NAME
         });
         log('Connected to MySQL database');
