@@ -550,55 +550,184 @@ app.delete('/api/contingency/:id', (req, res) => {
 // --- Equipment CRUD Operations ---
 
 // Get all equipment records
-app.get('/api/equipment', (req, res) => {
-  const query = 'SELECT * FROM equipment';
-  db.query(query, (err, results) => {
-    if (err) return res.status(500).json({ message: 'Database error' });
-    res.status(200).json({ equipment: results });
-  });
+app.post('/api/equipment', async (req, res) => {
+  const {
+    ProjectNo,
+    ProjectTitle,
+    EquipmentRequestedAmt,
+    RequestedMonth,
+    RequestedYear,
+    BillCopy,
+    IndentDate,
+    IndentAmount,
+    PurchaseOrderDate,
+    PurchaseOrderAmount,
+    Remark,
+    EquipmentDetails // Array of { EquipmentName, Quantity }
+  } = req.body;
+
+  if (!ProjectNo || !ProjectTitle || !EquipmentRequestedAmt || !RequestedMonth || !RequestedYear || !IndentDate || !IndentAmount || !EquipmentDetails) {
+    return res.status(400).json({ message: 'Required fields are missing' });
+  }
+
+  const IndentID = generateIndentID();
+  const connection = db.promise();
+
+  try {
+    // Start transaction
+    await connection.beginTransaction();
+
+    // Insert into equipment table
+    const [equipmentResult] = await connection.query(
+      `INSERT INTO equipment (
+        ProjectNo, ProjectTitle, EquipmentRequestedAmt, IndentID, RequestedMonth, RequestedYear,
+        BillCopy, IndentDate, IndentAmount, PurchaseOrderDate, PurchaseOrderAmount, Remark
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      [
+        ProjectNo, ProjectTitle, EquipmentRequestedAmt, IndentID, RequestedMonth, RequestedYear,
+        BillCopy, IndentDate, IndentAmount, PurchaseOrderDate, PurchaseOrderAmount, Remark
+      ]
+    );
+
+    const EquipmentId = equipmentResult.insertId;
+
+    // Insert into equipment_details table
+    const equipmentDetailsData = EquipmentDetails.map(detail => [EquipmentId, detail.EquipmentName, detail.Quantity]);
+    await connection.query(
+      `INSERT INTO equipment_details (EquipmentId, EquipmentName, Quantity) VALUES ?`,
+      [equipmentDetailsData]
+    );
+
+    // Commit transaction
+    await connection.commit();
+
+    res.status(201).json({ message: 'Equipment record added successfully', indentId: IndentID });
+  } catch (error) {
+    // Rollback transaction on error
+    await connection.rollback();
+    console.error(error);
+    res.status(500).json({ message: 'Error adding equipment record' });
+  }
 });
 
-// Get a specific equipment record by ID
-app.get('/api/equipment/:id', (req, res) => {
-  const { id } = req.params;
-  const query = 'SELECT * FROM equipment WHERE EquipmentId = ?';
-  db.query(query, [id], (err, results) => {
-    if (err) return res.status(500).json({ message: 'Database error' });
-    if (results.length === 0) return res.status(404).json({ message: 'Equipment record not found' });
-    res.status(200).json({ equipment: results[0] });
-  });
+
+app.get('/api/equipment', async (req, res) => {
+  try {
+    const [equipment] = await db.promise().query('SELECT * FROM equipment');
+    const [details] = await db.promise().query('SELECT * FROM equipment_details');
+
+    // Combine details with main equipment data
+    const data = equipment.map(record => ({
+      ...record,
+      EquipmentDetails: details.filter(detail => detail.EquipmentId === record.EquipmentId)
+    }));
+
+    res.status(200).json({ equipment: data });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Database error' });
+  }
 });
+
 
 // Create a new equipment record
-app.post('/api/equipment', (req, res) => {
-  const { ProjectNo, ProjectTitle, EquipmentRequestedAmt, IndentID, RequestedMonth, RequestedYear, BillCopy } = req.body;
-  const query = 'INSERT INTO equipment (ProjectNo, ProjectTitle, EquipmentRequestedAmt, IndentID, RequestedMonth, RequestedYear, BillCopy) VALUES (?, ?, ?, ?, ?, ?, ?)';
-  db.query(query, [ProjectNo, ProjectTitle, EquipmentRequestedAmt, IndentID, RequestedMonth, RequestedYear, BillCopy], (err, result) => {
-    if (err) return res.status(500).json({ message: 'Error adding equipment record' });
-    res.status(201).json({ message: 'Equipment record added successfully' });
-  });
+app.get('/api/equipment/:id', async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    const [equipment] = await db.promise().query('SELECT * FROM equipment WHERE EquipmentId = ?', [id]);
+    if (equipment.length === 0) {
+      return res.status(404).json({ message: 'Equipment record not found' });
+    }
+
+    const [details] = await db.promise().query('SELECT * FROM equipment_details WHERE EquipmentId = ?', [id]);
+
+    res.status(200).json({
+      ...equipment[0],
+      EquipmentDetails: details
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Database error' });
+  }
 });
+
 
 // Update an equipment record by ID
-app.put('/api/equipment/:id', (req, res) => {
+app.put('/api/equipment/:id', async (req, res) => {
   const { id } = req.params;
-  const { ProjectNo, ProjectTitle, EquipmentRequestedAmt, IndentID, RequestedMonth, RequestedYear, BillCopy } = req.body;
-  const query = 'UPDATE equipment SET ProjectNo = ?, ProjectTitle = ?, EquipmentRequestedAmt = ?, IndentID = ?, RequestedMonth = ?, RequestedYear = ?, BillCopy = ? WHERE EquipmentId = ?';
-  db.query(query, [ProjectNo, ProjectTitle, EquipmentRequestedAmt, IndentID, RequestedMonth, RequestedYear, BillCopy, id], (err, result) => {
-    if (err) return res.status(500).json({ message: 'Error updating equipment record' });
+  const {
+    ProjectNo,
+    ProjectTitle,
+    EquipmentRequestedAmt,
+    RequestedMonth,
+    RequestedYear,
+    BillCopy,
+    IndentDate,
+    IndentAmount,
+    PurchaseOrderDate,
+    PurchaseOrderAmount,
+    Remark,
+    EquipmentDetails
+  } = req.body;
+
+  const connection = db.promise();
+
+  try {
+    // Start transaction
+    await connection.beginTransaction();
+
+    // Update equipment table
+    await connection.query(
+      `UPDATE equipment SET 
+        ProjectNo = ?, ProjectTitle = ?, EquipmentRequestedAmt = ?, RequestedMonth = ?, RequestedYear = ?, 
+        BillCopy = ?, IndentDate = ?, IndentAmount = ?, PurchaseOrderDate = ?, PurchaseOrderAmount = ?, Remark = ?
+      WHERE EquipmentId = ?`,
+      [
+        ProjectNo, ProjectTitle, EquipmentRequestedAmt, RequestedMonth, RequestedYear,
+        BillCopy, IndentDate, IndentAmount, PurchaseOrderDate, PurchaseOrderAmount, Remark, id
+      ]
+    );
+
+    // Delete existing details
+    await connection.query('DELETE FROM equipment_details WHERE EquipmentId = ?', [id]);
+
+    // Insert new details
+    const equipmentDetailsData = EquipmentDetails.map(detail => [id, detail.EquipmentName, detail.Quantity]);
+    await connection.query(
+      `INSERT INTO equipment_details (EquipmentId, EquipmentName, Quantity) VALUES ?`,
+      [equipmentDetailsData]
+    );
+
+    // Commit transaction
+    await connection.commit();
+
     res.status(200).json({ message: 'Equipment record updated successfully' });
-  });
+  } catch (error) {
+    // Rollback transaction on error
+    await connection.rollback();
+    console.error(error);
+    res.status(500).json({ message: 'Error updating equipment record' });
+  }
 });
 
-// Delete an equipment record by ID
-app.delete('/api/equipment/:id', (req, res) => {
+
+app.delete('/api/equipment/:id', async (req, res) => {
   const { id } = req.params;
-  const query = 'DELETE FROM equipment WHERE EquipmentId = ?';
-  db.query(query, [id], (err, result) => {
-    if (err) return res.status(500).json({ message: 'Error deleting equipment record' });
+
+  try {
+    const [result] = await db.promise().query('DELETE FROM equipment WHERE EquipmentId = ?', [id]);
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ message: 'Equipment record not found' });
+    }
+
     res.status(200).json({ message: 'Equipment record deleted successfully' });
-  });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Error deleting equipment record' });
+  }
 });
+
 
 // --- Overheads CRUD Operations ---
 
