@@ -29,6 +29,9 @@ app.post('/api/purchaseReqs', authorize(['SuperAdmin']), (req,res)=>getPR(req, r
 app.post('/api/purchaseReqs/*', projectWiseAuthorisation, authorize(['SuperAdmin']), (req,res)=>getPRInfo(req, res));
 app.post('/api/purchaseOrders', authorize(['SuperAdmin']), (req,res)=>getPO(req, res));
 
+app.post('/api/indentStatus', authorize(['SuperAdmin']), (req, res) => updateIndentStatus(req, res));
+app.post('/api/purchaseReqStatus', authorize(['SuperAdmin']), (req, res) => updatePRStatus(req, res));
+
 //Put requests (right click on supplied function-> goto source definition to view the code)
 app.put('/api/projects', authorize(['SuperAdmin']), (req, res) => addProject(req, res));
 app.put('/api/users', authorize(['SuperAdmin']), (req, res) => addUser(req, res));
@@ -39,8 +42,6 @@ app.put('/api/equipment', (req, res) => addProjectIndent(req, res));
 app.put('/api/purchaseReqs', authorize(['SuperAdmin']), (req, res) => addPurchaseReq(req, res));
 app.put('/api/purchaseOrders', authorize(['SuperAdmin']), (req, res) => addPOrder(req, res));
 
-app.post('/api/indentStatus', authorize(['SuperAdmin']), (req, res) => updateIndentStatus(req, res));
-app.post('/api/purchaseReqStatus', authorize(['SuperAdmin']), (req, res) => updatePRStatus(req, res));
 
 // app.put('/api/users', authorize(['SuperAdmin']), (req, res) => {
 //   // const { id }  = req.params;

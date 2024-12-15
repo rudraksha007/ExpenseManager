@@ -1,10 +1,12 @@
-import React from 'react';
+import React, { useContext } from 'react';
 import '../../css/Popup.css';
 import { FaTimes } from 'react-icons/fa';
 import { closePopup } from '../../assets/popup';
 import { fetchDataWithFileUpload } from '../../assets/scripts';
+import { ProjectContext } from '../../assets/ProjectData';
 
-function TravelsPopup({ reset, projectNo, projectTitle }) {
+function TravelsPopup({ reset }) {
+    const { projectNo, projectTitle } = (useContext(ProjectContext)).project;
     const today = new Date().toISOString().split('T')[0];
     const handleSubmit = async (e) => {
         e.preventDefault();

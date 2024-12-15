@@ -1,18 +1,20 @@
-import React, { useEffect, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import '../../css/Popup.css';
 import { FaTimes } from 'react-icons/fa';
 import { fetchData } from '../../assets/scripts';
 import { Oval } from 'react-loader-spinner';
 import { closePopup } from '../../assets/popup';
+import { ProjectContext } from '../../assets/ProjectData';
 
-function ManpowerPopup({ reset, proj }) {
+function ManpowerPopup({ reset }) {
     const today = new Date().toISOString().split('T')[0];
     const [profiles, setProfiles] = useState([]);
     const [loading, setLoading] = useState(true);
     const [ind, setInd] = useState('Dummy Indent');
+    const {project} = useContext(ProjectContext);
     useEffect(() => {
         async function getProfiles() {
-            // const data = await fetchDataWithParams('profiles', {projectId: proj.id, action: add});
+            // const data = await fetchDataWithParams('profiles', {projectId: project.id, action: add});
             const data = await fetchData('profiles');
             if (data) {
                 let l = [];
@@ -45,10 +47,10 @@ function ManpowerPopup({ reset, proj }) {
                                     <label htmlFor="date">Date:</label>
                                     <input type="date" id="date" name="date" max={today} required />
                                     <label htmlFor="ProjectNo">Project No:</label>
-                                    <input type="number" id="ProjectNo" name="ProjectNo" disabled value={proj.ProjectNo} />
+                                    <input type="number" id="ProjectNo" name="ProjectNo" disabled value={project.ProjectNo} />
 
                                     <label htmlFor="ProjectTitle">Project Title:</label>
-                                    <input type="text" id="ProjectTitle" name="ProjectTitle" disabled value={proj.ProjectTitle} />
+                                    <input type="text" id="ProjectTitle" name="ProjectTitle" disabled value={project.ProjectTitle} />
                                     <label htmlFor="indentId">Indent ID:</label>
                                     <input type="text" id="indentId" name="indentId" disabled value={ind} />
                                 </div>

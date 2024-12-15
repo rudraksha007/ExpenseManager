@@ -30,14 +30,18 @@ function Navbar() {
 
                     </>
                 }
-                {profile ? <img src={person} alt="" height='80%' id='sideBarButton' color='white' style={{ position: 'absolute', top: '50%', right: 20, translate: '0% -50%' }} className='hoverable' onClick={() => document.getElementById('sideBar').style.transform = 'translateX(-100%)'} /> : <></>}
+                {profile ? <img src={person} alt="" height='80%' id='sideBarButton' color='white' style={{ position: 'absolute', top: '50%', right: 20, translate: '0% -50%', backgroundColor:'white', borderRadius:'50%' }} className='hoverable' onClick={() => document.getElementById('sideBar').style.transform = 'translateX(-100%)'} /> : <></>}
 
                 {profile ?
                     <div id="sideBar">
-                        
-                        
                         <FaTimes size={40} color='black' style={{ position: 'absolute', top: 20, right: 20 }} className='hoverable' onClick={() => document.getElementById('sideBar').style.transform = 'translateX(0)'} />
                         <div>
+                            <div id="profileDetails" style={{boxSizing: 'border-box', padding: '0px 20px'}}>
+                                <div style={{width:'100%', display:'flex', justifyContent: 'center'}}><img src={person} alt="" width='60%'/></div>
+                                <p><b>Name:</b> {profile ? profile.name : ""}</p>
+                                <p><b>Employee ID:</b> {profile ? profile.id : ""}</p>
+                                <p><b>LoggedIn As:</b> {profile ? profile.role : ""}</p>
+                            </div>
                             <Link to='/newproject' className='hoverable'> <FaPlus size={40} style={{ marginRight: 8 }} /> Create New Project</Link>
                             {profile && (profile.role == 'admin' || profile.role == 'superadmin' || profile.role == 'root') ?
                                 <>

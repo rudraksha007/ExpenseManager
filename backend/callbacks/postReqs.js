@@ -14,15 +14,14 @@ async function login(req, res) {
   if (email === process.env.ROOT_ID && password === rootPass) {
     let token = jwt.sign({ id: 0, role: 'root' }, process.env.SECRET_KEY, { expiresIn: '45m' });
     log('Root login successful');
-    return res.cookie('token', encrypt(token, fingerPrint), { httpOnly: true }).json(
-      {
-        profile: {
-          role: 'root',
-          name: 'root',
-          id: 0,
-          email: 'root'
-        }
-      }).status(200).end();
+    return res.cookie('token', encrypt(token, fingerPrint), { httpOnly: true }).json({
+      profile: {
+        role: 'root',
+        name: 'root',
+        id: 0,
+        email: 'root'
+      }
+    }).status(200).end();
   }
   db.query('SELECT * FROM users WHERE email = ?', [email]).then(results => {
     if (results.length === 0) return sendFailedResponse(res, 'User not found', 404);
@@ -74,6 +73,20 @@ function autoLogin(req, res) {
 
 function getProjects(req, res) {
   getFromDb('projects', req.body.fields).then((results) => {
+    const { page, text, status, fundedBy, fromDate, toDate } = req.body.filters;
+    if (text || status || fundedBy || fromDate || toDate) {
+      results = results.filter(project => {
+        let isValid = true;
+        if (text) isValid = isValid && project.ProjectTitle.includes(text);
+        if (status) isValid = isValid && project.ProjectStatus === status;
+        if (fundedBy) isValid = isValid && project.FundedBy === fundedBy;
+        if (fromDate) isValid = isValid && new Date(project.ProjectStartDate) > new Date(fromDate);
+        if (toDate) isValid = isValid && new Date(project.ProjectEndDate) < new Date(toDate);
+        return isValid;
+      });
+    }
+
+
     res.status(200).json({ projects: results, total: results.length }).end();
   }).catch((err) => {
     res.status(500).json({ message: 'Error fetching projects', err: err.message }).end();
@@ -121,9 +134,10 @@ function getProjectInfo(req, res) {
       sendFailedResponse(res, err.message, 500);
     });
     let tables = ['manpower', 'equipment', 'contingency', 'consumables', 'overhead', 'travel'];
-    const promises = tables.map((table) => getFromDb(table, ['RequestID', 'ProjectNo', 'ProjectTitle', 'RequestedAmt', 'EmployeeID', 'Reason', 'IndentID', 'RequestedDate'], `ProjectNo= ${projectNo}`).then((results) => {
+    const promises = tables.map((table) => getFromDb(table, ['*'], `ProjectNo= ${projectNo}`).then((results) => {
       results.forEach(result => {
         result.BillCopy = `pdf/${table}/${result.RequestID}`;
+
       });
       payload.data[table] = results;
     }));
@@ -166,15 +180,15 @@ async function getIndents(req, res) {
     const purchaseRequestIndentIds = (await getFromDb('PurchaseRequests', ['IndentID'])).map(pr => pr.IndentID);
     results = results.filter(indent => {
       if (!allowedProjects.includes(indent.ProjectNo)) return false;
-      
+
       let isValid = true;
       if (text) isValid = isValid && (indent.ProjectTitle.includes(text) || indent.IndentedPersonId.includes(text));
       if (status) {
-        if (status == 'PR'){
-          if(purchaseRequestIndentIds.includes(indent.IndentID))return false;
-          else if (indent.IndentStatus=='Approved')return true;
+        if (status == 'PR') {
+          if (purchaseRequestIndentIds.includes(indent.IndentID)) return false;
+          else if (indent.IndentStatus == 'Approved') return true;
           else return false;
-        } 
+        }
         isValid = isValid && indent.IndentStatus === status;
       }
       if (upto) isValid = isValid && indent.IndentAmount <= upto;
@@ -217,16 +231,16 @@ function getIndentInfo(req, res) {
 function updateIndentStatus(req, res) {
   const { Approved, IndentID } = req.body;
   console.log(IndentID);
-  
-  updateAtDb('indents', { IndentStatus: Approved?"Approved":"Rejected"}, { IndentID: IndentID }).then(() => {
+
+  updateAtDb('indents', { IndentStatus: Approved ? "Approved" : "Rejected" }, { IndentID: IndentID }).then(() => {
     res.status(200).json({ message: 'Indent updated' }).end();
   }).catch(err => {
     sendFailedResponse(res, err.message, 500);
   });
-  
+
 }
 
-function getPR(req, res){
+function getPR(req, res) {
   getFromDb('PurchaseRequests', ['*']).then((results) => {
     const { text, status, upto, above, fromDate, toDate } = req.body.filter;
     if (text || status || upto || above || fromDate || toDate) {
@@ -293,7 +307,7 @@ function getPRInfo(req, res) {
 function updatePRStatus(req, res) {
   const { Approved, PurchaseReqID } = req.body;
   console.log(PurchaseReqID);
-  
+
   updateAtDb('PurchaseRequests', { PRStatus: Approved ? "Approved" : "Rejected" }, { PurchaseReqID: PurchaseReqID }).then(() => {
     res.status(200).json({ message: 'Purchase request updated' }).end();
   }).catch(err => {
@@ -303,7 +317,7 @@ function updatePRStatus(req, res) {
 
 function getPO(req, res) {
   getFromDb('PurchaseOrders', ['*']).then((results) => {
-    
+
     const { text, status, upto, above, fromDate, toDate } = req.body.filter;
     if (text || status || upto || above || fromDate || toDate) {
       results = results.filter(po => {

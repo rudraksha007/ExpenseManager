@@ -1,8 +1,9 @@
-import React from "react";
+import React, { useContext } from "react";
 import { FaTimes } from "react-icons/fa";
+import { ProjectContext } from "../../assets/ProjectData";
 
-function EditProject({ data, reset }) {
-    const [form, setForm] = React.useState(data);
+function EditProject({ reset }) {
+    const [form, setForm] = React.useState(useContext(ProjectContext).project);
     const handleSubmit = (e) => {
         if(!e.currentTarget.checkValidity())return;
         //submit
@@ -18,7 +19,7 @@ function EditProject({ data, reset }) {
                     <input type="text" name="FundedBy" value={form.FundedBy || ''} onChange={(e) => setForm({ ...form, FundedBy: e.target.value })} />
 
                     <label>Project Id:</label>
-                    <input type="text" name="id" value={form.id || ''} onChange={(e) => setForm({ ...form, id: e.target.value })} />
+                    <input type="text" name="id" value={form.ProjectNo || ''} onChange={(e) => setForm({ ...form, id: e.target.value })} />
 
                     <label>Title:</label>
                     <input type="text" name="ProjectTitle" value={form.ProjectTitle || ''} onChange={(e) => setForm({ ...form, ProjectTitle: e.target.value })} />
@@ -30,10 +31,10 @@ function EditProject({ data, reset }) {
                     <input type="text" name="TotalSanctionAmount" value={form.TotalSanctionAmount || ''} onChange={(e) => setForm({ ...form, TotalSanctionAmount: e.target.value })} />
 
                     <label>Project Start Date:</label>
-                    <input type="date" name="ProjectStartDate" value={form.ProjectStartDate || ''} onChange={(e) => setForm({ ...form, ProjectStartDate: e.target.value })} />
+                    <input type="date" name="ProjectStartDate" value={form.ProjectStartDate ? form.ProjectStartDate.split('T')[0] : ''} onChange={(e) => setForm({ ...form, ProjectStartDate: e.target.value })} />
 
                     <label>Project End Date:</label>
-                    <input type="date" name="ProjectEndDate" value={form.ProjectEndDate || ''} onChange={(e) => setForm({ ...form, ProjectEndDate: e.target.value })} />
+                    <input type="date" name="ProjectEndDate" value={form.ProjectEndDate ? form.ProjectEndDate.split('T')[0] : ''} onChange={(e) => setForm({ ...form, ProjectEndDate: e.target.value })} />
 
                     <label>PI Name:</label>
                     <input type="text" name="PIName" value={form.PIName || ''} onChange={(e) => setForm({ ...form, PIName: e.target.value })} />
@@ -42,22 +43,22 @@ function EditProject({ data, reset }) {
                     <input type="text" name="CoPIs" value={form.CoPIs || ''} onChange={(e) => setForm({ ...form, CoPIs: e.target.value })} />
 
                     <label>Manpower Allocation Amt:</label>
-                    <input type="text" name="ManpowerAllocationAmt" value={form.ManpowerAllocationAmt || ''} onChange={(e) => setForm({ ...form, ManpowerAllocationAmt: e.target.value })} />
+                    <input type="text" name="ManpowerAllocationAmt" value={form.ManpowerAllocationAmt || 0} onChange={(e) => setForm({ ...form, ManpowerAllocationAmt: e.target.value })} />
 
                     <label>Consumables Allocation Amt:</label>
-                    <input type="text" name="ConsumablesAllocationAmt" value={form.ConsumablesAllocationAmt || ''} onChange={(e) => setForm({ ...form, ConsumablesAllocationAmt: e.target.value })} />
+                    <input type="text" name="ConsumablesAllocationAmt" value={form.ConsumablesAllocationAmt || 0} onChange={(e) => setForm({ ...form, ConsumablesAllocationAmt: e.target.value })} />
 
                     <label>Contingency Allocation Amt:</label>
-                    <input type="text" name="ContingencyAllocationAmt" value={form.ContingencyAllocationAmt || ''} onChange={(e) => setForm({ ...form, ContingencyAllocationAmt: e.target.value })} />
+                    <input type="text" name="ContingencyAllocationAmt" value={form.ContingencyAllocationAmt || 0} onChange={(e) => setForm({ ...form, ContingencyAllocationAmt: e.target.value })} />
 
                     <label>Overhead Allocation Amt:</label>
-                    <input type="text" name="OverheadAllocationAmt" value={form.OverheadAllocationAmt || ''} onChange={(e) => setForm({ ...form, OverheadAllocationAmt: e.target.value })} />
+                    <input type="text" name="OverheadAllocationAmt" value={form.OverheadAllocationAmt || 0} onChange={(e) => setForm({ ...form, OverheadAllocationAmt: e.target.value })} />
 
                     <label>Equipment Allocation Amt:</label>
-                    <input type="text" name="EquipmentAllocationAmt" value={form.EquipmentAllocationAmt || ''} onChange={(e) => setForm({ ...form, EquipmentAllocationAmt: e.target.value })} />
+                    <input type="text" name="EquipmentAllocationAmt" value={form.EquipmentAllocationAmt || 0} onChange={(e) => setForm({ ...form, EquipmentAllocationAmt: e.target.value })} />
 
                     <label>Travel Allocation Amt:</label>
-                    <input type="text" name="TravelAllocationAmt" value={form.TravelAllocationAmt || ''} onChange={(e) => setForm({ ...form, TravelAllocationAmt: e.target.value })} />
+                    <input type="text" name="TravelAllocationAmt" value={form.TravelAllocationAmt || 0} onChange={(e) => setForm({ ...form, TravelAllocationAmt: e.target.value })} />
                 </form>
                 <button type="submit" form='editProjectForm' className='hoverable'>Submit</button>
             </div>

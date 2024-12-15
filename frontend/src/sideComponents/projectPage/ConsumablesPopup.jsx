@@ -1,10 +1,12 @@
-import React from 'react';
+import React, { useContext } from 'react';
 import '../../css/Popup.css';
 import { FaTimes } from 'react-icons/fa';
 import { closePopup } from '../../assets/popup';
 import { fetchDataWithFileUpload } from '../../assets/scripts';
+import { ProjectContext } from '../../assets/ProjectData';
 
-function ConsumablesPopup({ reset, projectNo, projectTitle }) {
+function ConsumablesPopup({ reset }) {
+    const { projectNo, projectTitle, ManpowerAllocationAmt } = (useContext(ProjectContext)).project;
     const today = new Date().toISOString().split('T')[0];
     let total = 0;
     const handleSubmit = async (e) => {
@@ -28,16 +30,16 @@ function ConsumablesPopup({ reset, projectNo, projectTitle }) {
                     <input type="date" id="RequestedDate" name="RequestedDate" max={today} required />
 
                     <label htmlFor="ProjectNo">Project No:</label>
-                    <input type="number" id="ProjectNo" name="ProjectNo" readOnly value={projectNo} />
+                    <input type="number" id="ProjectNo" name="ProjectNo" readOnly value={projectNo} onChange={{}} />
 
                     <label htmlFor="ProjectTitle">Project Title:</label>
-                    <input type="text" id="ProjectTitle" name="ProjectTitle" readOnly value={projectTitle} />
+                    <input type="text" id="ProjectTitle" name="ProjectTitle" readOnly value={projectTitle} onChange={{}} />
 
                     <label htmlFor="IndentID">Indent ID:</label>
                     <input type="number" id="IndentID" name="IndentID" required />
                     
                     <label htmlFor="RequestedAmt">Invoice Amount:</label>
-                    <input type="number" id="RequestedAmt" name="RequestedAmt" value={total} min={1}/>
+                    <input type="number" id="RequestedAmt" name="RequestedAmt" value={total} min={1} max={ManpowerAllocationAmt} onInput={(e)=>checkMax(ManpowerAllocationAmt, e)}/>
 
                     <label htmlFor="Overhead">Overhead:</label>
                     <input type="number" id="Overhead" name="Overhead" required min={1}/>
@@ -64,3 +66,10 @@ function ConsumablesPopup({ reset, projectNo, projectTitle }) {
 };
 
 export default ConsumablesPopup;
+
+function checkMax(max, e){
+    if (e.currentTarget.value > max) {
+        e.currentTarget.setCustomValidity(`Please Allocated more funds to this field first`);
+        e.currentTarget.reportValidity();
+    }
+}
