@@ -14,8 +14,7 @@ async function login(req, res) {
   if (email === process.env.ROOT_ID && password === rootPass) {
     let token = jwt.sign({ id: 0, role: 'root' }, process.env.SECRET_KEY, { expiresIn: '45m' });
     log('Root login successful');
-    return res.cookie('token', encrypt(token, fingerPrint), { httpOnly: true }).json(
-      {
+    return res.cookie('token', encrypt(token, fingerPrint), { httpOnly: true }).json({
         profile: {
           role: 'root',
           name: 'root',
@@ -121,9 +120,10 @@ function getProjectInfo(req, res) {
       sendFailedResponse(res, err.message, 500);
     });
     let tables = ['manpower', 'equipment', 'contingency', 'consumables', 'overhead', 'travel'];
-    const promises = tables.map((table) => getFromDb(table, ['RequestID', 'ProjectNo', 'ProjectTitle', 'RequestedAmt', 'EmployeeID', 'Reason', 'IndentID', 'RequestedDate'], `ProjectNo= ${projectNo}`).then((results) => {
+    const promises = tables.map((table) => getFromDb(table, ['*'], `ProjectNo= ${projectNo}`).then((results) => {
       results.forEach(result => {
         result.BillCopy = `pdf/${table}/${result.RequestID}`;
+
       });
       payload.data[table] = results;
     }));

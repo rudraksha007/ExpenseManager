@@ -1,8 +1,6 @@
 .dashSection{
-    /* width: 30dvw; */
     box-shadow: 2px 2px 5px gray;
     height: fit-content;
-    /* max-height: 90dvh; */
     border-radius: 5px;
     padding: 10px 25px;
     background-color: inherit;
@@ -14,6 +12,7 @@
     grid-auto-rows: max-content; 
     gap: 20px;
     height: 90dvh;
+    padding: 20px;
     box-sizing: border-box;
 }
 #dashUserProjects{
