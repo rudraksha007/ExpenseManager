@@ -1,11 +1,13 @@
-import React from 'react';
+import React, { useContext } from 'react';
 import '../../css/Popup.css';
 import { FaTimes } from 'react-icons/fa';
 import { closePopup } from '../../assets/popup';
 import { fetchDataWithFileUpload } from '../../assets/scripts';
+import { ProjectContext } from '../../assets/ProjectData';
 
-function ContingencyPopup({ reset, projectNo, projectTitle }) {
+function ContingencyPopup({ reset }) {
     const today = new Date().toISOString().split('T')[0];
+    const { projectNo, projectTitle } = (useContext(ProjectContext)).project;
     const handleSubmit = async (e) => {
         e.preventDefault();
         if (!e.currentTarget.checkValidity()) return;

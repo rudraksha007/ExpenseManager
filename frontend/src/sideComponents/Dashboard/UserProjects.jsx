@@ -13,7 +13,7 @@ function UserProjects() {
     const {profile} = useContext(ProfileContext);
     useEffect(() => {
         async function fetchProjects() {
-            let data = (await fetchDataWithParams('projects', 'post', {id: profile.id, fields: ['ProjectNo','ProjectTitle','ProjectStartDate']}));
+            let data = (await fetchDataWithParams('projects', 'post', {id: profile.id, fields: ['ProjectNo','ProjectTitle','ProjectStartDate'], filters: {}}));
             console.log(data);
             data = data.projects;
             let projectList = [];

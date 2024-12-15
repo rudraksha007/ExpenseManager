@@ -1,10 +1,12 @@
-import React, { useRef } from 'react';
+import React, { useContext, useRef } from 'react';
 import '../../css/Popup.css';
 import { FaTimes } from 'react-icons/fa';
 import { closePopup } from '../../assets/popup';
 import { fetchDataWithFileUpload } from '../../assets/scripts';
+import { ProjectContext } from '../../assets/ProjectData';
 
-function EquipmentsPopup({ reset, projectNo, projectTitle }) {
+function EquipmentsPopup({ reset }) {
+    const { projectNo, projectTitle } = (useContext(ProjectContext)).project;
     const today = new Date().toISOString().split('T')[0];
     const [total, setTotal] = React.useState(0);
     const handleSubmit = async (e) => {

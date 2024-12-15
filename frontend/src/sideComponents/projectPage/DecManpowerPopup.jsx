@@ -1,20 +1,22 @@
-import React, { useEffect, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import '../../css/Popup.css';
 import { FaTimes } from 'react-icons/fa';
 import { fetchData, fetchDataWithParams } from '../../assets/scripts';
 import { Oval } from 'react-loader-spinner';
 import { closePopup } from '../../assets/popup';
+import { ProjectContext } from '../../assets/ProjectData';
 
-function DecManpowerPopup({ reset, proj }) {
+function DecManpowerPopup({ reset }) {
     const today = new Date().toISOString().split('T')[0];
     const [profiles, setProfiles] = useState([]);
     const [loading, setLoading] = useState(true);
     const [ind, setInd] = useState('Dummy Indent');
+    const {project} = useContext(ProjectContext);
     useEffect(() => {
         async function getProfiles() {
-            if (proj.workers) {
+            if (project.workers) {
                 let l = [];
-                proj.workers.map((profile, index) => (
+                project.workers.map((profile, index) => (
                     l.push(
                         <React.Fragment key={profile.id}>
                             <div><input type="checkbox" value={profile.id}/></div>
@@ -23,7 +25,7 @@ function DecManpowerPopup({ reset, proj }) {
                         </React.Fragment>
                     )
                 ));
-                // setInd(fetchDataWithParams('projects', {projectId: proj.id, action: 'dec'}).indentId);
+                // setInd(fetchDataWithParams('projects', {projectId: project.id, action: 'dec'}).indentId);
                 setProfiles(l);
             }
             setLoading(false);
@@ -43,10 +45,10 @@ function DecManpowerPopup({ reset, proj }) {
                                     <label htmlFor="date">Date:</label>
                                     <input type="date" id="date" name="date" max={today} required />
                                     <label htmlFor="ProjectNo">Project No:</label>
-                                    <input type="number" id="ProjectNo" name="ProjectNo" disabled value={proj.ProjectNo} />
+                                    <input type="number" id="ProjectNo" name="ProjectNo" disabled value={project.ProjectNo} />
 
                                     <label htmlFor="ProjectTitle">Project Title:</label>
-                                    <input type="text" id="ProjectTitle" name="ProjectTitle" disabled value={proj.ProjectTitle} />
+                                    <input type="text" id="ProjectTitle" name="ProjectTitle" disabled value={project.ProjectTitle} />
                                     <label htmlFor="indentId">Indent ID:</label>
                                     <input type="text" id="indentId" name="indentId" disabled value={ind} />
                                 </div>

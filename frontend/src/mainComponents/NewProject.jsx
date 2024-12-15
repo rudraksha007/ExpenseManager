@@ -1,7 +1,7 @@
 import { useNavigate } from 'react-router-dom';
 import { fetchDataWithParams } from '../assets/scripts';
 import '../css/NewProject.css';
-import { useState } from 'react';
+import React, { useState } from 'react';
 
 function NewProject() {
     const [formData, setFormData] = useState({
@@ -11,6 +11,7 @@ function NewProject() {
         ProjectEndDate: '',
         SanctionOrderNo: '',
         TotalSanctionamount: 0,
+        FundedBy: '',
         PIname: '',
         CoPIs: '',
         ManpowerAllocationAmt: 0,
@@ -20,105 +21,197 @@ function NewProject() {
         EquipmentAllocationAmt: 0,
         TravelAllocationAmt: 0
     });
+
     const navigate = useNavigate();
+
+    // Function to calculate the remaining budget (max value for each allocation input)
+    const getMax = (allocationField) => {
+        // Calculate the total allocated amount excluding the one field being edited
+        const totalAllocated = Object.keys(formData).reduce((sum, key) => {
+            // Sum all allocation amounts except the one currently being modified
+            if (key.includes("AllocationAmt") && key !== allocationField) {
+                sum += Number(formData[key]);
+            }
+            return sum;
+        }, 0);
+
+        // The remaining available amount for the allocation field
+        return formData.TotalSanctionamount - totalAllocated +1;
+    };
+
     const handleSubmit = async (e) => {
         e.preventDefault();
         if (!e.currentTarget.checkValidity()) return;
-        
-        let res = await fetchDataWithParams('projects','put', formData);
-        if(res.reqStatus=='success'){
+
+        let res = await fetchDataWithParams('projects', 'put', formData);
+        if (res.reqStatus === 'success') {
             alert('Project Created Successfully');
             setFormData({});
             navigate('/');
+        } else {
+            alert('Failed to create project: ' + res.message);
         }
-        else{
-            alert('Failed to create project: '+res.message);
-        }
-    }
+    };
+
+    const handleChange = (e) => {
+        setFormData({
+            ...formData,
+            [e.target.name]: e.target.value
+        });
+    };
+
     return (
-        <form id="newProjectDiv" onSubmit={(e) => handleSubmit(e)}>
+        <form id="newProjectDiv" onSubmit={handleSubmit}>
+            {/* Project Title */}
             <label>
                 Project Title:<span style={{ color: 'red' }}>*</span>
             </label>
-            <input type="text" name="ProjectTitle" placeholder="Enter project title" required onChange={(e) => setFormData({ ...formData, [e.target.name]: e.target.value })} value={formData.ProjectTitle || ''} />
+            <input
+                type="text"
+                name="ProjectTitle"
+                placeholder="Enter project title"
+                required
+                onChange={handleChange}
+                value={formData.ProjectTitle || ''}
+            />
 
+            {/* Project No */}
             <label>
                 Project No:<span style={{ color: 'red' }}>*</span>
             </label>
-            <input type="number" name="ProjectNo" placeholder="Enter project number" required min="0" onChange={(e) => setFormData({ ...formData, [e.target.name]: e.target.value })} value={formData.ProjectNo || ''} />
+            <input
+                type="number"
+                name="ProjectNo"
+                placeholder="Enter project number"
+                required
+                min="0"
+                onChange={handleChange}
+                value={formData.ProjectNo || ''}
+            />
 
+            {/* Project Start Date */}
             <label>
                 Project Start Date:<span style={{ color: 'red' }}>*</span>
             </label>
-            <input type="date" name="ProjectStartDate" placeholder="Enter start date" required onChange={(e) => setFormData({ ...formData, [e.target.name]: e.target.value })} value={formData.ProjectStartDate || ''} max={formData.ProjectEndDate || ''} />
+            <input
+                type="date"
+                name="ProjectStartDate"
+                placeholder="Enter start date"
+                required
+                onChange={handleChange}
+                value={formData.ProjectStartDate || ''}
+                max={formData.ProjectEndDate || ''}
+            />
 
+            {/* Project End Date */}
             <label>
                 Project End Date:<span style={{ color: 'red' }}>*</span>
             </label>
-            <input type="date" name="ProjectEndDate" placeholder="Enter end date" onChange={(e) => setFormData({ ...formData, [e.target.name]: e.target.value })} value={formData.ProjectEndDate || ''} min={formData.ProjectStartDate || ''} />
+            <input
+                type="date"
+                name="ProjectEndDate"
+                placeholder="Enter end date"
+                onChange={handleChange}
+                value={formData.ProjectEndDate || ''}
+                min={formData.ProjectStartDate || ''}
+            />
 
+            {/* Sanction Order No */}
             <label>
                 Sanction Order No:<span style={{ color: 'red' }}>*</span>
             </label>
-            <input type="text" name="SanctionOrderNo" placeholder="Enter sanction order number" required onChange={(e) => setFormData({ ...formData, [e.target.name]: e.target.value })} value={formData.SanctionOrderNo || ''} />
+            <input
+                type="text"
+                name="SanctionOrderNo"
+                placeholder="Enter sanction order number"
+                required
+                onChange={handleChange}
+                value={formData.SanctionOrderNo || ''}
+            />
 
+            {/* Total Sanction Amount */}
             <label>
-                Total Sanction amount:<span style={{ color: 'red' }}>*</span>
+                Total Sanction Amount:<span style={{ color: 'red' }}>*</span>
             </label>
-            <input type="number" name="TotalSanctionamount" placeholder="Enter total sanction amount" required min="0" onChange={(e) => setFormData({ ...formData, [e.target.name]: e.target.value })} value={formData.TotalSanctionamount || ''} />
+            <input
+                type="number"
+                name="TotalSanctionamount"
+                placeholder="Enter total sanction amount"
+                required
+                min="0"
+                onChange={handleChange}
+                value={formData.TotalSanctionamount || ''}
+            />
+
+            {/* Funded By */}
             <label>
                 Funded By:<span style={{ color: 'red' }}>*</span>
             </label>
-            <input type="text" name="FundedBy" placeholder="Enter funding agency" required onChange={(e) => setFormData({ ...formData, [e.target.name]: e.target.value })} value={formData.FundedBy || ''} />
-            <label>
-                PI name:<span style={{ color: 'red' }}>*</span>
-            </label>
-            <input type="text" name="PIname" placeholder="Enter PI name" required onChange={(e) => setFormData({ ...formData, [e.target.name]: e.target.value })} value={formData.PIname || ''} />
+            <input
+                type="text"
+                name="FundedBy"
+                placeholder="Enter funding agency"
+                required
+                onChange={handleChange}
+                value={formData.FundedBy || ''}
+            />
 
+            {/* PI Name */}
+            <label>
+                PI Name:<span style={{ color: 'red' }}>*</span>
+            </label>
+            <input
+                type="text"
+                name="PIname"
+                placeholder="Enter PI name"
+                required
+                onChange={handleChange}
+                value={formData.PIname || ''}
+            />
+
+            {/* CoPIs */}
             <label>
                 CoPIs:<span style={{ color: 'red' }}>*</span>
             </label>
-            <input type="text" name="CoPIs" placeholder="Enter CoPIs" required onChange={(e) => setFormData({ ...formData, [e.target.name]: e.target.value })} value={formData.CoPIs || ''} />
+            <input
+                type="text"
+                name="CoPIs"
+                placeholder="Enter CoPIs"
+                required
+                onChange={handleChange}
+                value={formData.CoPIs || ''}
+            />
 
-            <label>
-                Overhead Amount:<span style={{ color: 'red' }}>*</span>
-            </label>
-            <input type="number" name="OverheadAmount" placeholder="Enter overhead amount" required min="0" onChange={(e) => setFormData({ ...formData, [e.target.name]: e.target.value })} value={formData.OverheadAmount || ''} />
-            
-            <label>
-                Manpower Allocation Amt:
-            </label>
-            <input type="number" name="ManpowerAllocationAmt" placeholder="Enter manpower allocation amount" min="0" onChange={(e) => setFormData({ ...formData, [e.target.name]: e.target.value })} value={formData.ManpowerAllocationAmt || ''} />
+            {/* Allocation Amounts */}
+            {[
+                'ManpowerAllocationAmt',
+                'ConsumablesAllocationAmt',
+                'ContingencyAllocationAmt',
+                'OverheadAllocationAmt',
+                'EquipmentAllocationAmt',
+                'TravelAllocationAmt',
+            ].map((field) => (
+                <React.Fragment key={field}>
+                    <label>
+                        {field.replace(/([A-Z])/g, ' $1')}:
+                    </label>
+                    <input
+                        type="number"
+                        name={field}
+                        placeholder={`Enter ${field.replace(/([A-Z])/g, ' $1').toLowerCase()}`}
+                        min="0"
+                        onChange={handleChange}
+                        value={formData[field] || ''}
+                        max={getMax(field)} // Dynamically adjust max for each field
+                    />
+                </React.Fragment>
+            ))}
 
-            <label>
-                Consumables Allocation Amt:
-            </label>
-            <input type="number" name="ConsumablesAllocationAmt" placeholder="Enter consumables allocation amount" min="0" onChange={(e) => setFormData({ ...formData, [e.target.name]: e.target.value })} value={formData.ConsumablesAllocationAmt || ''} />
-
-            <label>
-                Contingency Allocation Amt:
-            </label>
-            <input type="number" name="ContingencyAllocationAmt" placeholder="Enter contingency allocation amount" min="0" onChange={(e) => setFormData({ ...formData, [e.target.name]: e.target.value })} value={formData.ContingencyAllocationAmt || ''} />
-
-            <label>
-                Overhead Allocation Amt:
-            </label>
-            <input type="number" name="OverheadAllocationAmt" placeholder="Enter overhead allocation amount" min="0" onChange={(e) => setFormData({ ...formData, [e.target.name]: e.target.value })} value={formData.OverheadAllocationAmt || ''} />
-
-            <label>
-                Equipment Allocation Amt:
-            </label>
-            <input type="number" name="EquipmentAllocationAmt" placeholder="Enter equipment allocation amount" min="0" onChange={(e) => setFormData({ ...formData, [e.target.name]: e.target.value })} value={formData.EquipmentAllocationAmt || ''} />
-
-            <label>
-                Travel Allocation Amt:
-            </label>
-            <input type="number" name="TravelAllocationAmt" placeholder="Enter travel allocation amount" min="0" onChange={(e) => setFormData({ ...formData, [e.target.name]: e.target.value })} value={formData.TravelAllocationAmt || ''} />
             <footer>
-                <input type="submit" value="Create New Project" className='hoverable tableTitle' />
+                <input type="submit" value="Create New Project" className="hoverable tableTitle" />
             </footer>
         </form>
-    )
+    );
 }
 
 export default NewProject;
