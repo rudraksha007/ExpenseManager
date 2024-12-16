@@ -335,14 +335,21 @@ async function fetchDataWithParams(url, method, data) {
     }
 }
 
-async function fetchDataWithFileUpload(url, method, form) {
+async function fetchDataWithFileUpload(url, method, form, extraData) {
     const fileInput = Array.from(form.children).find(child => child.type === 'file');
     const formData = new FormData(form);
     if (fileInput && fileInput.files.length > 0) {
         formData.append('BillCopy', fileInput.files[0]);
     }
+    if (extraData && typeof extraData === 'object') {
+        Object.keys(extraData).forEach(key => {
+            formData.append(key, extraData[key]);
+        });
+    }
     try {
         formData.append('fingerPrint', fingerPrint);
+        console.log(Object.fromEntries(formData.entries()));
+        
         const response = await fetch('/api/' + url, {
             method: method,
             body: formData,

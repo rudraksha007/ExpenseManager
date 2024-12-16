@@ -4,10 +4,12 @@ import { FaTimes } from 'react-icons/fa';
 import { closePopup } from '../../assets/popup';
 import { fetchDataWithFileUpload } from '../../assets/scripts';
 import { ProjectContext } from '../../assets/ProjectData';
+import { ProfileContext } from '../../assets/UserProfile';
 
 function ContingencyPopup({ reset }) {
     const today = new Date().toISOString().split('T')[0];
-    const { projectNo, projectTitle } = (useContext(ProjectContext)).project;
+    const { ProjectNo, ProjectTitle } = (useContext(ProjectContext)).project;
+    const { id, name } = useContext(ProfileContext).profile;
     const handleSubmit = async (e) => {
         e.preventDefault();
         if (!e.currentTarget.checkValidity()) return;
@@ -26,26 +28,21 @@ function ContingencyPopup({ reset }) {
                 <FaTimes size={30} style={{ position: 'absolute', right: 10, top: 10, cursor: 'pointer' }} onClick={(e) => closePopup(e, reset)} />
                 <h2>Add Contingency</h2>
                 <form className='popupForm' id='addEquipmentForm' onSubmit={(e) => handleSubmit(e)}>
-                    <label htmlFor="RequestID">Request ID:</label>
-                    <input type="number" id="RequestID" name="RequestID" required />
 
                     <label htmlFor="RequestedDate">Date:</label>
                     <input type="date" id="RequestedDate" name="RequestedDate" max={today} required />
 
                     <label htmlFor="ProjectNo">Project No:</label>
-                    <input type="number" id="ProjectNo" name="ProjectNo" readOnly value={projectNo} />
+                    <input type="number" id="ProjectNo" name="ProjectNo" readOnly value={ProjectNo} />
 
                     <label htmlFor="ProjectTitle">Project Title:</label>
-                    <input type="text" id="ProjectTitle" name="ProjectTitle" readOnly value={projectTitle} />
-
-                    <label htmlFor="IndentID">Indent ID:</label>
-                    <input type="number" id="IndentID" name="IndentID" required />
+                    <input type="text" id="ProjectTitle" name="ProjectTitle" readOnly value={ProjectTitle} />
 
                     <label htmlFor="EmployeeID">Employee ID:</label>
-                    <input type="number" id="EmployeeID" name="EmployeeID" required readOnly/>
+                    <input type="text" id="EmployeeID" name="EmployeeID" required readOnly value={id}/>
 
                     <label htmlFor="EmployeeName">Employee Name:</label>
-                    <input type="text" id="EmployeeName" name="EmployeeName" required />
+                    <input type="text" id="EmployeeName" name="EmployeeName" required value={name}/>
 
                     <label htmlFor="Reason">Purpose:</label>
                     <input type="text" id="Reason" name="Reason" required />

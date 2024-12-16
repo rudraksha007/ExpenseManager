@@ -1,4 +1,4 @@
-import React,{ useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import '../../css/UserProjects.css';
 import { fetchDataWithParams } from '../../assets/scripts';
 import { Oval } from 'react-loader-spinner';
@@ -10,22 +10,21 @@ import { FaEdit } from 'react-icons/fa';
 function UserProjects() {
     const [projects, setProjects] = useState([]);
     const [loading, setLoading] = useState(true);
-    const {profile} = useContext(ProfileContext);
+    
+    const { profile } = useContext(ProfileContext);
     useEffect(() => {
         async function fetchProjects() {
-            let data = (await fetchDataWithParams('projects', 'post', {id: profile.id, fields: ['ProjectNo','ProjectTitle','ProjectStartDate'], filters: {}}));
+            let data = (await fetchDataWithParams('projects', 'post', { id: profile.id, fields: ['ProjectNo', 'ProjectTitle', 'ProjectStartDate'], filters: {} }));
             console.log(data);
             data = data.projects;
-            let projectList = [];
-            data.map((project, index) => (
-                projectList.push(
-                    <React.Fragment key={project.ProjectNo}>
-                        <div>{index + 1}</div>
-                        <div>{project.ProjectTitle}</div>
-                        <div>{project.ProjectStartDate.split('T')[0]}</div>
-                        <div className='hoverable'><Link to={`/projects/${project.ProjectNo}`} title="View Project Details"><FaEdit size={20} /></Link></div>
-                    </React.Fragment>
-                )
+            let projectList = data.map((project, index) => (
+                <React.Fragment key={project.ProjectNo}>
+                    <div>{index + 1}</div>
+                    <div>{project.ProjectTitle}</div>
+                    <div>{project.ProjectStartDate.split('T')[0]}</div>
+                    <div className='hoverable'><Link to={`/projects/${project.ProjectNo}`} title="View Project Details"><FaEdit size={20} /></Link></div>
+                </React.Fragment>
+
             ));
             setProjects(projectList);
             setLoading(false);
@@ -34,8 +33,12 @@ function UserProjects() {
     }, []);
     return (
         <>
-            {loading ? <Oval color='black' height={80} strokeWidth={5} /> :
-                <>
+
+            {loading ?
+                <div className="dashSection" id="dashUserProjects" >
+                    <Oval color='black' height={80} strokeWidth={5} />
+                </div> :
+                <div className="dashSection" id="dashUserProjects">
                     <h2>Projects</h2>
                     <div id="userProjectsTable">
                         <div className='tableTitle'>Sl.</div>
@@ -44,7 +47,7 @@ function UserProjects() {
                         <div className='tableTitle'>Action</div>
                         {projects}
                     </div>
-                </>}
+                </div>}
         </>
     )
 }

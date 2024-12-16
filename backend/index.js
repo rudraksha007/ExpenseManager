@@ -35,7 +35,7 @@ app.post('/api/purchaseReqStatus', authorize(['SuperAdmin']), (req, res) => upda
 //Put requests (right click on supplied function-> goto source definition to view the code)
 app.put('/api/projects', authorize(['SuperAdmin']), (req, res) => addProject(req, res));
 app.put('/api/users', authorize(['SuperAdmin']), (req, res) => addUser(req, res));
-app.put('/api/travel', (req, res) => addTravel(req, res));
+app.put('/api/travel', (req, res) => addProjectIndent(req, res));
 app.put('/api/consumables', (req, res) => addProjectIndent(req, res));
 app.put('/api/contingency', (req, res) => addProjectIndent(req, res));
 app.put('/api/equipment', (req, res) => addProjectIndent(req, res));

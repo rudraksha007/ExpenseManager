@@ -37,20 +37,20 @@ async function connectDb() {
             {
                 tableName: 'users',
                 definition: `
-                id INT PRIMARY KEY,
-                name VARCHAR(255),
-                email VARCHAR(255) UNIQUE KEY,
-                password VARCHAR(255),
-                projects JSON,
-                status INT,
-                role VARCHAR(255),
-                ProfilePic LONGBLOB
+                    id INT PRIMARY KEY,
+                    name VARCHAR(255),
+                    email VARCHAR(255) UNIQUE KEY,
+                    password VARCHAR(255),
+                    projects JSON,
+                    status INT,
+                    role VARCHAR(255),
+                    ProfilePic LONGBLOB
             `
             },
             {
                 tableName: 'Indents',
                 definition: `
-                    IndentID INTEGER PRIMARY KEY,
+                    IndentID INTEGER PRIMARY KEY AUTO_INCREMENT,
                     IndentCategory VARCHAR(255),
                     ProjectNo INTEGER,
                     IndentAmount DOUBLE,
@@ -64,7 +64,7 @@ async function connectDb() {
             {
                 tableName: 'Manpower',
                 definition: `
-                    IndendID INTEGER PRIMARY KEY,
+                    IndentID INTEGER PRIMARY KEY,
                     ProjectNo INTEGER,
                     ProjectTitle VARCHAR(255),
                     EmployeeID INT,
@@ -84,9 +84,8 @@ async function connectDb() {
             {
                 tableName: 'Travel',
                 definition: `
-                    RequestID INTEGER PRIMARY KEY,
+                    IndentID INTEGER PRIMARY KEY,
                     ProjectNo INTEGER,
-                    IndentID INTEGER,
                     RequestedAmt DOUBLE,
                     EmployeeID INT,
                     Source VARCHAR(255),
@@ -107,14 +106,13 @@ async function connectDb() {
             {
                 tableName: 'Consumables',
                 definition: `
-                    RequestID INTEGER PRIMARY KEY,
+                    IndentID INTEGER PRIMARY KEY,
                     ProjectNo INTEGER,
                     ProjectTitle VARCHAR(255),
                     RequestedAmt DOUBLE,
                     EmployeeID INT,
                     Reason VARCHAR(255),
                     Remark VARCHAR(1000),
-                    IndentID INTEGER,
                     RequestedDate DATE,
                     BillCopy JSON,
                     FOREIGN KEY (EmployeeID) REFERENCES users(id),
@@ -134,7 +132,7 @@ async function connectDb() {
                     Reason VARCHAR(255),
                     IndentID INTEGER,
                     RequestedDate DATE,
-                    BillCopy LONGBLOB,
+                    BillCopy JSON,
                     FOREIGN KEY (EmployeeID) REFERENCES users(id),
                     FOREIGN KEY (ProjectNo) REFERENCES Projects(ProjectNo),
                     FOREIGN KEY (ProjectTitle) REFERENCES Projects(ProjectTitle),
@@ -144,15 +142,16 @@ async function connectDb() {
             {
                 tableName: 'Equipment',
                 definition: `
-                    RequestID INTEGER PRIMARY KEY,
+                    IndentID INTEGER PRIMARY KEY,
                     ProjectNo INTEGER,
                     ProjectTitle VARCHAR(255),
                     RequestedAmt DOUBLE,
                     EmployeeID INT,
                     Reason VARCHAR(255),
-                    IndentID INTEGER,
                     RequestedDate DATE,
-                    BillCopy LONGBLOB,
+                    Items JSON,
+                    Remark VARCHAR(1000),
+                    BillCopy JSON,
                     FOREIGN KEY (EmployeeID) REFERENCES users(id),
                     FOREIGN KEY (ProjectNo) REFERENCES Projects(ProjectNo),
                     FOREIGN KEY (ProjectTitle) REFERENCES Projects(ProjectTitle),
@@ -162,15 +161,15 @@ async function connectDb() {
             {
                 tableName: 'Contingency',
                 definition: `
-                    RequestID INTEGER PRIMARY KEY,
+                    IndentID INTEGER PRIMARY KEY,
                     ProjectNo INTEGER,
                     ProjectTitle VARCHAR(255),
                     RequestedAmt DOUBLE,
                     EmployeeID INT,
                     Reason VARCHAR(255),
-                    IndentID INTEGER,
                     RequestedDate DATE,
-                    BillCopy LONGBLOB,
+                    Remark VARCHAR(1000),
+                    BillCopy JSON,
                     FOREIGN KEY (EmployeeID) REFERENCES users(id),
                     FOREIGN KEY (ProjectNo) REFERENCES Projects(ProjectNo),
                     FOREIGN KEY (ProjectTitle) REFERENCES Projects(ProjectTitle),
@@ -248,7 +247,7 @@ function authenticate(req, res, next) {
 
 async function generateReport(reportType) {
     let query = '';
-    
+
     if (reportType === 'general') {
         query = `
             SELECT 
@@ -290,7 +289,7 @@ async function generateReport(reportType) {
                 p.ProjectNo, p.ProjectTitle, p.TotalSanctionAmount;
         `;
     }
-    
+
     return db.query(query).then(([rows]) => rows);
 }
 
@@ -346,7 +345,7 @@ async function getFromDb(table, fields, where) {
 async function updateAtDb(table, fieldsDictionary, where) {
     let fields = Object.entries(fieldsDictionary).map(([key, value]) => `${key}='${value}'`).join(', ');
     let wheres = Object.entries(where).map(([key, value]) => `${key}='${value}'`).join(' AND ');
-    console.log(fields+' WHERE '+wheres);
+    console.log(fields + ' WHERE ' + wheres);
     return db.query(`UPDATE ${table} SET ${fields} WHERE ${wheres}`);
 }
-export { db, authenticate, authorize, connectDb, getFromDb, projectWiseAuthorisation,updateAtDb };
+export { db, authenticate, authorize, connectDb, getFromDb, projectWiseAuthorisation, updateAtDb };

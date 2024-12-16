@@ -30,19 +30,72 @@ function addUser(req, res) {
 }
 
 async function addProjectIndent(req, res) {
-    const { ProjectNo, ProjectTitle, RequestedAmt, IndentID, Reason, RequestedDate } = req.body;
-    if(!parseBill(req)) return;
-    const BillCopy = req.files.BillCopy[0]
-    let query = 'INSERT INTO indents (IndentID, IndentCategory, ProjectNo, IndentAmount, IndentDate, IndentedPersonID, IndentStatus) VALUES (?, ?, ?, ?, ?, ?, ?)';
-    log([parseInt(IndentID), req.path.split('/').at(-1), parseInt(ProjectNo), parseInt(RequestedAmt), RequestedDate, req.processed.token.id, 'Pending']);
-    db.query(query, [parseInt(IndentID), req.path.split('/').at(-1), parseInt(ProjectNo), parseInt(RequestedAmt), RequestedDate, req.processed.token.id, 'Pending']).then(result => {
-        query = `INSERT INTO ${req.path.split('/').at(-1)} (ProjectNo, ProjectTitle, RequestedAmt, IndentID, RequestID, Reason, EmployeeID, RequestedDate, BillCopy) VALUES (?, ?, ?, ?, ?, ?, ?, ?,?)`;
-        db.query(query, [parseInt(ProjectNo), ProjectTitle, parseInt(RequestedAmt), parseInt(IndentID), parseInt(IndentID), Reason, req.processed.id, RequestedDate, BillCopy.data]).then(result => {
-            res.status(201).json({ message: 'Travel added successfully' }).end();
-        }).catch(err => {sendFailedResponse(res, err.message, 500);});
-    }).catch(err => { sendFailedResponse(res, err.message, 500); });
+    const { ProjectNo, ProjectTitle, RequestedAmt, Reason, RequestedDate, EmployeeID, Remarks, Source, FromDate, Destination, DestinationDate, Items } = req.body;
+    
+    if (!await parseBill(req, res)) return;
+    
+    const BillCopy = req.files.BillCopy;
+    const billFiles = Array.isArray(BillCopy) ? BillCopy : [BillCopy];
+    
+    // Convert BillCopy files to Base64 strings
+    const billBase64Strings = await Promise.all(billFiles.map(async (file) => {
+        
+        
+        const buffer = await file.data;
+        return Buffer.from(buffer).toString('base64');
+    }));
 
+    try {
+        // First query: Insert into the 'indents' table
+        let query = 'INSERT INTO indents (IndentCategory, ProjectNo, IndentAmount, IndentDate, IndentedPersonID, IndentStatus) VALUES (?, ?, ?, ?, ?, ?)';
+        console.log([req.path.split('/').at(-1), parseInt(ProjectNo), parseInt(RequestedAmt), RequestedDate, req.processed.token.id, 'Pending']);
+        
+        const result = await db.query(query, [req.path.split('/').at(-1), parseInt(ProjectNo), parseInt(RequestedAmt), RequestedDate, req.processed.token.id, 'Pending']);        
+        // Get the auto-incremented IndentID from the first query
+        const IndentID = result[0].insertId;
+        // If IndentID is not properly generated, send an error response
+        if (!IndentID) {
+            return sendFailedResponse(res, 'Failed to generate IndentID', 500);
+        }
+        let values = [];
+        switch (req.path.split('/').at(-1)) {
+            case 'consumables':
+                query = 'INSERT INTO consumables (IndentID, ProjectNo, ProjectTitle, RequestedAmt, EmployeeID, Reason, Remark, RequestedDate, BillCopy) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)';
+                values = [IndentID, parseInt(ProjectNo), ProjectTitle, parseInt(RequestedAmt), EmployeeID, Reason, Remarks, RequestedDate, JSON.stringify(billBase64Strings)];
+                break;
+            case 'equipment':
+                query = 'INSERT INTO equipment ( ProjectNo, ProjectTitle, RequestedAmt, EmployeeID, Reason, IndentID, RequestedDate, Items, BillCopy, Remark) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)';
+                values = [ parseInt(ProjectNo), ProjectTitle, parseInt(RequestedAmt), EmployeeID, Reason, IndentID, RequestedDate, JSON.stringify(Items), JSON.stringify(billBase64Strings), Remarks];
+                break;
+            case 'manpower':
+                query = 'INSERT INTO manpower (IndentID, ProjectNo, ProjectTitle, RequestedAmt, Reason, EmployeeID, RequestedDate, BillCopy, Remark) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)';
+                values = [parseInt(ProjectNo), ProjectTitle, parseInt(RequestedAmt), IndentID, Reason, EmployeeID, RequestedDate, JSON.stringify(billBase64Strings), Remarks];
+                break;
+            case 'overhead':
+                query = 'INSERT INTO overhead (IndentID, ProjectNo, ProjectTitle, RequestedAmt, Reason, EmployeeID, RequestedDate, BillCopy, Remark) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)';
+                values = [parseInt(ProjectNo), ProjectTitle, parseInt(RequestedAmt), IndentID, Reason, EmployeeID, RequestedDate, JSON.stringify(billBase64Strings), Remarks];
+                break;
+            case 'travel':
+                query = 'INSERT INTO travel (IndentID, ProjectNo, RequestedAmt, EmployeeID, Source, FromDate, Destination, DestinationDate, Reason, Remark, RequestedDate, Traveler, BillCopy) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)';
+                values = [IndentID, parseInt(ProjectNo), parseInt(RequestedAmt), EmployeeID, Source, FromDate, Destination, DestinationDate, Reason, Remarks, RequestedDate, EmployeeID, JSON.stringify(billBase64Strings)];
+                break;
+            case 'contingency':
+                query = 'INSERT INTO contingency (IndentID, ProjectNo, ProjectTitle, RequestedAmt, EmployeeID, Reason, RequestedDate, BillCopy, Remark) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)';
+                values = [IndentID, parseInt(ProjectNo), ProjectTitle, parseInt(RequestedAmt), EmployeeID, Reason, RequestedDate, JSON.stringify(billBase64Strings), Remarks];
+                break;
+            default:
+                {sendFailedResponse(res, 'Invalid indent category', 400);return}
+        }
+
+        await db.query(query, values);
+
+        // Send success response
+        res.status(201).json({ message: 'Project indent added successfully' }).end();
+    } catch (err) {
+        sendFailedResponse(res, err.message, 500);
+    }
 }
+
 
 async function addTravel(req, res) {
     const {

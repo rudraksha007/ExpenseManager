@@ -36,7 +36,7 @@ function NewProject() {
         }, 0);
 
         // The remaining available amount for the allocation field
-        return formData.TotalSanctionamount - totalAllocated +1;
+        return formData.TotalSanctionamount - totalAllocated;
     };
 
     const handleSubmit = async (e) => {
@@ -58,6 +58,17 @@ function NewProject() {
             ...formData,
             [e.target.name]: e.target.value
         });
+        console.log('ran');
+        
+        if (e.target.name.includes("AllocationAmt")) {
+            if (Number(e.target.value) > getMax(e.target.name)) {
+                console.log('invalid');
+                
+                e.currentTarget.setCustomValidity(`Allocation amount exceeds the remaining budget`);
+            }else{
+                e.currentTarget.setCustomValidity('');
+            }
+        }
     };
 
     return (
@@ -201,7 +212,7 @@ function NewProject() {
                         placeholder={`Enter ${field.replace(/([A-Z])/g, ' $1').toLowerCase()}`}
                         min="0"
                         onChange={handleChange}
-                        value={formData[field] || ''}
+                        value={formData[field] || 0}
                         max={getMax(field)} // Dynamically adjust max for each field
                     />
                 </React.Fragment>

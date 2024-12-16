@@ -1,6 +1,7 @@
 .dashSection{
     box-shadow: 2px 2px 5px gray;
     height: fit-content;
+    min-height: 80dvh;
     border-radius: 5px;
     padding: 10px 25px;
     background-color: inherit;
@@ -8,8 +9,8 @@
 }
 #dashBody{
     display: grid;
-    grid-template-columns: 45dvw 45dvw;
-    grid-auto-rows: max-content; 
+    grid-template-columns: 1fr 1fr;
+    grid-auto-rows: 90%; 
     gap: 20px;
     height: 90dvh;
     padding: 20px;

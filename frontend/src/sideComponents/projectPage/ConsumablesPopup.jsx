@@ -1,14 +1,17 @@
-import React, { useContext } from 'react';
+import React, { useContext, useEffect } from 'react';
 import '../../css/Popup.css';
 import { FaTimes } from 'react-icons/fa';
 import { closePopup } from '../../assets/popup';
-import { fetchDataWithFileUpload } from '../../assets/scripts';
+import { fetchDataWithFileUpload, fetchDataWithParams } from '../../assets/scripts';
 import { ProjectContext } from '../../assets/ProjectData';
+import { ProfileContext } from '../../assets/UserProfile';
 
 function ConsumablesPopup({ reset }) {
-    const { projectNo, projectTitle, ManpowerAllocationAmt } = (useContext(ProjectContext)).project;
+    const { ProjectNo, ProjectTitle, ConsumablesAllocationAmt, AllocatedConsumables } = (useContext(ProjectContext)).project;
+    const {profile} = useContext(ProfileContext);
     const today = new Date().toISOString().split('T')[0];
-    let total = 0;
+    const [IndentId, setIndentId] = React.useState(null);
+
     const handleSubmit = async (e) => {
         e.preventDefault();
         if (!e.currentTarget.checkValidity()) return;
@@ -30,25 +33,22 @@ function ConsumablesPopup({ reset }) {
                     <input type="date" id="RequestedDate" name="RequestedDate" max={today} required />
 
                     <label htmlFor="ProjectNo">Project No:</label>
-                    <input type="number" id="ProjectNo" name="ProjectNo" readOnly value={projectNo} onChange={{}} />
+                    <input type="number" id="ProjectNo" name="ProjectNo" readOnly value={ProjectNo} onChange={()=>{}} />
 
                     <label htmlFor="ProjectTitle">Project Title:</label>
-                    <input type="text" id="ProjectTitle" name="ProjectTitle" readOnly value={projectTitle} onChange={{}} />
-
-                    <label htmlFor="IndentID">Indent ID:</label>
-                    <input type="number" id="IndentID" name="IndentID" required />
+                    <input type="text" id="ProjectTitle" name="ProjectTitle" readOnly value={ProjectTitle} onChange={()=>{}} />
                     
                     <label htmlFor="RequestedAmt">Invoice Amount:</label>
-                    <input type="number" id="RequestedAmt" name="RequestedAmt" value={total} min={1} max={ManpowerAllocationAmt} onInput={(e)=>checkMax(ManpowerAllocationAmt, e)}/>
+                    <input type="number" id="RequestedAmt" name="RequestedAmt"  min={1} max={ConsumablesAllocationAmt-AllocatedConsumables}/>
 
                     <label htmlFor="Overhead">Overhead:</label>
                     <input type="number" id="Overhead" name="Overhead" required min={1}/>
                     
                     <label htmlFor="EmployeeID">Employee ID:</label>
-                    <input type="number" id="EmployeeID" name="EmployeeID" required min="1" />
+                    <input type="text" id="EmployeeID" name="EmployeeID" value={profile.id} required readOnly />
 
                     <label htmlFor="EmployeeName">Employee Name:</label>
-                    <input type="text" id="EmployeeName" name="EmployeeName" required />
+                    <input type="text" id="EmployeeName" name="EmployeeName" required readOnly value={profile.name}/>
                     
                     <label htmlFor="Reason">Reason:</label>
                     <input type="text" id="Reason" name="Reason" required />
@@ -66,10 +66,3 @@ function ConsumablesPopup({ reset }) {
 };
 
 export default ConsumablesPopup;
-
-function checkMax(max, e){
-    if (e.currentTarget.value > max) {
-        e.currentTarget.setCustomValidity(`Please Allocated more funds to this field first`);
-        e.currentTarget.reportValidity();
-    }
-}

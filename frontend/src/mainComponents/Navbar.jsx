@@ -48,8 +48,8 @@ function Navbar() {
                                     <Link to='/signup' className='hoverable'> <FaUserPlus size={40} style={{ marginRight: 8 }} /> Create New User</Link>
                                     <Link to='/profiles' className='hoverable'> <FaUser size={40} style={{ marginRight: 8 }} /> All Users</Link>
                                     <Link to='/investors' className='hoverable'> <FaUserPlus size={40} style={{ marginRight: 8 }} /> Add Funding Agencies</Link>
-                                    <NavLink to='/indents/'>  <FaTasks size={40} style={{ marginRight: 8 }} />Indents</NavLink>
-                                    <NavLink to='/purchasereqs/'> <FaAward size={40} style={{ marginRight: 8 }} /> Purchase Reqs</NavLink>
+                                    <NavLink to='/indents/' className='hoverable'>  <FaTasks size={40} style={{ marginRight: 8 }} />Indents</NavLink>
+                                    <NavLink to='/purchasereqs/' className='hoverable'> <FaAward size={40} style={{ marginRight: 8 }} /> Purchase Reqs</NavLink>
 
                                 </> : <></>}
                             <Link to='/login' className='hoverable' onClick={(e) => { signoff(e) }}> <FaSignOutAlt size={40} style={{ marginRight: 8 }} /> Sign Out</Link>

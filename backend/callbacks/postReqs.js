@@ -85,12 +85,14 @@ function getProjects(req, res) {
         return isValid;
       });
     }
-
-
     res.status(200).json({ projects: results, total: results.length }).end();
   }).catch((err) => {
     res.status(500).json({ message: 'Error fetching projects', err: err.message }).end();
   });
+}
+
+function getCharts(req, res){
+  
 }
 
 function logout(req, res) {
