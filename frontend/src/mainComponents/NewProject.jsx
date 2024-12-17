@@ -24,7 +24,7 @@ function NewProject() {
         TravelAllocationAmt: 0
     });
     const selected = useRef({ PIs: [], CoPIs: [] });
-
+    const navigate = useNavigate();
     const [users, setUsers] = useState([]);
     useEffect(() => {
         fetchDataWithParams('users', 'post', { filters: { role: 'Pi' } }).then(data => {
@@ -32,7 +32,9 @@ function NewProject() {
         });
     }, []);
 
-    
+    useEffect(() => {
+        setFormData({...formData, PIs: selected.current.PIs, CoPIs: selected.current.CoPIs});
+    }, [popup]);
         
 
     async function setPI() {
@@ -51,24 +53,24 @@ function NewProject() {
                             if (formData.CoPIs.includes(profile.id)) return;
                             return (
                                 <React.Fragment key={profile.id}>
-                                    <div>
+                                    <div style={{display: 'flex', justifyContent: 'center', alignItems: 'center'}}>
                                         <input
                                             type="checkbox"
-                                            value={profile.id}
+                                            value={JSON.stringify({id:profile.id, name: profile.name})}
                                             defaultChecked={selected.current.PIs.includes(profile.id)}
                                             onChange={(e) => {
                                                 if (e.target.checked) {
-                                                    selected.current = {CoPIs: selected.current.CoPIs, PIs: [...selected.current.PIs, profile.id]};
+                                                    selected.current = {CoPIs: selected.current.CoPIs, PIs: [...selected.current.PIs, e.target.value]};
                                                 } else {
-                                                    selected.current = {CoPIs: selected.current.CoPIs, PIs: selected.current.PIs.filter(id => id !== profile.id)};
+                                                    selected.current = {CoPIs: selected.current.CoPIs, PIs: selected.current.PIs.filter(id => id !== e.target.value)};
                                                 }
                                             }}
-                                            
+                                            style={{height: '100%', width: '100%'}}
                                         />
                                     </div>
                                     <div>{profile.id}</div>
                                     <div>{profile.name}</div>
-                                    <div>{profile.designation}</div>
+                                    <div>{profile.role}</div>
                                     <div>{profile.salary}</div>
                                 </React.Fragment>);
                         })}
@@ -79,44 +81,10 @@ function NewProject() {
     }
 
     async function setCoPI() {
-        const data = await fetchDataWithParams('users', 'post', { filters: { role: 'Pi' } });
-        console.log(data);
-
-        const copi = data.users.map((profile, index) => {
-            if (formData.PIs.includes(profile.id)) return;
-            return (
-                <React.Fragment key={profile.id}>
-                    <div>
-                        <input
-                            type="checkbox"
-                            value={profile.id}
-                            onChange={(e) => {
-                                if (e.target.checked) {
-                                    setFormData(prevState => ({
-                                        ...prevState,
-                                        CoPIs: [...prevState.CoPIs, profile.id]
-                                    }));
-                                } else {
-                                    setFormData(prevState => ({
-                                        ...prevState,
-                                        CoPIs: prevState.CoPIs.filter(id => id !== profile.id)
-                                    }));
-                                }
-                            }}
-                        />
-                    </div>
-                    <div>{profile.id}</div>
-                    <div>{profile.name}</div>
-                    <div>{profile.designation}</div>
-                    <div>{profile.salary}</div>
-                </React.Fragment>
-            );
-        });
-
         setPopup(
             <div className='projectPopup'>
-                <div className="projectPopupCont" id="largePopupCont">
-                    <FaTimes size={30} style={{ position: 'absolute', right: 10, top: 10, cursor: 'pointer' }} onClick={() => setPopup(null)} />
+                <form className="projectPopupCont" id="largePopupCont">
+                    <FaTimes size={30} style={{ position: 'absolute', right: 10, top: 10, cursor: 'pointer' }} onClick={() => { setPopup(null); }} />
                     <h2>Select CoPI</h2>
                     <div className='table' style={{ gridTemplateColumns: '1fr 3fr 6fr 3fr 3fr' }}>
                         <div className="tableTitle">Tick</div>
@@ -124,9 +92,33 @@ function NewProject() {
                         <div className="tableTitle">Name</div>
                         <div className="tableTitle">Designation</div>
                         <div className="tableTitle">Salary</div>
-                        {copi}
+                        {users.map((profile, index) => {
+                            if (formData.PIs.includes(profile.id)) return;
+                            return (
+                                <React.Fragment key={profile.id}>
+                                    <div style={{display: 'flex', justifyContent: 'center', alignItems: 'center'}}>
+                                        <input
+                                            type="checkbox"
+                                            value={JSON.stringify({id:profile.id, name: profile.name})}
+                                            defaultChecked={selected.current.CoPIs.includes(profile.id)}
+                                            onChange={(e) => {
+                                                if (e.target.checked) {
+                                                    selected.current = {PIs: selected.current.PIs, CoPIs: [...selected.current.CoPIs, e.target.value]};
+                                                } else {
+                                                    selected.current = {PIs: selected.current.PIs, CoPIs: selected.current.CoPIs.filter(id => id !== e.target.value)};
+                                                }
+                                            }}
+                                            style={{height: '100%', width: '100%'}}
+                                        />
+                                    </div>
+                                    <div>{profile.id}</div>
+                                    <div>{profile.name}</div>
+                                    <div>{profile.designation}</div>
+                                    <div>{profile.salary}</div>
+                                </React.Fragment>);
+                        })}
                     </div>
-                </div>
+                </form>
             </div>
         );
     }
@@ -150,14 +142,14 @@ function NewProject() {
         if (!e.currentTarget.checkValidity()) return;
         console.log(formData);
 
-        // let res = await fetchDataWithParams('projects', 'put', formData);
-        // if (res.reqStatus === 'success') {
-        //     alert('Project Created Successfully');
-        //     setFormData({});
-        //     navigate('/');
-        // } else {
-        //     alert('Failed to create project: ' + res.message);
-        // }
+        let res = await fetchDataWithParams('projects', 'put', formData);
+        if (res.reqStatus === 'success') {
+            alert('Project Created Successfully');
+            setFormData({});
+            navigate('/');
+        } else {
+            alert('Failed to create project: ' + res.message);
+        }
     };
 
     const handleChange = (e) => {
@@ -231,6 +223,7 @@ function NewProject() {
                     type="date"
                     name="ProjectEndDate"
                     placeholder="Enter end date"
+                    required
                     onChange={handleChange}
                     value={formData.ProjectEndDate || ''}
                     min={formData.ProjectStartDate || ''}

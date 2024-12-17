@@ -3,19 +3,40 @@ import { db, getFromDb, updateAtDb } from "../dbUtils.js";
 import { log, parseBill, sendFailedResponse } from "../utils.js";
 
 async function addProject(req, res) {
-    const { ProjectTitle, ProjectNo, ProjectStartDate, ProjectEndDate, SanctionOrderNo, TotalSanctionamount, PIname, CoPIs, ManpowerAllocationAmt, ConsumablesAllocationAmt, ContingencyAllocationAmt, OverheadAllocationAmt, EquipmentAllocationAmt, TravelAllocationAmt, FundedBy } = req.body;
-    const query = 'INSERT INTO projects (ProjectTitle, ProjectNo, ProjectStartDate, ProjectEndDate,SanctionOrderNo,TotalSanctionamount,PIname,CoPIs,ManpowerAllocationAmt,ConsumablesAllocationAmt,ContingencyAllocationAmt,OverheadAllocationAmt,EquipmentAllocationAmt,TravelAllocationAmt, FundedBy ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ? )';
-    db.query(query,
-        [ProjectTitle, ProjectNo,
-            ProjectStartDate, ProjectEndDate, SanctionOrderNo,
-            parseInt(TotalSanctionamount), PIname, CoPIs, parseInt(ManpowerAllocationAmt),
-            parseInt(ConsumablesAllocationAmt), parseInt(ContingencyAllocationAmt),
-            parseInt(OverheadAllocationAmt), parseInt(EquipmentAllocationAmt),
-            parseInt(TravelAllocationAmt), FundedBy]).then(result => {
-                res.status(201).json({ message: 'Project added successfully' }).end();
-            }).catch(err => {
-                sendFailedResponse(res, err.message, 500);
+    try {
+        const { ProjectTitle, ProjectNo, ProjectStartDate, ProjectEndDate, SanctionOrderNo, TotalSanctionamount, PIs, CoPIs, ManpowerAllocationAmt, ConsumablesAllocationAmt, ContingencyAllocationAmt, OverheadAllocationAmt, EquipmentAllocationAmt, TravelAllocationAmt, FundedBy } = req.body;
+        const query = 'INSERT INTO projects (ProjectTitle, ProjectNo, ProjectStartDate, ProjectEndDate,SanctionOrderNo,TotalSanctionamount,PIs,CoPIs,ManpowerAllocationAmt,ConsumablesAllocationAmt,ContingencyAllocationAmt,OverheadAllocationAmt,EquipmentAllocationAmt,TravelAllocationAmt, FundedBy ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ? )';
+        await db.query(query,
+            [ProjectTitle, ProjectNo, ProjectStartDate, ProjectEndDate, SanctionOrderNo,
+                parseInt(TotalSanctionamount), JSON.stringify(PIs), JSON.stringify(CoPIs), parseInt(ManpowerAllocationAmt),
+                parseInt(ConsumablesAllocationAmt), parseInt(ContingencyAllocationAmt),
+                parseInt(OverheadAllocationAmt), parseInt(EquipmentAllocationAmt),
+                parseInt(TravelAllocationAmt), FundedBy]);
+        res.status(201).json({ message: 'Project added successfully' }).end();
+        const uniqueIds = [];
+        const parseAndAddUnique = (arr) => {
+            arr.forEach(item => {
+                const parsedItem = JSON.parse(item);
+                if (!uniqueIds.includes(parsedItem.id)) {
+                    uniqueIds.push(parsedItem.id);
+                }
             });
+        };
+        parseAndAddUnique(PIs);
+        parseAndAddUnique(CoPIs);
+
+        await Promise.all(uniqueIds.map(async (id) => {
+            const updateUserProjectsQuery = 'UPDATE users SET projects = JSON_ARRAY_APPEND(projects, "$", ?) WHERE id = ?';
+            try {
+                await db.query(updateUserProjectsQuery, [ProjectNo, id]);
+                console.log(`User projects updated successfully for user ID: ${id}`);
+            } catch (err) {
+                console.error(`Failed to update user projects for user ID: ${id}:`, err.message);
+            }
+        }));
+    } catch (err) {
+        sendFailedResponse(res, err.message, 500);
+    }
 }
 
 function addUser(req, res) {

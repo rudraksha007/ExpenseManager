@@ -50,32 +50,30 @@ function autoLogin(req, res) {
   if (token.id === 0) return res.status(200).json({ message: 'Auto login successful', role: 'root', name: 'root', id: 0, email: 'root' }).end();
   db.query('SELECT * FROM users WHERE id = ?', [token.id]).then(results => {
 
-    if (results.length === 0) {
+    if (results[0].length === 0) {
       return res.status(404).res.clearCookie('token').json({ message: 'User not found' }).end();
     }
-    const user = results[0];
-    compare(password, user.password, (err, isValid) => {
-      if (!isValid) return res.status(401).json({ message: 'Invalid password' }).end();
-      res.status(200).json(
-        {
-          message: 'Login successful',
-          role: user.role,
-          name: user.name,
-          id: user.id,
-          email: user.email,
-        }).end();
-    });
+    const user = results[0][0];
+    // console.log(user);
+    res.status(200).json(
+      {
+        message: 'Login successful',
+        role: user.role,
+        name: user.name,
+        id: user.id,
+        email: user.email,
+      }).end();
   }).catch(err => {
     return sendFailedResponse(res, err.message, 500);
   });
-  return res.status(200).json({ message: 'Auto login successful', role: token.role });
 }
 
 function getProjects(req, res) {
   getFromDb('projects', req.body.fields).then((results) => {
     const { page, text, status, fundedBy, fromDate, toDate } = req.body.filters;
-    if (text || status || fundedBy || fromDate || toDate) {
-      results = results.filter(project => {
+    results = results.filter(project => {
+      if (!req.processed.allowedProjects.includes(project.ProjectNo)) return false;
+      if (text || status || fundedBy || fromDate || toDate) {
         let isValid = true;
         if (text) isValid = isValid && project.ProjectTitle.includes(text);
         if (status) isValid = isValid && project.ProjectStatus === status;
@@ -83,16 +81,17 @@ function getProjects(req, res) {
         if (fromDate) isValid = isValid && new Date(project.ProjectStartDate) > new Date(fromDate);
         if (toDate) isValid = isValid && new Date(project.ProjectEndDate) < new Date(toDate);
         return isValid;
-      });
-    }
+      }
+      return true;
+    });
     res.status(200).json({ projects: results, total: results.length }).end();
   }).catch((err) => {
     res.status(500).json({ message: 'Error fetching projects', err: err.message }).end();
   });
 }
 
-function getCharts(req, res){
-  
+function getCharts(req, res) {
+
 }
 
 function logout(req, res) {

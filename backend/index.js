@@ -19,7 +19,7 @@ await connectDb();
 app.post('/api/login', (req, res) => login(req, res)); 
 app.post('/api/logout', (req, res) => logout(req, res)); 
 app.post('/api/autoLogin', (req, res) => autoLogin(req, res)); 
-app.post('/api/projects', (req, res) => getProjects(req, res));
+app.post('/api/projects', projectWiseAuthorisation, (req, res) => getProjects(req, res));
 app.post('/api/users', authorize(['SuperAdmin']), (req, res) => getUsers(req, res));
 app.post('/api/projects/*', (req, res)=>getProjectInfo(req, res));
 app.post('/api/pdf/*', (req, res)=>getBillCopy(req, res));

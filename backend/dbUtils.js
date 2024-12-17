@@ -305,15 +305,16 @@ function authorize(allowedRoles) {
 
 const projectWiseAuthorisation = (req, res, next) => {
     if (req.processed.token.role != 'root' && req.processed.token.role != 'SuperAdmin') {
+        
         getFromDb('users', ['projects'], `id=${req.processed.token.id}`).then((projects) => {
             if (projects.length == 0) {
                 return sendFailedResponse(res, 'Permission denied', 403);
             }
-            projects = JSON.parse(projects[0].projects);
-            if (!projects.includes(req.body.ProjectNo)) {
-                return sendFailedResponse(res, 'Permission denied', 403);
-            }
-            req.processed.allowedProjects = projects;
+            
+            projects = projects[0].projects;
+            let arr = [];
+            projects.forEach(ele=>arr.push(Number(ele)))
+            req.processed.allowedProjects = arr;
             next();
             return;
         }).catch((err) => {
@@ -321,13 +322,15 @@ const projectWiseAuthorisation = (req, res, next) => {
         });
     }
     else {
-
+        
         getFromDb('Projects', ['ProjectNo']).then((projects) => {
             let arr = [];
             projects.forEach(project => {
                 arr.push(project.ProjectNo);
             });
             req.processed.allowedProjects = arr;
+            console.log(arr);
+            
             next();
         }).catch((err) => {
             return sendFailedResponse(res, err.message, 500);

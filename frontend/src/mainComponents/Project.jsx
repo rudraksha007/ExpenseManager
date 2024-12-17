@@ -64,7 +64,7 @@ function ProjectContent() {
                         <div><b>Total Sanction Amount:</b> <span>${project.TotalSanctionAmount}</span></div>
                         <div><b>Project Start Date:</b> <span>{new Date(project.ProjectStartDate).toLocaleDateString()}</span></div>
                         <div><b>Project End Date:</b> <span>{new Date(project.ProjectEndDate).toLocaleDateString()}</span></div>
-                        <div><b>PI Name:</b> <span>{project.PIName}</span></div>
+                        <div><b>PI Name:</b> <span>{project.PIs}</span></div>
                         <div><b>Co-PIs:</b> <span>{project.CoPIs}</span></div>
                         <div><b>Manpower Allocation Amt:</b> <span>${project.ManpowerAllocationAmt}</span></div>
                         <div><b>Consumables Allocation Amt:</b> <span>${project.ConsumablesAllocationAmt}</span></div>

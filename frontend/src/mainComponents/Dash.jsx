@@ -11,7 +11,7 @@ function Dash() {
     useEffect(() => {
         async function fetchProjects() {
             setLoading(true);
-            let data = (await fetchDataWithParams('projects', 'post', { fields: ['ProjectTitle', 'TotalSanctionAmount', 'FundedBy', 'PIName'], filters: {} }));
+            let data = (await fetchDataWithParams('projects', 'post', { fields: ['ProjectNo','ProjectTitle', 'TotalSanctionAmount', 'FundedBy', 'PIs'], filters: {} }));
             console.log(data);
             data = data.projects;
             setChartData(compile(data));
@@ -22,14 +22,28 @@ function Dash() {
     return (
         <div id='dashBody'>
             <UserProjects />
-            <div className='dashSection' id='dashProjectAllocationChart' style={{display: 'flex', flexWrap: 'wrap', justifyContent: 'space-evenly'}}>
+            <div className='dashSection' id='dashProjectAllocationChart' style={{display: 'flex', flexWrap: 'wrap', justifyContent: 'space-evenly', alignItems: 'center'}}>
                 {
                     loading ? <Oval color='#000' size={50} /> :
                         <>
-                            <PieChart title={'Pie Chart'} labels={Object.keys(chartData.projectFund)} numbers={Object.values(chartData.projectFund)} />
-                            <PieChart title={'Pie Chart'} labels={Object.keys(chartData.PIFund)} numbers={Object.values(chartData.PIFund)} />
-                            <PieChart title={'Pie Chart'} labels={Object.keys(chartData.AgencyFund)} numbers={Object.values(chartData.AgencyFund)} />
-                            
+                            {Object.keys(chartData.projectFund).length > 0 ? 
+                                <PieChart title={'Project Fund'} 
+                                labels={Object.keys(chartData.projectFund)} 
+                                numbers={Object.values(chartData.projectFund)} /> 
+                                : 
+                                <p style={{ color: 'red', fontStyle: 'italic', border: '1px solid black', padding: '10px', textAlign: 'center' }}>No data found for Project Fund</p>}
+
+                            {Object.keys(chartData.PIFund).length > 0 ? 
+                                <PieChart title={'PI Fund'} 
+                                labels={Object.keys(chartData.PIFund)} numbers={Object.values(chartData.PIFund)} /> 
+                                : 
+                                <p style={{ color: 'red', fontStyle: 'italic', border: '1px solid black', padding: '10px', textAlign: 'center' }}>No data found for PI Fund</p>}
+                            {Object.keys(chartData.AgencyFund).length > 0 ? 
+                                <PieChart title={'Agency Fund'} 
+                                labels={Object.keys(chartData.AgencyFund)} 
+                                numbers={Object.values(chartData.AgencyFund)} /> 
+                                : 
+                                <p style={{ color: 'red', fontStyle: 'italic', border: '1px solid black', padding: '10px', textAlign: 'center' }}>No data found for Agency Fund</p>}
                         </>
                 }
             </div>
@@ -41,14 +55,16 @@ export default Dash;
 
 function compile(data) {
     let chartData = {projectFund: {}, PIFund: {}, AgencyFund: {}};
+    console.log(data);
+    
     data.forEach(project => {
         chartData.projectFund[project.ProjectTitle] = project.TotalSanctionAmount;
-        project.PIName.split(',').forEach(pi => {
-            const strippedPI = pi.trim();
-            if (chartData.PIFund[strippedPI]) {
-            chartData.PIFund[strippedPI] += project.TotalSanctionAmount;
+        project.PIs.forEach(pi => {       
+            pi = JSON.parse(pi); 
+            if (chartData.PIFund[`${pi.name}(${pi.id})`]) {
+            chartData.PIFund[`${pi.name}(${pi.id})`] += project.TotalSanctionAmount;
             } else {
-            chartData.PIFund[strippedPI] = project.TotalSanctionAmount;
+            chartData.PIFund[`${pi.name}(${pi.id})`] = project.TotalSanctionAmount;
             }
         });
 
