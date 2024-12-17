@@ -27,6 +27,7 @@ function Indents() {
                 data.indents.map((indent, index) => {
                     let color = {};
                     switch (indent.IndentStatus) {
+                        case 'Completed':
                         case 'Approved':
                             color = { backgroundColor: 'rgb(200, 250, 200)' };
                             break;

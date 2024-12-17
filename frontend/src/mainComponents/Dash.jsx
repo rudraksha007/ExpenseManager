@@ -59,7 +59,9 @@ function compile(data) {
     
     data.forEach(project => {
         chartData.projectFund[project.ProjectTitle] = project.TotalSanctionAmount;
-        project.PIs.forEach(pi => {       
+        project.PIs.forEach(pi => {  
+            console.log(pi);
+                 
             pi = JSON.parse(pi); 
             if (chartData.PIFund[`${pi.name}(${pi.id})`]) {
             chartData.PIFund[`${pi.name}(${pi.id})`] += project.TotalSanctionAmount;

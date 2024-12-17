@@ -4,7 +4,7 @@ import '../css/NewProject.css';
 import React, { useEffect, useRef, useState } from 'react';
 import { FaTimes } from 'react-icons/fa';
 
-function NewProject() {
+function NewProject({ EditFormData }) {
     const [popup, setPopup] = useState(null);
     const [formData, setFormData] = useState({
         ProjectTitle: '',
@@ -23,99 +23,76 @@ function NewProject() {
         EquipmentAllocationAmt: 0,
         TravelAllocationAmt: 0
     });
-    const selected = useRef({ PIs: [], CoPIs: [] });
+    const selected = useRef({ PIs: [], CoPIs: [], Workers: [] });
     const navigate = useNavigate();
     const [users, setUsers] = useState([]);
     useEffect(() => {
-        fetchDataWithParams('users', 'post', { filters: { role: 'Pi' } }).then(data => {
+        if(EditFormData){
+            setFormData(EditFormData);
+            if(EditFormData.PIs) selected.current.PIs = EditFormData.PIs;
+            if(EditFormData.CoPIs) selected.current.CoPIs = EditFormData.CoPIs;
+            if(EditFormData.Workers) selected.current.Workers = EditFormData.Workers;
+        }
+        fetchDataWithParams('users', 'post', { filters: {} }).then(data => {
             setUsers(data.users);
         });
     }, []);
 
     useEffect(() => {
-        setFormData({...formData, PIs: selected.current.PIs, CoPIs: selected.current.CoPIs});
+        setFormData({ ...formData, PIs: selected.current.PIs, CoPIs: selected.current.CoPIs, Workers: selected.current.Workers });
     }, [popup]);
-        
 
-    async function setPI() {
+
+    async function setPopupContent(type) {
+        const isWorker = type === 'Worker';
+        const filteredUsers = isWorker ? users.filter(profile => profile.id !== 0 && profile.role !== 'Pi') : users.filter(profile => profile.role === 'Pi');
+        
         setPopup(
             <div className='projectPopup'>
                 <form className="projectPopupCont" id="largePopupCont">
                     <FaTimes size={30} style={{ position: 'absolute', right: 10, top: 10, cursor: 'pointer' }} onClick={() => { setPopup(null); }} />
-                    <h2>Select PI</h2>
+                    <h2>Select {type}</h2>
                     <div className='table' style={{ gridTemplateColumns: '1fr 3fr 6fr 3fr 3fr' }}>
                         <div className="tableTitle">Tick</div>
                         <div className="tableTitle">Employee ID</div>
                         <div className="tableTitle">Name</div>
                         <div className="tableTitle">Designation</div>
                         <div className="tableTitle">Salary</div>
-                        {users.map((profile, index) => {
-                            if (formData.CoPIs.includes(profile.id)) return;
+                        {filteredUsers.map((profile) => {
+                            if (!isWorker && ((type === 'PI' && formData.CoPIs.includes(JSON.stringify({ id: profile.id, name: profile.name }))) || (type === 'CoPI' && formData.PIs.includes(JSON.stringify({ id: profile.id, name: profile.name }))))) return null;
                             return (
                                 <React.Fragment key={profile.id}>
-                                    <div style={{display: 'flex', justifyContent: 'center', alignItems: 'center'}}>
+                                    <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
                                         <input
                                             type="checkbox"
-                                            value={JSON.stringify({id:profile.id, name: profile.name})}
-                                            defaultChecked={selected.current.PIs.includes(profile.id)}
+                                            value={JSON.stringify({ id: profile.id, name: profile.name })}
+                                            defaultChecked={type === 'PI' ? selected.current.PIs.includes(JSON.stringify({ id: profile.id, name: profile.name })) :
+                                                type === 'CoPI' ? selected.current.CoPIs.includes(JSON.stringify({ id: profile.id, name: profile.name })) :
+                                                    selected.current.Workers?.includes(JSON.stringify({ id: profile.id, name: profile.name }))}
                                             onChange={(e) => {
                                                 if (e.target.checked) {
-                                                    selected.current = {CoPIs: selected.current.CoPIs, PIs: [...selected.current.PIs, e.target.value]};
+                                                    selected.current = type === 'PI'
+                                                        ? { ...selected.current, PIs: [...selected.current.PIs, e.target.value] }
+                                                        : type === 'CoPI'
+                                                            ? { ...selected.current, CoPIs: [...selected.current.CoPIs, e.target.value] }
+                                                            : { ...selected.current, Workers: [...selected.current.Workers, e.target.value] };
                                                 } else {
-                                                    selected.current = {CoPIs: selected.current.CoPIs, PIs: selected.current.PIs.filter(id => id !== e.target.value)};
+                                                    selected.current = type === 'PI'
+                                                        ? { ...selected.current, PIs: selected.current.PIs.filter(id => id !== e.target.value) }
+                                                        : type === 'CoPI'
+                                                            ? { ...selected.current, CoPIs: selected.current.CoPIs.filter(id => id !== e.target.value) }
+                                                            : { ...selected.current, Workers: selected.current.Workers.filter(id => id !== e.target.value) };
                                                 }
                                             }}
-                                            style={{height: '100%', width: '100%'}}
+                                            style={{ height: '100%', width: '100%' }}
                                         />
                                     </div>
                                     <div>{profile.id}</div>
                                     <div>{profile.name}</div>
                                     <div>{profile.role}</div>
-                                    <div>{profile.salary}</div>
-                                </React.Fragment>);
-                        })}
-                    </div>
-                </form>
-            </div>
-        );
-    }
-
-    async function setCoPI() {
-        setPopup(
-            <div className='projectPopup'>
-                <form className="projectPopupCont" id="largePopupCont">
-                    <FaTimes size={30} style={{ position: 'absolute', right: 10, top: 10, cursor: 'pointer' }} onClick={() => { setPopup(null); }} />
-                    <h2>Select CoPI</h2>
-                    <div className='table' style={{ gridTemplateColumns: '1fr 3fr 6fr 3fr 3fr' }}>
-                        <div className="tableTitle">Tick</div>
-                        <div className="tableTitle">Employee ID</div>
-                        <div className="tableTitle">Name</div>
-                        <div className="tableTitle">Designation</div>
-                        <div className="tableTitle">Salary</div>
-                        {users.map((profile, index) => {
-                            if (formData.PIs.includes(profile.id)) return;
-                            return (
-                                <React.Fragment key={profile.id}>
-                                    <div style={{display: 'flex', justifyContent: 'center', alignItems: 'center'}}>
-                                        <input
-                                            type="checkbox"
-                                            value={JSON.stringify({id:profile.id, name: profile.name})}
-                                            defaultChecked={selected.current.CoPIs.includes(profile.id)}
-                                            onChange={(e) => {
-                                                if (e.target.checked) {
-                                                    selected.current = {PIs: selected.current.PIs, CoPIs: [...selected.current.CoPIs, e.target.value]};
-                                                } else {
-                                                    selected.current = {PIs: selected.current.PIs, CoPIs: selected.current.CoPIs.filter(id => id !== e.target.value)};
-                                                }
-                                            }}
-                                            style={{height: '100%', width: '100%'}}
-                                        />
-                                    </div>
-                                    <div>{profile.id}</div>
-                                    <div>{profile.name}</div>
-                                    <div>{profile.designation}</div>
-                                    <div>{profile.salary}</div>
-                                </React.Fragment>);
+                                    <div>{profile.TotalSalary}</div>
+                                </React.Fragment>
+                            );
                         })}
                     </div>
                 </form>
@@ -140,7 +117,10 @@ function NewProject() {
     const handleSubmit = async (e) => {
         e.preventDefault();
         if (!e.currentTarget.checkValidity()) return;
-        console.log(formData);
+        if(formData.PIs.length === 0 || formData.CoPIs.length === 0 || formData.Workers.length === 0){
+            alert('Please select at least one PI, CoPI and Worker');
+            return;
+        }
 
         let res = await fetchDataWithParams('projects', 'put', formData);
         if (res.reqStatus === 'success') {
@@ -277,7 +257,7 @@ function NewProject() {
                     placeholder={`${formData.PIs.length} PI(s) selected`}
                     className='hoverable'
                     readOnly
-                    onClick={() => setPI()}
+                    onClick={() => setPopupContent('PI')}
                 />
                 <label>
                     CoPIs:<span style={{ color: 'red' }}>*</span>
@@ -287,7 +267,17 @@ function NewProject() {
                     placeholder={`${formData.CoPIs.length} CoPI(s) selected`}
                     className='hoverable'
                     readOnly
-                    onClick={() => setCoPI()}
+                    onClick={() => setPopupContent('CoPI')}
+                />
+                <label>
+                    Workers:<span style={{ color: 'red' }}>*</span>
+                </label>
+                <input
+                    type="text"
+                    placeholder={`${formData.Workers?.length || 0} Worker(s) selected`}
+                    className='hoverable'
+                    readOnly
+                    onClick={() => setPopupContent('Worker')}
                 />
 
                 {/* Allocation Amounts */}

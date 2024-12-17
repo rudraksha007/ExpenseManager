@@ -5,13 +5,16 @@ import { closePopup } from '../../assets/popup';
 import { fetchDataWithFileUpload } from '../../assets/scripts';
 import { ProjectContext } from '../../assets/ProjectData';
 import { ProfileContext } from '../../assets/UserProfile';
+import { Oval } from 'react-loader-spinner';
 
 function TravelsPopup({ reset }) {
-    const { ProjectNo, ProjectTitle } = (useContext(ProjectContext)).project;
+    const { ProjectNo, ProjectTitle, RemainingTravelAmt } = (useContext(ProjectContext)).project;
     const {id, name} = useContext(ProfileContext).profile;
+    const [loading, setLoading] = React.useState(false);
     const today = new Date().toISOString().split('T')[0];
     const handleSubmit = async (e) => {
         e.preventDefault();
+        setLoading(true);
         if(!e.currentTarget.checkValidity())return;
         const res = await fetchDataWithFileUpload('travel', 'put', e.currentTarget);
         if(res.reqStatus === 'success'){
@@ -20,11 +23,14 @@ function TravelsPopup({ reset }) {
         }else{
             alert('Failed: '+res.message);
         }
+        setLoading(false);
     }
 
     return (
         <div className='projectPopup'>
             <div className="projectPopupCont">
+                {loading ? <Oval color='white' height={80} strokeWidth={5} /> : 
+                <>
                 <FaTimes size={30} style={{ position: 'absolute', right: 10, top: 10, cursor: 'pointer' }} onClick={(e) => closePopup(e, reset)} />
                 <h2>Add Travel</h2>
                 <form className='popupForm' id='addTravelForm' onSubmit={(e) => handleSubmit(e)}>
@@ -62,7 +68,7 @@ function TravelsPopup({ reset }) {
                     <input type="text" id="Reason" name="Reason" required />
                     
                     <label htmlFor="RequestedAmt">Invoice Amount:</label>
-                    <input type="number" min='1' id="RequestedAmt" name="RequestedAmt" required />
+                    <input type="number" min='1' id="RequestedAmt" name="RequestedAmt" required max={RemainingTravelAmt}/>
                     
                     <label htmlFor="Remarks">Remarks:</label>
                     <textarea id="Remarks" name="Remarks" rows="4" />
@@ -71,6 +77,7 @@ function TravelsPopup({ reset }) {
                     <input type="file" id="BillCopy" name="BillCopy" accept="application/pdf" required title='Upload Reciept' multiple/>
                 </form>
                 <button type="submit" form='addTravelForm' className='hoverable'>Submit</button>
+                </>}
             </div>
         </div>
     );

@@ -4,14 +4,16 @@ import { log, parseBill, sendFailedResponse } from "../utils.js";
 
 async function addProject(req, res) {
     try {
-        const { ProjectTitle, ProjectNo, ProjectStartDate, ProjectEndDate, SanctionOrderNo, TotalSanctionamount, PIs, CoPIs, ManpowerAllocationAmt, ConsumablesAllocationAmt, ContingencyAllocationAmt, OverheadAllocationAmt, EquipmentAllocationAmt, TravelAllocationAmt, FundedBy } = req.body;
-        const query = 'INSERT INTO projects (ProjectTitle, ProjectNo, ProjectStartDate, ProjectEndDate,SanctionOrderNo,TotalSanctionamount,PIs,CoPIs,ManpowerAllocationAmt,ConsumablesAllocationAmt,ContingencyAllocationAmt,OverheadAllocationAmt,EquipmentAllocationAmt,TravelAllocationAmt, FundedBy ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ? )';
+        const { ProjectTitle, ProjectNo, ProjectStartDate, ProjectEndDate, SanctionOrderNo, TotalSanctionamount, PIs, CoPIs, Workers, ManpowerAllocationAmt, ConsumablesAllocationAmt, ContingencyAllocationAmt, OverheadAllocationAmt, EquipmentAllocationAmt, TravelAllocationAmt, FundedBy } = req.body;
+        const query = 'INSERT INTO projects (ProjectTitle, ProjectNo, ProjectStartDate, ProjectEndDate, SanctionOrderNo, TotalSanctionAmount, PIs, CoPIs, Workers, ManpowerAllocationAmt, ConsumablesAllocationAmt, ContingencyAllocationAmt, OverheadAllocationAmt, EquipmentAllocationAmt, TravelAllocationAmt, FundedBy) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)';
+        
         await db.query(query,
             [ProjectTitle, ProjectNo, ProjectStartDate, ProjectEndDate, SanctionOrderNo,
-                parseInt(TotalSanctionamount), JSON.stringify(PIs), JSON.stringify(CoPIs), parseInt(ManpowerAllocationAmt),
-                parseInt(ConsumablesAllocationAmt), parseInt(ContingencyAllocationAmt),
-                parseInt(OverheadAllocationAmt), parseInt(EquipmentAllocationAmt),
-                parseInt(TravelAllocationAmt), FundedBy]);
+            parseFloat(TotalSanctionamount), JSON.stringify(PIs), JSON.stringify(CoPIs), JSON.stringify(Workers), parseFloat(ManpowerAllocationAmt),
+            parseFloat(ConsumablesAllocationAmt), parseFloat(ContingencyAllocationAmt),
+            parseFloat(OverheadAllocationAmt), parseFloat(EquipmentAllocationAmt),
+            parseFloat(TravelAllocationAmt), FundedBy]);
+        
         res.status(201).json({ message: 'Project added successfully' }).end();
         const uniqueIds = [];
         const parseAndAddUnique = (arr) => {
@@ -24,12 +26,12 @@ async function addProject(req, res) {
         };
         parseAndAddUnique(PIs);
         parseAndAddUnique(CoPIs);
+        parseAndAddUnique(Workers);
 
         await Promise.all(uniqueIds.map(async (id) => {
             const updateUserProjectsQuery = 'UPDATE users SET projects = JSON_ARRAY_APPEND(projects, "$", ?) WHERE id = ?';
             try {
                 await db.query(updateUserProjectsQuery, [ProjectNo, id]);
-                console.log(`User projects updated successfully for user ID: ${id}`);
             } catch (err) {
                 console.error(`Failed to update user projects for user ID: ${id}:`, err.message);
             }
@@ -41,9 +43,9 @@ async function addProject(req, res) {
 
 function addUser(req, res) {
     let x = { ...req.body, projects: '[]', status: 1 };
-    const { id, name, email, password, projects, role, status } = x;
-    const query = 'INSERT INTO users(id,name,email,password,projects,status,role) VALUES (?, ?, ?, ?, ?, ?,?)';
-    db.query(query, [parseInt(id), name, email, password, projects, status, role]).then(result => {
+    const { id, name, email, password, projects, role, BasicSalary, HRA_Percentage } = x;
+    const query = 'INSERT INTO users(id, name, email, password, projects, status, role, BasicSalary, HRA_Percentage) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)';
+    db.query(query, [parseInt(id), name, email, password, projects, 1, role, parseFloat(BasicSalary), parseFloat(HRA_Percentage)]).then(result => {
         res.status(201).json({ message: 'Profile added successfully' }).end();
     }).catch(err => {
         sendFailedResponse(res, err.message, 500);
@@ -51,6 +53,7 @@ function addUser(req, res) {
 }
 
 async function addProjectIndent(req, res) {
+    if(req.path.split('/').at(-1)==='manpower'){addManpower(req, res);return;}
     const { ProjectNo, ProjectTitle, RequestedAmt, Reason, RequestedDate, EmployeeID, Remarks, Source, FromDate, Destination, DestinationDate, Items } = req.body;
     
     if (!await parseBill(req, res)) return;
@@ -69,7 +72,6 @@ async function addProjectIndent(req, res) {
     try {
         // First query: Insert into the 'indents' table
         let query = 'INSERT INTO indents (IndentCategory, ProjectNo, IndentAmount, IndentDate, IndentedPersonID, IndentStatus) VALUES (?, ?, ?, ?, ?, ?)';
-        console.log([req.path.split('/').at(-1), parseInt(ProjectNo), parseInt(RequestedAmt), RequestedDate, req.processed.token.id, 'Pending']);
         
         const result = await db.query(query, [req.path.split('/').at(-1), parseInt(ProjectNo), parseInt(RequestedAmt), RequestedDate, req.processed.token.id, 'Pending']);        
         // Get the auto-incremented IndentID from the first query
@@ -87,10 +89,6 @@ async function addProjectIndent(req, res) {
             case 'equipment':
                 query = 'INSERT INTO equipment ( ProjectNo, ProjectTitle, RequestedAmt, EmployeeID, Reason, IndentID, RequestedDate, Items, BillCopy, Remark) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)';
                 values = [ parseInt(ProjectNo), ProjectTitle, parseInt(RequestedAmt), EmployeeID, Reason, IndentID, RequestedDate, JSON.stringify(Items), JSON.stringify(billBase64Strings), Remarks];
-                break;
-            case 'manpower':
-                query = 'INSERT INTO manpower (IndentID, ProjectNo, ProjectTitle, RequestedAmt, Reason, EmployeeID, RequestedDate, BillCopy, Remark) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)';
-                values = [parseInt(ProjectNo), ProjectTitle, parseInt(RequestedAmt), IndentID, Reason, EmployeeID, RequestedDate, JSON.stringify(billBase64Strings), Remarks];
                 break;
             case 'overhead':
                 query = 'INSERT INTO overhead (IndentID, ProjectNo, ProjectTitle, RequestedAmt, Reason, EmployeeID, RequestedDate, BillCopy, Remark) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)';
@@ -117,6 +115,9 @@ async function addProjectIndent(req, res) {
     }
 }
 
+async function addManpower(req, res) {
+
+}
 
 async function addTravel(req, res) {
     const {

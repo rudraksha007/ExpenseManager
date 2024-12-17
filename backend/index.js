@@ -5,7 +5,7 @@ import { login, autoLogin, getProjects, logout, getUsers, getProjectInfo, getInd
 import cookieParser from 'cookie-parser';
 import { db, authenticate, authorize, connectDb, projectWiseAuthorisation } from './dbUtils.js';
 import cors from 'cors';
-import { addPOrder, addProject,addProjectIndent,addPurchaseReq,addTravel,addUser } from './callbacks/putReqs.js';
+import { addPOrder, addProject,addProjectIndent,addPurchaseReq,addUser } from './callbacks/putReqs.js';
 import fileUpload from 'express-fileupload';
 
 const hash = import('bcryptjs').hash;
@@ -20,25 +20,24 @@ app.post('/api/login', (req, res) => login(req, res));
 app.post('/api/logout', (req, res) => logout(req, res)); 
 app.post('/api/autoLogin', (req, res) => autoLogin(req, res)); 
 app.post('/api/projects', projectWiseAuthorisation, (req, res) => getProjects(req, res));
-app.post('/api/users', authorize(['SuperAdmin']), (req, res) => getUsers(req, res));
+app.post('/api/users', authorize(['Pi','SuperAdmin']), (req, res) => getUsers(req, res));
 app.post('/api/projects/*', (req, res)=>getProjectInfo(req, res));
 app.post('/api/pdf/*', (req, res)=>getBillCopy(req, res));
 app.post('/api/indents', projectWiseAuthorisation, (req, res) => getIndents(req, res));
 app.post('/api/indents/*', projectWiseAuthorisation, (req, res) => getIndentInfo(req, res));
 app.post('/api/purchaseReqs', authorize(['SuperAdmin']), (req,res)=>getPR(req, res));
-app.post('/api/purchaseReqs/*', projectWiseAuthorisation, authorize(['SuperAdmin']), (req,res)=>getPRInfo(req, res));
-app.post('/api/purchaseOrders', authorize(['SuperAdmin']), (req,res)=>getPO(req, res));
 
 app.post('/api/indentStatus', authorize(['SuperAdmin']), (req, res) => updateIndentStatus(req, res));
 app.post('/api/purchaseReqStatus', authorize(['SuperAdmin']), (req, res) => updatePRStatus(req, res));
 
 //Put requests (right click on supplied function-> goto source definition to view the code)
-app.put('/api/projects', authorize(['SuperAdmin']), (req, res) => addProject(req, res));
+app.put('/api/projects', authorize(['Pi','SuperAdmin']), (req, res) => addProject(req, res));
 app.put('/api/users', authorize(['SuperAdmin']), (req, res) => addUser(req, res));
 app.put('/api/travel', (req, res) => addProjectIndent(req, res));
 app.put('/api/consumables', (req, res) => addProjectIndent(req, res));
 app.put('/api/contingency', (req, res) => addProjectIndent(req, res));
 app.put('/api/equipment', (req, res) => addProjectIndent(req, res));
+app.put('/api/manpower', (req, res) => addProjectIndent(req, res));
 app.put('/api/purchaseReqs', authorize(['SuperAdmin']), (req, res) => addPurchaseReq(req, res));
 app.put('/api/purchaseOrders', authorize(['SuperAdmin']), (req, res) => addPOrder(req, res));
 
@@ -77,7 +76,7 @@ app.delete('/api/projects/:id', authorize(['Super Admin', 'Admin(PME)']), (req, 
   const { id } = req.body;
   const query = 'DELETE FROM projects WHERE ProjectNo = ?';
   db.query(query, [id], (err, result) => {
-    if (err) { console.log(err); return res.status(500).json({ message: 'Error deleting project' }) };
+    if (err) {  return res.status(500).json({ message: 'Error deleting project' }) };
     res.status(200).json({ message: 'Project deleted successfully' });
   });
 });

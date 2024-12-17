@@ -25,6 +25,7 @@ async function connectDb() {
                     TotalSanctionAmount DOUBLE,
                     PIs JSON NOT NULL,
                     CoPIs JSON NOT NULL,
+                    Workers JSON NOT NULL,
                     ManpowerAllocationAmt DOUBLE,
                     ConsumablesAllocationAmt DOUBLE,
                     ContingencyAllocationAmt DOUBLE,
@@ -38,12 +39,15 @@ async function connectDb() {
                 tableName: 'users',
                 definition: `
                     id INT PRIMARY KEY,
-                    name VARCHAR(255),
+                    name VARCHAR(255) NOT NULL,
                     email VARCHAR(255) UNIQUE KEY,
-                    password VARCHAR(255),
+                    password VARCHAR(255) NOT NULL,
                     projects JSON,
                     status INT,
-                    role VARCHAR(255),
+                    role ENUM('Techanican', 'JRK', 'SRK', 'RA', 'Pi', 'SuperAdmin'),
+                    BasicSalary DECIMAL(10, 2),
+                    HRA_Percentage DECIMAL(5, 2),
+                    TotalSalary DECIMAL(10, 2) GENERATED ALWAYS AS (BasicSalary + (BasicSalary * HRA_Percentage / 100)) VIRTUAL,
                     ProfilePic LONGBLOB
             `
             },
@@ -56,7 +60,7 @@ async function connectDb() {
                     IndentAmount DOUBLE,
                     IndentedPersonId INT,
                     IndentDate DATE,
-                    IndentStatus VARCHAR(255),
+                    IndentStatus ENUM('Pending', 'Approved', 'Rejected', 'Completed'),
                     FOREIGN KEY (ProjectNo) REFERENCES Projects(ProjectNo),
                     FOREIGN KEY (IndentedPersonId) REFERENCES users(id)
                 `
@@ -69,10 +73,6 @@ async function connectDb() {
                     ProjectTitle VARCHAR(255),
                     EmployeeID INT,
                     Name VARCHAR(255),
-                    Position ENUM('Techanican', 'JRK', 'SRK', 'RA'),
-                    BasicSalary DECIMAL(10, 2),
-                    HRA_Percentage DECIMAL(5, 2),
-                    TotalSalary DECIMAL(10, 2) GENERATED ALWAYS AS (BasicSalary + (BasicSalary * HRA_Percentage / 100)) VIRTUAL,
                     JoiningDate DATE,
                     EndDate DATE,
                     FOREIGN KEY (EmployeeID) REFERENCES users(id),
@@ -175,35 +175,6 @@ async function connectDb() {
                     FOREIGN KEY (ProjectTitle) REFERENCES Projects(ProjectTitle),
                     FOREIGN KEY (IndentID) REFERENCES Indents(IndentID)
                 `
-            }, {
-                tableName: 'PurchaseRequests',
-                definition: `
-                    PurchaseReqID INT PRIMARY KEY,
-                    PRDate DATE,
-                    ProjectNo INT,
-                    IndentID INT,
-                    PurchaseRequestAmount DOUBLE,
-                    PRRequestor INT,
-                    PRStatus VARCHAR(255),
-                    FOREIGN KEY (PRRequestor) REFERENCES users(id),
-                    FOREIGN KEY (ProjectNo) REFERENCES Projects(ProjectNo),
-                    FOREIGN KEY (IndentID) REFERENCES Indents(IndentID)
-                `
-            },
-            {
-                tableName: 'PurchaseOrders',
-                definition: `
-                    PurchaseOrderID INTEGER PRIMARY KEY,
-                    PODate DATE,
-                    ProjectNo INTEGER,
-                    PurchaseReqID INTEGER,
-                    PurchaseOrderAmount DOUBLE,
-                    PORequestor INT,
-                    POStatus VARCHAR(255),
-                    FOREIGN KEY (PORequestor) REFERENCES users(id),
-                    FOREIGN KEY (ProjectNo) REFERENCES Projects(ProjectNo),
-                    FOREIGN KEY (PurchaseReqID) REFERENCES PurchaseRequests(PurchaseReqID)
-                `
             }
         ];
         // Queries to create tables if they don't exist
@@ -220,6 +191,50 @@ async function connectDb() {
                 }
             }
             await db.query(`INSERT IGNORE INTO users (id, name, email, password, projects, status, role) VALUES (0, 'root', '${process.env.ROOT_ID}', '${process.env.ROOT_PASSWORD}', '[]', 1, 'root')`);
+            await db.query('DROP VIEW IF EXISTS ManpowerWithPaid;');
+            await db.query(`
+                CREATE VIEW ManpowerWithPaid AS
+                SELECT 
+                    m.*,
+                    (DATEDIFF(m.EndDate, m.JoiningDate) * u.TotalSalary) / 30 AS paid
+                FROM 
+                    Manpower m
+                JOIN 
+                    users u ON m.EmployeeID = u.id;
+            `);
+            log('ManpowerWithPaid view created');
+            await db.query('DROP VIEW IF EXISTS ProjectAllocationSummary;');
+            await db.query(`
+                CREATE VIEW ProjectAllocationSummary AS
+                SELECT 
+                    p.*,
+                    p.ManpowerAllocationAmt - IFNULL(SUM(mp.paid), 0) AS RemainingManpowerAmt,
+                    p.TravelAllocationAmt - IFNULL(SUM(t.RequestedAmt), 0) AS RemainingTravelAmt,
+                    p.ConsumablesAllocationAmt - IFNULL(SUM(c.RequestedAmt), 0) AS RemainingConsumablesAmt,
+                    p.ContingencyAllocationAmt - IFNULL(SUM(ct.RequestedAmt), 0) AS RemainingContingencyAmt,
+                    p.OverheadAllocationAmt - IFNULL(SUM(o.RequestedAmt), 0) AS RemainingOverheadAmt,
+                    p.EquipmentAllocationAmt - IFNULL(SUM(e.RequestedAmt), 0) AS RemainingEquipmentAmt
+                FROM 
+                    Projects p
+                LEFT JOIN 
+                    ManpowerWithPaid mp ON p.ProjectNo = mp.ProjectNo
+                LEFT JOIN 
+                    Travel t ON p.ProjectNo = t.ProjectNo
+                LEFT JOIN 
+                    Consumables c ON p.ProjectNo = c.ProjectNo
+                LEFT JOIN 
+                    Contingency ct ON p.ProjectNo = ct.ProjectNo
+                LEFT JOIN 
+                    Overhead o ON p.ProjectNo = o.ProjectNo
+                LEFT JOIN 
+                    Equipment e ON p.ProjectNo = e.ProjectNo
+                GROUP BY 
+                    p.ProjectNo, p.ProjectTitle, 
+                    p.ManpowerAllocationAmt, p.TravelAllocationAmt, 
+                    p.ConsumablesAllocationAmt, p.ContingencyAllocationAmt, 
+                    p.OverheadAllocationAmt, p.EquipmentAllocationAmt;
+            `);
+            log('ProjectAllocationSummary view created');
             log('SQL Binding Complete');
         })();
         return db;
@@ -305,15 +320,15 @@ function authorize(allowedRoles) {
 
 const projectWiseAuthorisation = (req, res, next) => {
     if (req.processed.token.role != 'root' && req.processed.token.role != 'SuperAdmin') {
-        
+
         getFromDb('users', ['projects'], `id=${req.processed.token.id}`).then((projects) => {
             if (projects.length == 0) {
                 return sendFailedResponse(res, 'Permission denied', 403);
             }
-            
+
             projects = projects[0].projects;
             let arr = [];
-            projects.forEach(ele=>arr.push(Number(ele)))
+            projects.forEach(ele => arr.push(Number(ele)))
             req.processed.allowedProjects = arr;
             next();
             return;
@@ -322,7 +337,7 @@ const projectWiseAuthorisation = (req, res, next) => {
         });
     }
     else {
-        
+
         getFromDb('Projects', ['ProjectNo']).then((projects) => {
             let arr = [];
             projects.forEach(project => {
@@ -330,7 +345,7 @@ const projectWiseAuthorisation = (req, res, next) => {
             });
             req.processed.allowedProjects = arr;
             console.log(arr);
-            
+
             next();
         }).catch((err) => {
             return sendFailedResponse(res, err.message, 500);

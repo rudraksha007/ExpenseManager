@@ -22,21 +22,24 @@ function PurchaseReqs() {
                 console.log(data);
                 if (data.reqStatus == 'success') {
                     let l = [];
-                    data.purchaseReqs.map((request, index) => (
+                    data.purchaseReqs.map((request, index) => {
+                        let color = {backgroundColor: 'rgb(220, 220, 220)'};
+                        if (request.IndentStatus === 'Completed') {color.backgroundColor = 'rgb(220, 255, 220)'}
+                        else if (request.IndentStatus === 'Rejected') {color.backgroundColor = 'rgb(255, 200, 200)'}; 
                         l.push(
                             <React.Fragment key={request.PurchaseReqID}>
-                                <div>{index + 1}</div>
-                                <div>{request.ProjectNo}</div>
-                                <div>{request.PRDate.split('T')[0]}</div>
-                                <div>{request.PurchaseRequestAmount}</div>
-                                <div>{request.PRRequestor}</div>
-                                <div>{request.PRStatus}</div>
-                                <div title='Click to view Details' className='requestId hoverable' onClick={() => setPopup(<PurchaseReqPopup id={request.PurchaseReqID} reset={() => setPopup(null)} />)}>
-                                    {request.PurchaseReqID}
+                                <div style={color}>{index + 1}</div>
+                                <div style={color}>{request.ProjectNo}</div>
+                                <div style={color}>{request.IndentDate.split('T')[0]}</div>
+                                <div style={color}>{request.IndentAmount}</div>
+                                <div style={color}>{request.IndentedPersonId}</div>
+                                <div style={color}>{request.IndentStatus === 'Approved' ? 'Pending' : request.IndentStatus}</div>
+                                <div style={color} title='Click to view Details' className='requestId hoverable' onClick={() => setPopup(<PurchaseReqPopup id={request.IndentID} reset={() => setPopup(null)} />)}>
+                                    {request.IndentID}
                                 </div>
                             </React.Fragment>
                         )
-                    ));
+                });
                     setRequests(l);
                 }
             } catch (error) {
@@ -66,7 +69,6 @@ function PurchaseReqs() {
                         <div className='tableTitle'>Status</div>
                         <div className='tableTitle'>Request ID (details)</div>
                         {requests}
-                        <div className="add hoverable" onClick={()=>setPopup(<NewPRPopup reset={()=>setPopup(null)}/>)}><FaPlus /></div>
                     </div>
                 </div>
             }

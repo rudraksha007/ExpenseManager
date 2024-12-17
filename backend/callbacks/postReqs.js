@@ -54,7 +54,6 @@ function autoLogin(req, res) {
       return res.status(404).res.clearCookie('token').json({ message: 'User not found' }).end();
     }
     const user = results[0][0];
-    // console.log(user);
     res.status(200).json(
       {
         message: 'Login successful',
@@ -71,7 +70,7 @@ function autoLogin(req, res) {
 function getProjects(req, res) {
   getFromDb('projects', req.body.fields).then((results) => {
     const { page, text, status, fundedBy, fromDate, toDate } = req.body.filters;
-    results = results.filter(project => {
+    results = results.filter(project => {  
       if (!req.processed.allowedProjects.includes(project.ProjectNo)) return false;
       if (text || status || fundedBy || fromDate || toDate) {
         let isValid = true;
@@ -99,22 +98,20 @@ function logout(req, res) {
 }
 
 function getUsers(req, res) {
-  getFromDb('users', ['name', 'email', 'id', 'role', 'projects', 'status']).then((results) => {
+  getFromDb('users', ['name', 'email', 'id', 'role', 'projects', 'status', 'TotalSalary', 'BasicSalary', 'HRA_Percentage'], 'id != 0').then((results) => {
     const { text, role } = req.body.filters;
     if (text || role) {
-      let actual = []
+      let actual = [];
       results.forEach(user => {
         if (text && role) {
           if (user.name.startsWith(text) && user.role === role) {
             log('both');
             actual.push(user);
           }
-        }
-        else if (text && (user.name.startsWith(text) || user.email.startsWith(text))) {
+        } else if (text && (user.name.startsWith(text) || user.email.startsWith(text))) {
           log('text');
           actual.push(user);
-        }
-        else if ((role && user.role === role)) {
+        } else if (role && user.role === role) {
           actual.push(user);
           log('role');
         }
@@ -129,7 +126,7 @@ function getProjectInfo(req, res) {
   try {
     let projectNo = parseInt(req.path.split('/')[3]);
     let payload = { data: {} };
-    getFromDb('projects', ['*'], `ProjectNo= ${projectNo}`).then((results) => {
+    getFromDb('ProjectAllocationSummary', ['*'], `ProjectNo= ${projectNo}`).then((results) => {
       payload.data = results[0];
     }).catch((err) => {
       sendFailedResponse(res, err.message, 500);
@@ -229,20 +226,18 @@ function getIndentInfo(req, res) {
   });
 }
 
-function updateIndentStatus(req, res) {
+async function updateIndentStatus(req, res) {
   const { Approved, IndentID } = req.body;
-  console.log(IndentID);
-
-  updateAtDb('indents', { IndentStatus: Approved ? "Approved" : "Rejected" }, { IndentID: IndentID }).then(() => {
+  try {
+    await updateAtDb('indents', { IndentStatus: Approved ? "Approved" : "Rejected" }, { IndentID: IndentID })
     res.status(200).json({ message: 'Indent updated' }).end();
-  }).catch(err => {
+  } catch (err) {
     sendFailedResponse(res, err.message, 500);
-  });
-
+  }
 }
 
 function getPR(req, res) {
-  getFromDb('PurchaseRequests', ['*']).then((results) => {
+  getFromDb('indents', ['*'], `IndentStatus IN ('Approved', 'Completed')`).then((results) => {
     const { text, status, upto, above, fromDate, toDate } = req.body.filter;
     if (text || status || upto || above || fromDate || toDate) {
       results = results.filter(pr => {
@@ -307,9 +302,7 @@ function getPRInfo(req, res) {
 
 function updatePRStatus(req, res) {
   const { Approved, PurchaseReqID } = req.body;
-  console.log(PurchaseReqID);
-
-  updateAtDb('PurchaseRequests', { PRStatus: Approved ? "Approved" : "Rejected" }, { PurchaseReqID: PurchaseReqID }).then(() => {
+  updateAtDb('indents', { IndentStatus: Approved ? "Completed" : "Rejected" }, { IndentID: PurchaseReqID }).then(() => {
     res.status(200).json({ message: 'Purchase request updated' }).end();
   }).catch(err => {
     sendFailedResponse(res, err.message, 500);

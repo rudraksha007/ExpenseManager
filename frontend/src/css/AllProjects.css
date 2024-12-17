@@ -7,6 +7,9 @@
     grid-template-columns: 1fr 5fr 2fr 3fr 2fr 2fr 2fr;
     gap: 2px;
     grid-auto-rows: max-content;
+    overflow-y: auto;
+    box-sizing: border-box;
+    padding-bottom: 40px;
 }
 .table{
     display: grid;

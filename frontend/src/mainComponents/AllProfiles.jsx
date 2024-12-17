@@ -38,7 +38,7 @@ function AllProfiles() {
                         <div style={style}>{profile.role}</div>
                         <div style={style}>{profile.email}</div>
                         <div style={style}>{profile.id}</div>
-                        <div style={style}>{profile.projects}</div>
+                        <div style={style}>{profile.projects.length}</div>
                         <div className='allProfilesActions' style={style}>
                             <Link to={`/profiles/${profile.id}`} title="View Profile Details"><FaEdit size={20} /></Link>
                         </div>

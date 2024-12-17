@@ -132,7 +132,7 @@ function ProjectContent() {
                             {table[4]}
                             <div className="add">
                                 <div className='hoverable inherit'><FaEdit size={20} onClick={() => setPopup(<DecManpowerPopup reset={() => setPopup(null)} />)} /></div>
-                                <div className='hoverable inherit'><FaPlus size={20} onClick={() => setPopup(<AddManpowerPopup reset={() => setPopup(null)} />)} /></div>
+                                <div className='hoverable inherit'><FaPlus size={20} onClick={() => setPopup(<AddManpowerPopup reset={() => setPopup(null)} workers={project.Workers}/>)} /></div>
                             </div>
                         </div>
                     </div>
@@ -148,16 +148,18 @@ function compileDate(response, setPopup) {
 
     let tempArray = [];
     if (response.consumables) {
-        Object.keys(response.consumables).forEach((key) => (
+        Object.keys(response.consumables).forEach((key,index) => {
+            console.log(response.consumables[key].IndentStatus);
+            
             tempArray.push([
-                <div key={`${key}-sl`}>{key + 1}</div>,
+                <div key={`${key}-sl`}>{index + 1}</div>,
                 <div key={`${key}-employeeId`}>{response.consumables[key].EmployeeID}</div>,
                 <div key={`${key}-indentId`}>{response.consumables[key].IndentID}</div>,
                 <div key={`${key}-date`}>{response.consumables[key].RequestedDate.split('T')[0]}</div>,
                 <div key={`${key}-reason`}>{response.consumables[key].Reason}</div>,
                 <div key={`${key}-bill`} className='hoverable' onClick={() => setPopup(<PDFPopup reset={() => setPopup(null)} pdf={response.consumables[key].BillCopy} />)}>${response.consumables[key].RequestedAmt}</div>
             ])
-        ));
+    });
     }
     arr.push(tempArray);
 

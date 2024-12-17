@@ -1,19 +1,24 @@
-import React, { useContext } from 'react';
+import React, { useContext, useState } from 'react';
 import '../../css/Popup.css';
 import { FaTimes } from 'react-icons/fa';
+import { Oval } from 'react-loader-spinner';
 import { closePopup } from '../../assets/popup';
 import { fetchDataWithFileUpload } from '../../assets/scripts';
 import { ProjectContext } from '../../assets/ProjectData';
 import { ProfileContext } from '../../assets/UserProfile';
 
 function ContingencyPopup({ reset }) {
+    const [loading, setLoading] = useState(false);
     const today = new Date().toISOString().split('T')[0];
-    const { ProjectNo, ProjectTitle } = (useContext(ProjectContext)).project;
+    const { ProjectNo, ProjectTitle, RemainingContingencyAmt } = (useContext(ProjectContext)).project;
     const { id, name } = useContext(ProfileContext).profile;
+
     const handleSubmit = async (e) => {
         e.preventDefault();
         if (!e.currentTarget.checkValidity()) return;
+        setLoading(true);
         const res = await fetchDataWithFileUpload('contingency', 'put', e.currentTarget);
+        setLoading(false);
         if (res.reqStatus === 'success') {
             alert('Contingency Added Successfully');
             reset();
@@ -25,6 +30,8 @@ function ContingencyPopup({ reset }) {
     return (
         <div className='projectPopup'>
             <div className="projectPopupCont">
+                {loading ? <Oval color='white' height={80} strokeWidth={5} /> : 
+                <>
                 <FaTimes size={30} style={{ position: 'absolute', right: 10, top: 10, cursor: 'pointer' }} onClick={(e) => closePopup(e, reset)} />
                 <h2>Add Contingency</h2>
                 <form className='popupForm' id='addEquipmentForm' onSubmit={(e) => handleSubmit(e)}>
@@ -48,7 +55,7 @@ function ContingencyPopup({ reset }) {
                     <input type="text" id="Reason" name="Reason" required />
 
                     <label htmlFor="RequestedAmt">Invoice Amount:</label>
-                    <input type="number" id="RequestedAmt" name="RequestedAmt" />
+                    <input type="number" id="RequestedAmt" name="RequestedAmt" min={0} max={RemainingContingencyAmt}/>
 
                     <label htmlFor="Remarks">Remarks:</label>
                     <textarea id="Remarks" name="Remarks" rows="4" />
@@ -57,6 +64,7 @@ function ContingencyPopup({ reset }) {
                     <input type="file" id="BillCopy" name="BillCopy" accept="application/pdf" required multiple/>
                 </form>
                 <button type="submit" form='addEquipmentForm' className='hoverable'>Submit</button>
+                </>}
             </div>
         </div>
     );

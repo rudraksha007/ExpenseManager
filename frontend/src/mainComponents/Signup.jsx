@@ -37,12 +37,15 @@ function Signup() {
                     <label className="loginInput hoverable">Designation:
                         <select name='role' required defaultValue={"Pi"}>
                             <option value="" disabled>Select</option>
+                            <option value="JRK">JRK</option>
+                            <option value="SRK">SRK</option>
+                            <option value="RA">RA</option>
                             <option value="Pi">PI</option>
-                            <option value="Scientist">Scientist</option>
-                            <option value="Admin">Admin</option>
-                            <option value="SuperAdmin">Super Admin</option>
+                            <option value="SuperAdmin">Techanican</option>
                         </select>
                     </label>
+                    <label className="loginInput hoverable">Basic Salary:<input type='number' name='BasicSalary' placeholder="Enter Basic Salary" required min={0} step="0.01" /></label>
+                    <label className="loginInput hoverable">HRA Percentage:<input type='number' name='HRA_Percentage' placeholder="Enter HRA Percentage" required min={0} step="0.01" /></label>
                 </div>
                 <div id="submitDiv">
                     <label id="loginNewAcct">Have an account? <Link to={"/login"}>Login</Link></label>

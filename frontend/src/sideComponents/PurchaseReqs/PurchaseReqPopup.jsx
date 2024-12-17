@@ -12,7 +12,7 @@ function PurchaseReqPopup({ reset, id }) {
 
     React.useEffect(() => {
         async function fetchRequestDetails() {
-            let data = await fetchData(`purchaseReqs/${id}`, 'post');
+            let data = await fetchData(`indents/${id}`, 'post');
             if (data.reqStatus == 'success') setRequestDetails(data.data);
             else setRequestDetails({
                 RequestID: 'N/A',
@@ -47,15 +47,15 @@ function PurchaseReqPopup({ reset, id }) {
                         </div>
                         <div className='requestDetailField'>
                             <h4>Request ID</h4>
-                            <span>{requestDetails?.PurchaseReqID}</span>
+                            <span>{requestDetails?.IndentID}</span>
                         </div>
                         <div className='requestDetailField'>
                             <h4>Request Date</h4>
-                            <span>{requestDetails?.PRDate.split('T')[0]}</span>
+                            <span>{requestDetails?.IndentDate.split('T')[0]}</span>
                         </div>
                         <div className='requestDetailField'>
                             <h4>Request Status</h4>
-                            <span>{requestDetails?.PRStatus}</span>
+                            <span>{requestDetails?.IndentStatus}</span>
                         </div>
                         <div className='requestDetailField'>
                             <h4>Request Category</h4>
@@ -63,17 +63,20 @@ function PurchaseReqPopup({ reset, id }) {
                         </div>
                         <div className='requestDetailField'>
                             <h4>Request Amount</h4>
-                            <span>{requestDetails?.PurchaseRequestAmount}</span>
+                            <span>{requestDetails?.IndentAmount}</span>
                         </div>
                         <div className='requestDetailField'>
                             <h4>Requested Person ID</h4>
-                            <span>{requestDetails?.PRRequestor}</span>
+                            <span>{requestDetails?.IndentedPersonId}</span>
                         </div>
                     </div>
+                    {requestDetails?.IndentStatus === 'Completed' ? <></>
+                    :
                     <div className="requestPopupActions">
-                        <FaTimes size={30} style={{ marginRight: 5 }} className='hoverable' title='Reject This Request' onClick={() => reject(requestDetails.PurchaseReqID, reset)} />
-                        <FaCheck size={30} style={{ marginRight: 5 }} className='hoverable' title='Approve This Request' onClick={() => approve(requestDetails.PurchaseReqID, reset)} />
+                        <FaTimes size={30} style={{ marginRight: 5 }} className='hoverable' title='Reject This Request' onClick={() => reject(requestDetails.IndentID, reset)} />
+                        <FaCheck size={30} style={{ marginRight: 5 }} className='hoverable' title='Approve This Request' onClick={() => approve(requestDetails.IndentID, reset)} />
                     </div>
+                    }
                 </div>}
         </div >
     );
