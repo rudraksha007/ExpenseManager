@@ -1,18 +1,21 @@
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { fetchDataWithParams } from '../assets/scripts';
 import '../css/NewProject.css';
 import React, { useEffect, useRef, useState } from 'react';
 import { FaTimes } from 'react-icons/fa';
 
-function NewProject({ EditFormData }) {
+function NewProject() {
     const [popup, setPopup] = useState(null);
-    const [formData, setFormData] = useState({
+    const navigate = useNavigate();
+    const location = useLocation();
+    const {EditFormData} = location.state || {};
+    const [formData, setFormData] = useState(EditFormData?{...EditFormData, ProjectStartDate: EditFormData.ProjectStartDate.split('T')[0], ProjectEndDate: EditFormData.ProjectEndDate.split('T')[0]}:{
         ProjectTitle: '',
         ProjectNo: 0,
         ProjectStartDate: '',
         ProjectEndDate: '',
         SanctionOrderNo: '',
-        TotalSanctionamount: 0,
+        TotalSanctionAmount: 0,
         FundedBy: '',
         PIs: [],
         CoPIs: [],
@@ -24,10 +27,11 @@ function NewProject({ EditFormData }) {
         TravelAllocationAmt: 0
     });
     const selected = useRef({ PIs: [], CoPIs: [], Workers: [] });
-    const navigate = useNavigate();
     const [users, setUsers] = useState([]);
     useEffect(() => {
         if(EditFormData){
+            console.log(EditFormData);
+            
             setFormData(EditFormData);
             if(EditFormData.PIs) selected.current.PIs = EditFormData.PIs;
             if(EditFormData.CoPIs) selected.current.CoPIs = EditFormData.CoPIs;
@@ -111,7 +115,7 @@ function NewProject({ EditFormData }) {
         }, 0);
 
         // The remaining available amount for the allocation field
-        return formData.TotalSanctionamount - totalAllocated;
+        return formData.TotalSanctionAmount - totalAllocated;
     };
 
     const handleSubmit = async (e) => {
@@ -121,12 +125,18 @@ function NewProject({ EditFormData }) {
             alert('Please select at least one PI, CoPI and Worker');
             return;
         }
-
-        let res = await fetchDataWithParams('projects', 'put', formData);
+        let res = null;
+        if(EditFormData){
+            res = await fetchDataWithParams('editProject', 'put', formData);
+            console.log(formData);
+            
+        }else{
+            res = await fetchDataWithParams('projects', 'put', formData);
+        }
         if (res.reqStatus === 'success') {
-            alert('Project Created Successfully');
+            alert(`Project ${EditFormData?'Saved':'Created'} Successfully`);
             setFormData({});
-            navigate('/');
+            navigate(EditFormData?`/projects/${formData.ProjectNo}`:'/');
         } else {
             alert('Failed to create project: ' + res.message);
         }
@@ -154,7 +164,6 @@ function NewProject({ EditFormData }) {
         <>
             <form id="newProjectDiv" onSubmit={handleSubmit}>
                 {popup}
-                {/* Project Title */}
                 <label>
                     Project Title:<span style={{ color: 'red' }}>*</span>
                 </label>
@@ -163,6 +172,7 @@ function NewProject({ EditFormData }) {
                     name="ProjectTitle"
                     placeholder="Enter project title"
                     required
+                    readOnly={EditFormData?true:false}
                     onChange={handleChange}
                     value={formData.ProjectTitle || ''}
                 />
@@ -176,6 +186,7 @@ function NewProject({ EditFormData }) {
                     name="ProjectNo"
                     placeholder="Enter project number"
                     required
+                    readOnly = {EditFormData?true:false}
                     min="0"
                     onChange={handleChange}
                     value={formData.ProjectNo || ''}
@@ -228,12 +239,12 @@ function NewProject({ EditFormData }) {
                 </label>
                 <input
                     type="number"
-                    name="TotalSanctionamount"
+                    name="TotalSanctionAmount"
                     placeholder="Enter total sanction amount"
                     required
                     min="0"
                     onChange={handleChange}
-                    value={formData.TotalSanctionamount || ''}
+                    value={formData.TotalSanctionAmount || ''}
                 />
 
                 {/* Funded By */}
@@ -306,7 +317,7 @@ function NewProject({ EditFormData }) {
                 ))}
 
                 <footer>
-                    <input type="submit" value="Create New Project" className="hoverable tableTitle" />
+                    <input type="submit" value={EditFormData? "Save Changes":"Create New Project"} className="hoverable tableTitle" />
                 </footer>
             </form>
         </>

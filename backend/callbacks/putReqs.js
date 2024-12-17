@@ -4,12 +4,12 @@ import { log, parseBill, sendFailedResponse } from "../utils.js";
 
 async function addProject(req, res) {
     try {
-        const { ProjectTitle, ProjectNo, ProjectStartDate, ProjectEndDate, SanctionOrderNo, TotalSanctionamount, PIs, CoPIs, Workers, ManpowerAllocationAmt, ConsumablesAllocationAmt, ContingencyAllocationAmt, OverheadAllocationAmt, EquipmentAllocationAmt, TravelAllocationAmt, FundedBy } = req.body;
+        const { ProjectTitle, ProjectNo, ProjectStartDate, ProjectEndDate, SanctionOrderNo, TotalSanctionAmount, PIs, CoPIs, Workers, ManpowerAllocationAmt, ConsumablesAllocationAmt, ContingencyAllocationAmt, OverheadAllocationAmt, EquipmentAllocationAmt, TravelAllocationAmt, FundedBy } = req.body;
         const query = 'INSERT INTO projects (ProjectTitle, ProjectNo, ProjectStartDate, ProjectEndDate, SanctionOrderNo, TotalSanctionAmount, PIs, CoPIs, Workers, ManpowerAllocationAmt, ConsumablesAllocationAmt, ContingencyAllocationAmt, OverheadAllocationAmt, EquipmentAllocationAmt, TravelAllocationAmt, FundedBy) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)';
         
         await db.query(query,
             [ProjectTitle, ProjectNo, ProjectStartDate, ProjectEndDate, SanctionOrderNo,
-            parseFloat(TotalSanctionamount), JSON.stringify(PIs), JSON.stringify(CoPIs), JSON.stringify(Workers), parseFloat(ManpowerAllocationAmt),
+            parseFloat(TotalSanctionAmount), JSON.stringify(PIs), JSON.stringify(CoPIs), JSON.stringify(Workers), parseFloat(ManpowerAllocationAmt),
             parseFloat(ConsumablesAllocationAmt), parseFloat(ContingencyAllocationAmt),
             parseFloat(OverheadAllocationAmt), parseFloat(EquipmentAllocationAmt),
             parseFloat(TravelAllocationAmt), FundedBy]);
@@ -36,6 +36,25 @@ async function addProject(req, res) {
                 console.error(`Failed to update user projects for user ID: ${id}:`, err.message);
             }
         }));
+    } catch (err) {
+        sendFailedResponse(res, err.message, 500);
+    }
+}
+
+async function editProject(req, res) {
+    try {
+        const { ProjectNo, ProjectStartDate, ProjectEndDate, SanctionOrderNo, TotalSanctionAmount, PIs, CoPIs, Workers, ManpowerAllocationAmt, ConsumablesAllocationAmt, ContingencyAllocationAmt, OverheadAllocationAmt, EquipmentAllocationAmt, TravelAllocationAmt, FundedBy } = req.body;
+
+        const query = 'UPDATE projects SET  ProjectStartDate = ?, ProjectEndDate = ?, SanctionOrderNo = ?, TotalSanctionAmount = ?, PIs = ?, CoPIs = ?, Workers = ?, ManpowerAllocationAmt = ?, ConsumablesAllocationAmt = ?, ContingencyAllocationAmt = ?, OverheadAllocationAmt = ?, EquipmentAllocationAmt = ?, TravelAllocationAmt = ?, FundedBy = ? WHERE ProjectNo = ?';
+
+        await db.query(query,
+            [ ProjectStartDate, ProjectEndDate, SanctionOrderNo,
+            parseFloat(TotalSanctionAmount), JSON.stringify(PIs), JSON.stringify(CoPIs), JSON.stringify(Workers), parseFloat(ManpowerAllocationAmt),
+            parseFloat(ConsumablesAllocationAmt), parseFloat(ContingencyAllocationAmt),
+            parseFloat(OverheadAllocationAmt), parseFloat(EquipmentAllocationAmt),
+            parseFloat(TravelAllocationAmt), FundedBy, ProjectNo]);
+
+        res.status(200).json({ message: 'Project updated successfully' }).end();
     } catch (err) {
         sendFailedResponse(res, err.message, 500);
     }
@@ -208,4 +227,4 @@ async function addPOrder(req, res) {
 
 
 
-export { addProject, addUser, addProjectIndent,addPurchaseReq, addPOrder, addTravel };
+export { addProject, editProject, addUser, addProjectIndent,addPurchaseReq, addPOrder, addTravel };

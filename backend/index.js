@@ -5,7 +5,7 @@ import { login, autoLogin, getProjects, logout, getUsers, getProjectInfo, getInd
 import cookieParser from 'cookie-parser';
 import { db, authenticate, authorize, connectDb, projectWiseAuthorisation } from './dbUtils.js';
 import cors from 'cors';
-import { addPOrder, addProject,addProjectIndent,addPurchaseReq,addUser } from './callbacks/putReqs.js';
+import { addPOrder, addProject,addProjectIndent,addPurchaseReq,addUser, editProject } from './callbacks/putReqs.js';
 import fileUpload from 'express-fileupload';
 
 const hash = import('bcryptjs').hash;
@@ -40,6 +40,7 @@ app.put('/api/equipment', (req, res) => addProjectIndent(req, res));
 app.put('/api/manpower', (req, res) => addProjectIndent(req, res));
 app.put('/api/purchaseReqs', authorize(['SuperAdmin']), (req, res) => addPurchaseReq(req, res));
 app.put('/api/purchaseOrders', authorize(['SuperAdmin']), (req, res) => addPOrder(req, res));
+app.put('/api/editProject', authorize(['Pi','SuperAdmin']), (req, res) => editProject(req, res));
 
 
 // app.put('/api/users', authorize(['SuperAdmin']), (req, res) => {

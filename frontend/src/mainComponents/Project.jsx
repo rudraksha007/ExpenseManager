@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useContext } from 'react';
-import { useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import '../css/Project.css';
 import { FaPlus, FaEdit } from 'react-icons/fa';
 import AddManpowerPopup from '../sideComponents/projectPage/AddManpowerPopup';
@@ -16,6 +16,7 @@ import { ProjectContext, ProjectProvider } from '../assets/ProjectData';
 
 function ProjectContent() {
     let { id } = useParams();
+    const navigate = useNavigate();
     const [activeTab, setActiveTab] = useState('Consumables');
     const [table, setTable] = useState([]);
     const { project, setProject } = useContext(ProjectContext);
@@ -54,7 +55,11 @@ function ProjectContent() {
             {loading ? <Oval color='black' height={80} strokeWidth={5} /> :
                 <div id='projectMainDiv'>
                     {popup}
-                    <h1>Project Details <FaEdit size={40} className='hoverable' title='Edit' style={{ position: 'absolute', right: 20 }} onClick={() => setPopup(<EditProject reset={() => setPopup(<></>)} />)} /></h1>
+                    <h1>Project Details <FaEdit size={40} className='hoverable' title='Edit' style={{ position: 'absolute', right: 20 }} onClick={() => navigate('/newproject', {
+                        state: {
+                            EditFormData: project
+                        }
+                    })} /></h1>
 
                     <div id="projectDetails">
                         <div><b>Funded By:</b> <span>{project.FundedBy}</span></div>
