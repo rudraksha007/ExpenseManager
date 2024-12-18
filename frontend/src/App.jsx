@@ -10,7 +10,7 @@ import Project from './mainComponents/Project';
 import Indents from './mainComponents/Indents';
 import PurchaseReqs from './mainComponents/PurchaseReqs';
 import AllProfiles from './mainComponents/AllProfiles';
-import { autoLogin } from './assets/scripts.js';
+import { autoLogin, initialize } from './assets/scripts.js';
 import { ProfileContext } from './assets/UserProfile';
 import { Oval } from 'react-loader-spinner';
 import NewProject from './mainComponents/NewProject.jsx';
@@ -23,6 +23,7 @@ function App() {
     document.title = 'Project Management System';
     async function login() {
       if(profile){return;}
+      await initialize();
       let prof = await autoLogin();
       setProfile(prof);
       setLoading(false);

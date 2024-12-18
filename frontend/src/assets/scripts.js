@@ -1,8 +1,8 @@
 import FingerprintJS from '@fingerprintjs/fingerprintjs';
 
 const mainUrl = '/api/';
-const fpPromise = await FingerprintJS.load();
-const fingerPrint = (await fpPromise.get()).visitorId;
+let fpPromise = null;
+let fingerPrint = null;
 let data = {
     profiles: {
         profiles: [
@@ -307,6 +307,10 @@ let data = {
         projectManager: "Mr. X"
     }
 }
+async function initialize() {
+    fingerPrint = (await fpPromise.get()).visitorId;
+    fpPromise = await FingerprintJS.load();
+}
 async function fetchData(url, method) {
     return (await fetchDataWithParams(url, method, {}));
 }
@@ -390,4 +394,4 @@ async function login(setProfile) {
     return true;
 }
 
-export { fetchData, login, fetchDataWithParams, autoLogin, fetchDataWithFileUpload };
+export { fetchData, login, fetchDataWithParams, autoLogin, fetchDataWithFileUpload, initialize };

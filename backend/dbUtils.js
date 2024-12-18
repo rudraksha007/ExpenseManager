@@ -249,7 +249,8 @@ function authenticate(req, res, next) {
     });
 };
 
-async function generateReport(reportType) {
+async function generateReport(req, res) {
+    const reportType = req.body.reportType;
     let query = '';
 
     if (reportType === 'general') {
@@ -350,4 +351,4 @@ async function updateAtDb(table, fieldsDictionary, where) {
     let wheres = Object.entries(where).map(([key, value]) => `${key}='${value}'`).join(' AND ');
     return db.query(`UPDATE ${table} SET ${fields} WHERE ${wheres}`);
 }
-export { db, authenticate, authorize, connectDb, getFromDb, projectWiseAuthorisation, updateAtDb };
+export { db, authenticate, authorize, connectDb, getFromDb, projectWiseAuthorisation, updateAtDb, generateReport };
