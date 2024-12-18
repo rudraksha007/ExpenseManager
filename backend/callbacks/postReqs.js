@@ -175,7 +175,6 @@ async function getIndents(req, res) {
 
     });
     await Promise.all(projectPromises);
-    const purchaseRequestIndentIds = (await getFromDb('PurchaseRequests', ['IndentID'])).map(pr => pr.IndentID);
     results = results.filter(indent => {
       if (!allowedProjects.includes(indent.ProjectNo)) return false;
 
@@ -183,8 +182,7 @@ async function getIndents(req, res) {
       if (text) isValid = isValid && (indent.ProjectTitle.includes(text) || indent.IndentedPersonId.includes(text));
       if (status) {
         if (status == 'PR') {
-          if (purchaseRequestIndentIds.includes(indent.IndentID)) return false;
-          else if (indent.IndentStatus == 'Approved') return true;
+          if (indent.IndentStatus == 'Approved') return true;
           else return false;
         }
         isValid = isValid && indent.IndentStatus === status;

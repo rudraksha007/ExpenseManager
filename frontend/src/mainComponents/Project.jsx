@@ -66,17 +66,17 @@ function ProjectContent() {
                         <div><b>Project Id:</b> <span>{id}</span></div>
                         <div><b>Title:</b> <span>{project.ProjectTitle}</span></div>
                         <div><b>Sanction Order No:</b> <span>{project.SanctionOrderNo}</span></div>
-                        <div><b>Total Sanction Amount:</b> <span>${project.TotalSanctionAmount}</span></div>
+                        <div><b>Total Sanction Amount:</b> <span>₹{project.TotalSanctionAmount}</span></div>
                         <div><b>Project Start Date:</b> <span>{new Date(project.ProjectStartDate).toLocaleDateString()}</span></div>
                         <div><b>Project End Date:</b> <span>{new Date(project.ProjectEndDate).toLocaleDateString()}</span></div>
                         <div><b>PI Name:</b> <span>{project.PIs}</span></div>
                         <div><b>Co-PIs:</b> <span>{project.CoPIs}</span></div>
-                        <div><b>Manpower Allocation Amt:</b> <span>${project.ManpowerAllocationAmt}</span></div>
-                        <div><b>Consumables Allocation Amt:</b> <span>${project.ConsumablesAllocationAmt}</span></div>
-                        <div><b>Contingency Allocation Amt:</b> <span>${project.ContingencyAllocationAmt}</span></div>
-                        <div><b>Overhead Allocation Amt:</b> <span>${project.OverheadAllocationAmt}</span></div>
-                        <div><b>Equipment Allocation Amt:</b> <span>${project.EquipmentAllocationAmt}</span></div>
-                        <div><b>Travel Allocation Amt:</b> <span>${project.TravelAllocationAmt}</span></div>
+                        <div><b>Manpower Allocation Amt:</b> <span>₹{project.ManpowerAllocationAmt}</span></div>
+                        <div><b>Consumables Allocation Amt:</b> <span>₹{project.ConsumablesAllocationAmt}</span></div>
+                        <div><b>Contingency Allocation Amt:</b> <span>₹{project.ContingencyAllocationAmt}</span></div>
+                        <div><b>Overhead Allocation Amt:</b> <span>₹{project.OverheadAllocationAmt}</span></div>
+                        <div><b>Equipment Allocation Amt:</b> <span>₹{project.EquipmentAllocationAmt}</span></div>
+                        <div><b>Travel Allocation Amt:</b> <span>₹{project.TravelAllocationAmt}</span></div>
                     </div>
                     <div id="projectTabs" style={{ color: 'white' }}>
                         <div className="hoverable" id='projectTabsActive' onClick={() => setActiveTab('Consumables')}><b>Consumables</b></div>
@@ -162,7 +162,7 @@ function compileDate(response, setPopup) {
                 <div key={`${key}-indentId`}>{response.consumables[key].IndentID}</div>,
                 <div key={`${key}-date`}>{response.consumables[key].RequestedDate.split('T')[0]}</div>,
                 <div key={`${key}-reason`}>{response.consumables[key].Reason}</div>,
-                <div key={`${key}-bill`} className='hoverable' onClick={() => setPopup(<PDFPopup reset={() => setPopup(null)} pdf={response.consumables[key].BillCopy} />)}>${response.consumables[key].RequestedAmt}</div>
+                <div key={`${key}-bill`} className='hoverable' onClick={() => setPopup(<PDFPopup reset={() => setPopup(null)} pdf={response.consumables[key].BillCopy} />)}>₹{response.consumables[key].RequestedAmt}</div>
             ])
     });
     }
@@ -177,7 +177,7 @@ function compileDate(response, setPopup) {
                 <div key={`${key}-indentId`}>{response.contingency[key].IndentID}</div>,
                 <div key={`${key}-date`}>{response.contingency[key].RequestedDate.split('T')[0]}</div>,
                 <div key={`${key}-reason`}>{response.contingency[key].Reason}</div>,
-                <div key={`${key}-bill`} className='hoverable' onClick={() => setPopup(<PDFPopup reset={() => setPopup(null)} pdf={response.contingency[key].BillCopy} />)}>${response.contingency[key].RequestedAmt}</div>
+                <div key={`${key}-bill`} className='hoverable' onClick={() => setPopup(<PDFPopup reset={() => setPopup(null)} pdf={response.contingency[key].BillCopy} />)}>₹{response.contingency[key].RequestedAmt}</div>
             ])
         ));
     }
@@ -193,7 +193,7 @@ function compileDate(response, setPopup) {
             <div key={`${key}-source`}>{response.travel[key].Source} ({response.travel[key].FromDate.split('T')[0]})</div>,
             <div key={`${key}-destination`}>{response.travel[key].Destination} ({response.travel[key].DestinationDate.split('T')[0]})</div>,
             <div key={`${key}-purpose`}>{response.travel[key].Reason}</div>,
-            <div key={`${key}-bill`} className='hoverable' onClick={() => setPopup(<PDFPopup reset={() => setPopup(null)} pdf={response.travel[key].BillCopy} />)}>${response.travel[key].RequestedAmt}</div>
+            <div key={`${key}-bill`} className='hoverable' onClick={() => setPopup(<PDFPopup reset={() => setPopup(null)} pdf={response.travel[key].BillCopy} />)}>₹{response.travel[key].RequestedAmt}</div>
             ])
         ));
     }
@@ -208,7 +208,7 @@ function compileDate(response, setPopup) {
             <div key={`${key}-indentId`}>{response.equipment[key].IndentID}</div>,
             <div key={`${key}-date`}>{response.equipment[key].RequestedDate.split('T')[0]}</div>,
             <div key={`${key}-purpose`}>{response.equipment[key].Reason}</div>,
-            <div key={`${key}-bill`} className='hoverable' onClick={() => setPopup(<PDFPopup reset={() => setPopup(null)} pdf={response.equipment[key].BillCopy} />)}>${response.equipment[key].RequestedAmt}</div>
+            <div key={`${key}-bill`} className='hoverable' onClick={() => setPopup(<PDFPopup reset={() => setPopup(null)} pdf={response.equipment[key].BillCopy} />)}>₹{response.equipment[key].RequestedAmt}</div>
             ])
         ));
     }
@@ -216,17 +216,13 @@ function compileDate(response, setPopup) {
 
     tempArray=[];
     response.manpower.map((item, index) => {
-        let style = {};
-        if (!item.toDate) {
-            style = { backgroundColor: 'rgb(200, 250, 200)' };
-        }
         tempArray.push([
-            <div key={`${item.id}-sl`} style={style}>{index + 1}</div>,
-            <div key={`${item.id}-employeeId`} style={style}>{item.EmployeeID}</div>,
-            <div key={`${item.id}-indentId`} style={style}>{item.IndentID}</div>,
-            <div key={`${item.id}-fromDate`} style={style}>{item.JoiningDate}</div>,
-            <div key={`${item.id}-toDate`} style={style}>{item.EndDate || 'N/A'}</div>,
-            <div key={`${item.id}-total`} style={style}>{item.TotalSalary}</div>
+            <div key={`${item.id}-sl`}>{index + 1}</div>,
+            <div key={`${item.id}-employeeId`}>{item.EmployeeID}</div>,
+            <div key={`${item.id}-indentId`}>{item.IndentID}</div>,
+            <div key={`${item.id}-fromDate`}>{item.JoiningDate.split('T')[0] || 'N/A'}</div>,
+            <div key={`${item.id}-toDate`}>{item.EndDate.split('T')[0] || 'N/A'}</div>,
+            <div key={`${item.id}-total`}>₹{item.RequestedAmt}</div>
         ]);
     });
     arr.push(tempArray);
@@ -239,7 +235,7 @@ function compileDate(response, setPopup) {
                 <div key={`${key}-requestId`}>{response.overhead[key].RequestID}</div>,
                 <div key={`${key}-indentId`}>{response.overhead[key].IndentID}</div>,
                 <div key={`${key}-date`}>{response.overhead[key].RequestedDate.split('T')[0]}</div>,
-                <div key={`${key}-bill`} className='hoverable' onClick={() => setPopup(<PDFPopup reset={() => setPopup(null)} pdf={response.overhead[key].BillCopy} />)}>${response.overhead[key].RequestedAmt}</div>
+                <div key={`${key}-bill`} className='hoverable' onClick={() => setPopup(<PDFPopup reset={() => setPopup(null)} pdf={response.overhead[key].BillCopy} />)}>₹{response.overhead[key].RequestedAmt}</div>
             ])
         ));
     }

@@ -15,7 +15,7 @@
     display: grid;
     gap: 2px;
     grid-auto-rows: max-content;
-    
+    padding-bottom: 30px;
 }
 .tableCell{
     background-color: rgb(222, 222, 222);

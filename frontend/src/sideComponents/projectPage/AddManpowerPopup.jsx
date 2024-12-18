@@ -5,41 +5,25 @@ import { fetchData, fetchDataWithParams } from '../../assets/scripts';
 import { Oval } from 'react-loader-spinner';
 import { closePopup } from '../../assets/popup';
 import { ProjectContext } from '../../assets/ProjectData';
+import { ProfileContext } from '../../assets/UserProfile';
 
 function ManpowerPopup({ reset, workers }) {
-    const [profiles, setProfiles] = useState([]);
+    const [profiles, setProfiles] = useState({});
     const [filter, setFilter] = useState({ text: '' });
     const [loading, setLoading] = useState(true);
-    const users = useRef({});
     const [totalAllocation, setTotalAllocation] = useState(0);
     const { project } = useContext(ProjectContext);
-    
+    const {profile} = useContext(ProfileContext);
+
     useEffect(() => {
         async function getProfiles() {
-            const data = await fetchDataWithParams('users', 'post', {filters: filter});
+            const data = await fetchDataWithParams('users', 'post', { filters: filter });
             if (data) {
-                let l = [];
-                let users1 = {};
-                          
-                data.users.map((profile, index) => {
-                    if (profile.role === 'SuperAdmin'||profile.role === 'Pi') return;
-                    if (workers.includes(JSON.stringify({id:profile.id, name:profile.name}))) return;
-                    l.push(
-                        <React.Fragment key={profile.id}>
-                            <div style={{display: 'flex', justifyContent:'center', alignItems:'center'}}>
-                                <input type="checkbox" value={JSON.stringify({id: profile.id, name: profile.name})} style={{height:'100%', width: '100%'}} className='tick' onChange={(e)=>handleChange(e)}/>
-                                </div>
-                            <div>{profile.id}</div>
-                            <div>{profile.name}</div>
-                            <div>{profile.role}</div>
-                            <div>{profile.TotalSalary}</div>
-                        </React.Fragment>
-                    );
-                    users1[profile.id] = profile;
+                let dict = {};
+                data.users.forEach(user => {
+                    dict[user.id] = user;
                 });
-                console.log(users1);
-                users.current = users1;
-                setProfiles(l);
+                setProfiles(dict);
             }
             setLoading(false);
         }
@@ -49,6 +33,11 @@ function ManpowerPopup({ reset, workers }) {
     const [toDate, setToDate] = useState('');
     async function handleSubmit(e) {
         e.preventDefault();
+        if(!e.target.checkValidity())return;
+        if(totalAllocation>project.RemainingManpowerAmt){
+            alert('Total allocation exceeds Allocated Manpower Amount');
+            return;
+        }
         const checkboxes = document.querySelectorAll('.tick');
         const selectedWorkers = [];
         checkboxes.forEach(checkbox => {
@@ -56,31 +45,34 @@ function ManpowerPopup({ reset, workers }) {
                 selectedWorkers.push(checkbox.value);
             }
         });
-        let formData = new FormData(e.target);
-        formData.append('workers', selectedWorkers);
-        // let result = await fetchDataWithParams('manpower', 'put', formData);
-        // if (result.reqStatus === 'success') {
-        //     alert('Manpower added successfully');
-        //     closePopup(e, reset);
-        // } else {
-        //     alert('Failed to add manpower');
-        //     console.log(result.message);
-        // }
-        console.log(Object.fromEntries(formData));
+        let formData = Object.fromEntries(new FormData(e.target));
+        formData = { ...formData, workers: selectedWorkers, EmployeeID: profile.id, RequestedAmt: totalAllocation };
         
-    }
-    
-    useEffect(() => {
-        if(!document.getElementById('totalAllocation'))return;
-        document.getElementById('totalAllocation').value=parseFloat(document.getElementById('totalAllocation').value) + totalAllocation;
-    }, [totalAllocation]);
-        
-    const handleChange = (e)=>{
-        if (e.currentTarget.checked) {
-            setTotalAllocation(users.current[JSON.parse(e.currentTarget.value).id].TotalSalary);
-        }else{
-            setTotalAllocation(-users.current[JSON.parse(e.currentTarget.value).id].TotalSalary);
+        let result = await fetchDataWithParams('manpower', 'put', formData);
+        if (result.reqStatus === 'success') {
+            alert('Manpower added successfully');
+            closePopup(e, reset);
+        } else {
+            alert('Failed to add manpower');
+            console.log(result.message);
         }
+    }
+
+    const handleChange = (e) => {
+        if (!fromDate || !toDate) {
+            return;
+        }
+        const checkboxes = document.querySelectorAll('.tick');
+        let total = 0;
+        checkboxes.forEach(checkbox => {
+            if (checkbox.checked) {
+                total += parseFloat(profiles[JSON.parse(checkbox.value).id].TotalSalary);
+            }
+        });
+        const diffInDays = (new Date(toDate) - new Date(fromDate)) / (1000 * 60 * 60 * 24) + 1;
+        total *= diffInDays;        
+        setTotalAllocation((total / 30).toFixed(2));
+        
     }
 
     return (
@@ -91,23 +83,23 @@ function ManpowerPopup({ reset, workers }) {
                         <>
                             <FaTimes size={30} style={{ position: 'absolute', right: 10, top: 10, cursor: 'pointer' }} onClick={(e) => closePopup(e, reset)} />
                             <h2>Add Manpower</h2>
-                            <form className='largePopupForm' onSubmit={(e)=>handleSubmit(e)} id='manpowerForm' >
+                            <form className='largePopupForm' onSubmit={(e) => handleSubmit(e)} id='manpowerForm' >
                                 <div className='largePopupDetails' style={{ gridTemplateColumns: '1fr 2fr 1fr 2fr' }}>
                                     <label htmlFor="ProjectNo">Project No:</label>
                                     <input type="number" id="ProjectNo" name="ProjectNo" readOnly required value={project.ProjectNo} />
 
                                     <label htmlFor="ProjectTitle">Project Title:</label>
                                     <input type="text" id="ProjectTitle" name="ProjectTitle" readOnly required value={project.ProjectTitle} />
-                                    
+
                                     <label htmlFor="fromDate">From Date:</label>
-                                    <input type="date" id="fromDate" name="fromDate" max={toDate} value={fromDate} onChange={(e) => setFromDate(e.currentTarget.value)} required />
+                                    <input type="date" id="fromDate" name="fromDate" max={toDate} value={fromDate} onChange={(e) =>{ setFromDate(e.currentTarget.value); handleChange(e)}} required />
                                     <label htmlFor="toDate">To Date:</label>
-                                    <input type="date" id="toDate" name="toDate" min={fromDate} value={toDate} onChange={(e) => setToDate(e.currentTarget.value)} required />
+                                    <input type="date" id="toDate" name="toDate" min={fromDate} value={toDate} onChange={(e) => {setToDate(e.currentTarget.value); handleChange(e)}} required />
                                     <label htmlFor="totalAllocation">Total Allocation:</label>
-                                    <input type="number" id="totalAllocation"required readOnly defaultValue={0} />
+                                    <input type="number" id="totalAllocation" name='totalAllocation' required readOnly value={totalAllocation} max={project.RemainingManpowerAmt}/>
                                 </div>
                                 <hr style={{ border: '1px solid black' }} />
-                                <form className="largePopupDetails" style={{ display: 'grid', gridTemplateColumns: '1fr 2fr 1fr 2fr' }}>
+                                <div className="largePopupDetails" style={{ display: 'grid', gridTemplateColumns: '1fr 2fr 1fr 2fr' }}>
                                     <label htmlFor="filterText">Filter by Name:</label>
                                     <input
                                         type="text"
@@ -127,14 +119,30 @@ function ManpowerPopup({ reset, workers }) {
                                         <option value="Manager">Manager</option>
                                         <option value="Technician">Technician</option>
                                     </select>
-                                </form>
+                                </div>
                                 <div className='table' style={{ gridTemplateColumns: '1fr 3fr 6fr 3fr 3fr' }}>
                                     <div className="tableTitle">Tick</div>
                                     <div className="tableTitle">Employee ID</div>
                                     <div className="tableTitle">Name</div>
                                     <div className="tableTitle">Designation</div>
                                     <div className="tableTitle">Salary</div>
-                                    {profiles}
+                                    {
+                                        Object.entries(profiles).map(([id, profile]) => {
+                                            if (profile.role === 'SuperAdmin' || profile.role === 'Pi') return null;
+                                            if (workers.includes(JSON.stringify({ id: profile.id, name: profile.name }))) return null;
+                                            return (
+                                                <React.Fragment key={profile.id}>
+                                                    <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+                                                        <input type="checkbox" value={JSON.stringify({ id: profile.id, name: profile.name })} style={{ height: '100%', width: '100%' }} className='tick' onChange={(e) => handleChange(e)} />
+                                                    </div>
+                                                    <div>{profile.id}</div>
+                                                    <div>{profile.name}</div>
+                                                    <div>{profile.role}</div>
+                                                    <div>{profile.TotalSalary}</div>
+                                                </React.Fragment>
+                                            );
+                                        })
+                                    }
                                 </div>
                             </form>
                             <button type="submit" className='hoverable' form='manpowerForm'>Submit</button>

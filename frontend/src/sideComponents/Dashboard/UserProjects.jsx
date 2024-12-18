@@ -41,8 +41,8 @@ function UserProjects() {
                     <div className='table' style={{ gridTemplateColumns: '1fr 5fr 3fr 3fr 3fr', maxHeight:'60dvh', overflowY:'auto' }}>
                         <div className='tableTitle'>Sl.</div>
                         <div className='tableTitle'>Title</div>
-                        <div className='tableTitle'>Role</div>
                         <div className='tableTitle'>Status</div>
+                        <div className='tableTitle'>Role</div>
                         <div className='tableTitle'>Action</div>
                         {projects}
                     </div>

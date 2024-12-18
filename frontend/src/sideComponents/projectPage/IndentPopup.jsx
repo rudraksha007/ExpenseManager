@@ -69,10 +69,11 @@ function IndentPopup({ reset, id }) {
                             <span>{requestDetails?.IndentedPersonId}</span>
                         </div>
                     </div>
+                    {requestDetails?.IndentStatus === 'Pending' ? 
                     <div className="requestPopupActions">
                         <FaTimes size={30} style={{ marginRight: 5 }} className='hoverable' title='Reject This Request' onClick={() => reject(requestDetails.IndentID, reset)} />
                         <FaCheck size={30} style={{ marginRight: 5 }} className='hoverable' title='Aproove This Request' onClick={() => aproove(requestDetails.IndentID, reset)} />
-                    </div>
+                    </div>:<></>}
                 </div>}
         </div >
     );
@@ -89,7 +90,7 @@ async function aproove(indent, reset) {
         alert('Request Aprooved');
         reset();
     }
-    else alert('Failed: '+data.message);
+    else alert('Failed: ' + data.message);
 }
 
 async function reject(IndentID, reset) {
@@ -98,7 +99,7 @@ async function reject(IndentID, reset) {
         alert('Request Rejected');
         reset();
     }
-    else alert('Failed: '+data.message);
+    else alert('Failed: ' + data.message);
 
 }
 

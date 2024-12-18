@@ -18,6 +18,7 @@ function EquipmentsPopup({ reset }) {
     const handleSubmit = async (e) => {
         e.preventDefault();
         if (!e.currentTarget.checkValidity()) return;
+        setLoading(true);
         const equipmentInputs = Array.from(e.currentTarget.querySelectorAll('#equipmentsTable input'));
         const equipmentArray = [];
         for (let i = 0; i < equipmentInputs.length; i += 3) {
@@ -26,17 +27,16 @@ function EquipmentsPopup({ reset }) {
             const price = parseFloat(equipmentInputs[i + 2].value);
             equipmentArray.push({ name, description, price });
         }
-        setLoading(true);
         
         
         const res = await fetchDataWithFileUpload('equipment', 'put', e.currentTarget, { equipments: equipmentArray });
-        setLoading(false);
         if (res.reqStatus === 'success') {
             alert('Equipment Added Successfully');
             reset();
         } else {
             alert('Failed: ' + res.message);
         }
+        setLoading(false);
     };
 
     function handlePriceChange(e) {

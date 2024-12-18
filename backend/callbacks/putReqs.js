@@ -135,7 +135,23 @@ async function addProjectIndent(req, res) {
 }
 
 async function addManpower(req, res) {
+    try {
+        const { ProjectNo, ProjectTitle, EmployeeID, fromDate, toDate, totalAllocation, workers, RequestedAmt } = req.body;
 
+        // Insert into the 'indents' table
+        let query = 'INSERT INTO indents (IndentCategory, ProjectNo, IndentAmount, IndentDate, IndentedPersonID, IndentStatus) VALUES (?, ?, ?, ?, ?, ?)';
+        const result = await db.query(query, ['manpower', parseInt(ProjectNo), parseFloat(RequestedAmt), new Date(), req.processed.token.id, 'Pending']);
+        const IndentID = result[0].insertId;
+
+        // Insert into the 'manpower' table
+        query = 'INSERT INTO manpower (IndentID, ProjectNo, ProjectTitle, EmployeeID, Workers, JoiningDate, EndDate, RequestedAmt) VALUES (?, ?, ?, ?, ?, ?, ?, ?)';
+        const values = [IndentID, parseInt(ProjectNo), ProjectTitle, parseInt(EmployeeID), JSON.stringify(workers), fromDate, toDate, parseFloat(RequestedAmt)];
+        await db.query(query, values);
+
+        res.status(201).json({ message: 'Manpower added successfully' }).end();
+    } catch (err) {
+        sendFailedResponse(res, err.message, 500);
+    }
 }
 
 async function addTravel(req, res) {

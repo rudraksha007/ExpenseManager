@@ -72,9 +72,10 @@ async function connectDb() {
                     ProjectNo INTEGER,
                     ProjectTitle VARCHAR(255),
                     EmployeeID INT,
-                    Name VARCHAR(255),
+                    Workers JSON,
                     JoiningDate DATE,
                     EndDate DATE,
+                    RequestedAmt DOUBLE,
                     FOREIGN KEY (EmployeeID) REFERENCES users(id),
                     FOREIGN KEY (ProjectNo) REFERENCES Projects(ProjectNo),
                     FOREIGN KEY (ProjectTitle) REFERENCES Projects(ProjectTitle),
@@ -191,24 +192,12 @@ async function connectDb() {
                 }
             }
             await db.query(`INSERT IGNORE INTO users (id, name, email, password, projects, status, role) VALUES (0, 'root', '${process.env.ROOT_ID}', '${process.env.ROOT_PASSWORD}', '[]', 1, 'root')`);
-            await db.query('DROP VIEW IF EXISTS ManpowerWithPaid;');
-            await db.query(`
-                CREATE VIEW ManpowerWithPaid AS
-                SELECT 
-                    m.*,
-                    (DATEDIFF(m.EndDate, m.JoiningDate) * u.TotalSalary) / 30 AS paid
-                FROM 
-                    Manpower m
-                JOIN 
-                    users u ON m.EmployeeID = u.id;
-            `);
-            log('ManpowerWithPaid view created');
             await db.query('DROP VIEW IF EXISTS ProjectAllocationSummary;');
             await db.query(`
                 CREATE VIEW ProjectAllocationSummary AS
                 SELECT 
                     p.*,
-                    p.ManpowerAllocationAmt - IFNULL(SUM(mp.paid), 0) AS RemainingManpowerAmt,
+                    p.ManpowerAllocationAmt - IFNULL(SUM(mp.RequestedAmt), 0) AS RemainingManpowerAmt,
                     p.TravelAllocationAmt - IFNULL(SUM(t.RequestedAmt), 0) AS RemainingTravelAmt,
                     p.ConsumablesAllocationAmt - IFNULL(SUM(c.RequestedAmt), 0) AS RemainingConsumablesAmt,
                     p.ContingencyAllocationAmt - IFNULL(SUM(ct.RequestedAmt), 0) AS RemainingContingencyAmt,
@@ -217,7 +206,7 @@ async function connectDb() {
                 FROM 
                     Projects p
                 LEFT JOIN 
-                    ManpowerWithPaid mp ON p.ProjectNo = mp.ProjectNo
+                    Manpower mp ON p.ProjectNo = mp.ProjectNo
                 LEFT JOIN 
                     Travel t ON p.ProjectNo = t.ProjectNo
                 LEFT JOIN 
