@@ -302,7 +302,6 @@ function authorize(allowedRoles) {
         if (!allowedRoles.includes(req.processed.token.role) && req.processed.token.role !== 'root') {
             return res.status(403).json({ message: 'Permission denied' });
         }
-        console.log(req.processed.token.role);
         next();
     };
 };
@@ -326,15 +325,12 @@ const projectWiseAuthorisation = (req, res, next) => {
         });
     }
     else {
-
         getFromDb('Projects', ['ProjectNo']).then((projects) => {
             let arr = [];
             projects.forEach(project => {
                 arr.push(project.ProjectNo);
             });
             req.processed.allowedProjects = arr;
-            console.log(arr);
-
             next();
         }).catch((err) => {
             return sendFailedResponse(res, err.message, 500);
@@ -352,7 +348,6 @@ async function getFromDb(table, fields, where) {
 async function updateAtDb(table, fieldsDictionary, where) {
     let fields = Object.entries(fieldsDictionary).map(([key, value]) => `${key}='${value}'`).join(', ');
     let wheres = Object.entries(where).map(([key, value]) => `${key}='${value}'`).join(' AND ');
-    console.log(fields + ' WHERE ' + wheres);
     return db.query(`UPDATE ${table} SET ${fields} WHERE ${wheres}`);
 }
 export { db, authenticate, authorize, connectDb, getFromDb, projectWiseAuthorisation, updateAtDb };

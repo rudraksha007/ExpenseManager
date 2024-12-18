@@ -13,23 +13,16 @@ function EquipmentsPopup({ reset }) {
     const today = new Date().toISOString().split('T')[0];
     const [total, setTotal] = useState(0);
     const [loading, setLoading] = useState(false);
-    const [equipments, setEquipments] = useState([]);
+    const [equipments, setEquipments] = useState({});
 
     const handleSubmit = async (e) => {
         e.preventDefault();
         if (!e.currentTarget.checkValidity()) return;
         setLoading(true);
-        const equipmentInputs = Array.from(e.currentTarget.querySelectorAll('#equipmentsTable input'));
-        const equipmentArray = [];
-        for (let i = 0; i < equipmentInputs.length; i += 3) {
-            const name = equipmentInputs[i].value;
-            const description = equipmentInputs[i + 1].value;
-            const price = parseFloat(equipmentInputs[i + 2].value);
-            equipmentArray.push({ name, description, price });
-        }
         
         
-        const res = await fetchDataWithFileUpload('equipment', 'put', e.currentTarget, { equipments: equipmentArray });
+        
+        const res = await fetchDataWithFileUpload('equipment', 'put', e.currentTarget, { Items: JSON.stringify(Object.values(equipments)) });
         if (res.reqStatus === 'success') {
             alert('Equipment Added Successfully');
             reset();
@@ -48,18 +41,23 @@ function EquipmentsPopup({ reset }) {
         setTotal(newTotal);
     }
     const removeEquipment = (id) => {
-        setEquipments(equipments.filter((equipment) => equipment.id !== id));
-        setEquipments((prevEquipments) =>
-            prevEquipments
-                .filter((equipment) => equipment.id !== id)
-                .map((equipment, index) => ({ ...equipment, sl: index + 1 }))
-        );
+        setEquipments((prevEquipments) => {
+            const updatedEquipments = { ...prevEquipments };
+            delete updatedEquipments[id];
+            return updatedEquipments;
+        });
     };
+
+    function handleChange (id, field, value){
+        setEquipments({...equipments, [id]:{...equipments[id], [field]:value}});
+    }
+
     const addEquipment = () => {
-        setEquipments([
-            ...equipments,
-            { id: Date.now(), name: "", description: "", price: 0, sl: equipments.length + 1 } // Use a unique ID
-        ]);
+        
+        setEquipments((prevEquipments) => {
+            let date = new Date().getTime();
+            return {...prevEquipments, [date]: {name: '', description: '', installation: '', warranty: '', price: 0 } };
+        });
     };
 
     return (
@@ -98,21 +96,25 @@ function EquipmentsPopup({ reset }) {
                                 <label htmlFor="TotalAmount">Total Amount:</label>
                                 <input type="number" id="TotalAmount" name="RequestedAmt" readOnly value={total} />
                             </div>
-                            <div className='table largePopupDetails' style={{ gridTemplateColumns: '1fr 3fr 4fr 3fr 1fr', gap: '2px' }} id='equipmentsTable'>
+                            <div className='table largePopupDetails' style={{ gridTemplateColumns: '1fr 3fr 5fr 3fr 3fr 2fr 1fr', gap: '2px' }} id='equipmentsTable'>
                                 <div className="tableTitle">Sl.</div>
                                 <div className="tableTitle">Equipment</div>
                                 <div className="tableTitle">Description</div>
+                                <div className="tableTitle">Installation</div>
+                                <div className="tableTitle">Warranty</div>
                                 <div className="tableTitle">Price</div>
                                 <div className="tableTitle">-</div>
                                 {
-                                    equipments.map((equipment) => (
-                                        <React.Fragment key={equipment.id}>
-                                            <div>{equipment.sl}</div>
-                                            <input type="text"/>
-                                            <input type="text" />
-                                            <input type="number"min={0} onChange={(e) => { handlePriceChange(e) }}
+                                    Object.keys(equipments).map((equipment, index) => (
+                                        <React.Fragment key={equipment}>
+                                            <div>{index+1}</div>
+                                            <input type="text" onChange={(e)=>handleChange(equipment, 'name', e.target.value)} />
+                                            <input type="text" onChange={(e)=>handleChange(equipment, 'description', e.target.value)}/>
+                                            <input type="date" onChange={(e)=>handleChange(equipment, 'installation', e.target.value)}/>
+                                            <input type="text" onChange={(e)=>handleChange(equipment, 'warranty', e.target.value)}/>
+                                            <input type="number"min={0} onChange={(e) => { handleChange(equipment, 'price', e.target.value);handlePriceChange(e) }}
                                             />
-                                            <div className='hoverable' style={{ textAlign: 'center', alignContent: 'center' }} onClick={() => { removeEquipment(equipment.id) }}><FaTimes /></div>
+                                            <div className='hoverable' style={{ textAlign: 'center', alignContent: 'center' }} onClick={() => { removeEquipment(equipment) }}><FaTimes /></div>
                                         </React.Fragment>
                                     ))}
                                 <div className='hoverable' onClick={(e) => addEquipment(e)}><FaPlus /></div>

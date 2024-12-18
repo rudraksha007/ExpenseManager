@@ -11,20 +11,16 @@ import { ProfileContext } from '../assets/UserProfile.jsx';
 function AllProjects() {
 
     const [projects, setProjects] = useState([]);
-    const [toDate, setToDate] = useState('');
-    const [fromDate, setFromDate] = useState('');
     const total = useRef(0);
     const [loading, setLoading] = useState(true);
-    const [filter, setFilter] = useState({ page: 1, text: '', status: '', fundedBy: '', fromDate: fromDate, toDate: toDate });
+    const[agencies,setAgencies]=useState([]);
+    const [filter, setFilter] = useState({ page: 1, text: '', status: '', fundedBy: '', fromDate: '', toDate: '' });
     const { profile } = useContext(ProfileContext);
     async function getProjects() {
         // const data = await fetchDataWithParams(`projects`, { page: filter.page, count: 25 });
         let data = (await fetchDataWithParams('projects', 'post', { id: profile.id, fields: ['ProjectNo', 'ProjectTitle', 'ProjectStartDate', 'ProjectEndDate', 'TotalSanctionamount', 'FundedBy'], filters: filter }));
-        console.log(filter);
-        
-        console.log(data);
-
         if (data.reqStatus == 'success') {
+            setAgencies(data.agencies);
             let l = [];
             data.projects.map((project, index) => (
                 l.push(
@@ -66,27 +62,29 @@ function AllProjects() {
                         <label>
                             Status:
                             <select name="status" id="status" value={filter.status} onChange={(e) => setFilter({ ...filter, status: e.target.value })}>
-                                <option value="all">All</option>
-                                <option value="active">Active</option>
-                                <option value="completed">Completed</option>
+                                <option value="">All</option>
+                                <option value="Active">Active</option>
+                                <option value="Inactive">Inactive</option>
                             </select>
                         </label>
                         <label>
                             Funded By:
                             <select name="fundedBy" id="fundedBy" value={filter.fundedBy} onChange={(e) => setFilter({ ...filter, fundedBy: e.target.value })}>
-                                <option value="all">All</option>
-                                <option value="Investor A">Investor A</option>
-                                <option value="Investor B">Investor B</option>
-                                <option value="Investor C">Investor C</option>
+                                <option value="">All</option>
+                                {
+                                    agencies.map((agency, index) => (
+                                        <option key={index} value={agency}>{agency}</option>
+                                    ))
+                                }
                             </select>
                         </label>
                         <label>
                             From Date:
-                            <input type="date" id="fromDate" name="fromDate" placeholder="From Date" value={filter.fromDate} max={toDate} onChange={(e) => setFilter({ ...filter, fromDate: e.currentTarget.value })} />
+                            <input type="date" id="fromDate" name="fromDate" placeholder="From Date" value={filter.fromDate} max={filter.toDate} onChange={(e) => setFilter({ ...filter, fromDate: e.currentTarget.value })} />
                         </label>
                         <label>
                             To Date:
-                            <input type="date" id="toDate" name="toDate" placeholder="To Date" value={filter.toDate} min={fromDate} max={new Date().toISOString().split("T")[0]} onChange={(e) => setFilter({ ...filter, toDate: e.currentTarget.value })} />
+                            <input type="date" id="toDate" name="toDate" placeholder="To Date" value={filter.toDate} min={filter.fromDate} onChange={(e) => setFilter({ ...filter, toDate: e.currentTarget.value })} />
                         </label>
                         <label><input type="submit" value="Apply" id='applyFilter' onClick={() => getProjects()} /></label>
                     </div>

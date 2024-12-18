@@ -35,7 +35,7 @@
     padding: 5px 10px;
     box-sizing: border-box;
 }
-.table>div:not(.tableTitle){
+.table>*:not(.tableTitle){
     background-color: rgb(222, 222, 222);
 }
 .allProjectsActions, .allProfilesActions{

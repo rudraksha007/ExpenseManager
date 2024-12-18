@@ -13,7 +13,7 @@ async function login(req, res) {
   let rootPass = Hash(process.env.ROOT_PASSWORD);
   if (email === process.env.ROOT_ID && password === rootPass) {
     let token = jwt.sign({ id: 0, role: 'root' }, process.env.SECRET_KEY, { expiresIn: '45m' });
-    log('Root login successful');
+    log(`Root logged in from ${req.ip}`);
     return res.cookie('token', encrypt(token, fingerPrint), { httpOnly: true }).json({
       profile: {
         role: 'root',
@@ -27,7 +27,6 @@ async function login(req, res) {
     if (results.length === 0) return sendFailedResponse(res, 'User not found', 404);
     const user = results[0][0];
     if (password == user.password) {
-      log('logged in')
       let token = jwt.sign({ id: user.id, role: user.role }, process.env.SECRET_KEY, { expiresIn: '45m' });
       return res.cookie('token', encrypt(token, fingerPrint), { httpOnly: true }).status(200).json({
         profile: {
@@ -70,12 +69,16 @@ function autoLogin(req, res) {
 function getProjects(req, res) {
   getFromDb('projects', req.body.fields).then((results) => {
     const { page, text, status, fundedBy, fromDate, toDate } = req.body.filters;
+    const fundedByList = [...new Set(results.map(project => project.FundedBy))];
     results = results.filter(project => {  
       if (!req.processed.allowedProjects.includes(project.ProjectNo)) return false;
       if (text || status || fundedBy || fromDate || toDate) {
         let isValid = true;
-        if (text) isValid = isValid && project.ProjectTitle.includes(text);
-        if (status) isValid = isValid && project.ProjectStatus === status;
+        if (text) isValid = isValid && project.ProjectTitle.toLowerCase().includes(text);
+        if (status) {
+          let s = new Date(project.ProjectEndDate) >= new Date() ? 'Active' : 'Inactive';
+          isValid = isValid && status === s;
+        }
         if (fundedBy) isValid = isValid && project.FundedBy === fundedBy;
         if (fromDate) isValid = isValid && new Date(project.ProjectStartDate) > new Date(fromDate);
         if (toDate) isValid = isValid && new Date(project.ProjectEndDate) < new Date(toDate);
@@ -83,14 +86,10 @@ function getProjects(req, res) {
       }
       return true;
     });
-    res.status(200).json({ projects: results, total: results.length }).end();
+    res.status(200).json({ projects: results, total: results.length, agencies: fundedByList }).end();
   }).catch((err) => {
     res.status(500).json({ message: 'Error fetching projects', err: err.message }).end();
   });
-}
-
-function getCharts(req, res) {
-
 }
 
 function logout(req, res) {
@@ -104,7 +103,7 @@ function getUsers(req, res) {
       let actual = [];
       results.forEach(user => {
         if (text && role) {
-          if (user.name.startsWith(text) && user.role === role) {
+          if (user.name.toLowerCase().includes(text) && user.role === role) {
             log('both');
             actual.push(user);
           }
@@ -179,7 +178,7 @@ async function getIndents(req, res) {
       if (!allowedProjects.includes(indent.ProjectNo)) return false;
 
       let isValid = true;
-      if (text) isValid = isValid && (indent.ProjectTitle.includes(text) || indent.IndentedPersonId.includes(text));
+      if (text) isValid = isValid && (indent.ProjectTitle.toLowerCase().includes(text) || indent.IndentedPersonId.includes(text));
       if (status) {
         if (status == 'PR') {
           if (indent.IndentStatus == 'Approved') return true;

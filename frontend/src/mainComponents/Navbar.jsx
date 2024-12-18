@@ -42,12 +42,11 @@ function Navbar() {
                                 <p><b>Employee ID:</b> {profile ? profile.id : ""}</p>
                                 <p><b>LoggedIn As:</b> {profile ? profile.role : ""}</p>
                             </div>
-                            <Link to='/newproject' className='hoverable'> <FaPlus size={40} style={{ marginRight: 8 }} /> Create New Project</Link>
+                            <NavLink to='/newproject' className='hoverable'> <FaPlus size={40} style={{ marginRight: 8 }} /> Create New Project</NavLink>
                             {profile && (profile.role == 'admin' || profile.role == 'superadmin' || profile.role == 'root') ?
                                 <>
-                                    <Link to='/signup' className='hoverable'> <FaUserPlus size={40} style={{ marginRight: 8 }} /> Create New User</Link>
-                                    <Link to='/profiles' className='hoverable'> <FaUser size={40} style={{ marginRight: 8 }} /> All Users</Link>
-                                    <Link to='/investors' className='hoverable'> <FaUserPlus size={40} style={{ marginRight: 8 }} /> Add Funding Agencies</Link>
+                                    <NavLink to='/signup' className='hoverable'> <FaUserPlus size={40} style={{ marginRight: 8 }} /> Create New User</NavLink>
+                                    <NavLink to='/profiles' className='hoverable'> <FaUser size={40} style={{ marginRight: 8 }} /> All Users</NavLink>
                                     <NavLink to='/indents/' className='hoverable'>  <FaTasks size={40} style={{ marginRight: 8 }} />Indents</NavLink>
                                     <NavLink to='/purchasereqs/' className='hoverable'> <FaAward size={40} style={{ marginRight: 8 }} /> Purchase Reqs</NavLink>
 

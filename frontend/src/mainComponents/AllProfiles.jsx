@@ -69,10 +69,11 @@ function AllProfiles() {
                             Role:
                             <select name="role" id="role" value={filter.role} onChange={(e) => setFilter({ ...filter, role: e.currentTarget.value })}>
                                 <option value="" >All</option>
+                                <option value="JRK">JRF</option>
+                                <option value="SRK">SRF</option>
+                                <option value="RA">RA</option>
                                 <option value="Pi">PI</option>
-                                <option value="Scientist">Scientist</option>
-                                <option value="Admin">Admin</option>
-                                <option value="SuperAdmin">Super Admin</option>
+                                <option value="SuperAdmin">Techanican</option>
                             </select>
                         </label>
                         <label><input type="submit" value="Apply" id='applyFilter' /></label>

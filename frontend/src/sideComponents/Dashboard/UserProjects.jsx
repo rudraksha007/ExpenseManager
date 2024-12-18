@@ -23,7 +23,7 @@ function UserProjects() {
                     <div>{project.ProjectTitle}</div>
                     <div>{new Date(project.ProjectEndDate) >= new Date() ? 'Active' : 'Inactive'}</div>
                     <div>{profile.role!=='Pi'?profile.role:project.PIs.includes(JSON.stringify({id:profile.id, name: profile.name}))?'PI':'CoPI'}</div>
-                    <div className='hoverable'><Link to={`/projects/${project.ProjectNo}`} title="View Project Details"><FaEdit size={20} /></Link></div>
+                    <Link to={`/projects/${project.ProjectNo}`} title="View Project Details" className='hoverable'><FaEdit size={20} /></Link>
                 </React.Fragment>
 
             ));

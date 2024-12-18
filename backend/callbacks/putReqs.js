@@ -1,6 +1,5 @@
-import { fileTypeFromBuffer } from "file-type";
-import { db, getFromDb, updateAtDb } from "../dbUtils.js";
-import { log, parseBill, sendFailedResponse } from "../utils.js";
+import { db, getFromDb } from "../dbUtils.js";
+import { parseBill, sendFailedResponse } from "../utils.js";
 
 async function addProject(req, res) {
     try {
@@ -33,7 +32,7 @@ async function addProject(req, res) {
             try {
                 await db.query(updateUserProjectsQuery, [ProjectNo, id]);
             } catch (err) {
-                console.error(`Failed to update user projects for user ID: ${id}:`, err.message);
+                return sendFailedResponse(res, err.message, 500);
             }
         }));
     } catch (err) {
@@ -79,23 +78,18 @@ async function addProjectIndent(req, res) {
     
     const BillCopy = req.files.BillCopy;
     const billFiles = Array.isArray(BillCopy) ? BillCopy : [BillCopy];
-    
-    // Convert BillCopy files to Base64 strings
     const billBase64Strings = await Promise.all(billFiles.map(async (file) => {
         
         
         const buffer = await file.data;
         return Buffer.from(buffer).toString('base64');
     }));
-
+'"[object Object],[object Object]"'
     try {
-        // First query: Insert into the 'indents' table
         let query = 'INSERT INTO indents (IndentCategory, ProjectNo, IndentAmount, IndentDate, IndentedPersonID, IndentStatus) VALUES (?, ?, ?, ?, ?, ?)';
         
         const result = await db.query(query, [req.path.split('/').at(-1), parseInt(ProjectNo), parseInt(RequestedAmt), RequestedDate, req.processed.token.id, 'Pending']);        
-        // Get the auto-incremented IndentID from the first query
         const IndentID = result[0].insertId;
-        // If IndentID is not properly generated, send an error response
         if (!IndentID) {
             return sendFailedResponse(res, 'Failed to generate IndentID', 500);
         }
@@ -107,7 +101,7 @@ async function addProjectIndent(req, res) {
                 break;
             case 'equipment':
                 query = 'INSERT INTO equipment ( ProjectNo, ProjectTitle, RequestedAmt, EmployeeID, Reason, IndentID, RequestedDate, Items, BillCopy, Remark) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)';
-                values = [ parseInt(ProjectNo), ProjectTitle, parseInt(RequestedAmt), EmployeeID, Reason, IndentID, RequestedDate, JSON.stringify(Items), JSON.stringify(billBase64Strings), Remarks];
+                values = [ parseInt(ProjectNo), ProjectTitle, parseInt(RequestedAmt), EmployeeID, Reason, IndentID, RequestedDate, Items, JSON.stringify(billBase64Strings), Remarks];
                 break;
             case 'overhead':
                 query = 'INSERT INTO overhead (IndentID, ProjectNo, ProjectTitle, RequestedAmt, Reason, EmployeeID, RequestedDate, BillCopy, Remark) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)';

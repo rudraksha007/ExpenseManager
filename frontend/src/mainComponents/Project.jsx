@@ -135,10 +135,7 @@ function ProjectContent() {
                             <span className="tableTitle">To Date</span>
                             <span className="tableTitle">Total</span>
                             {table[4]}
-                            <div className="add">
-                                <div className='hoverable inherit'><FaEdit size={20} onClick={() => setPopup(<DecManpowerPopup reset={() => setPopup(null)} />)} /></div>
-                                <div className='hoverable inherit'><FaPlus size={20} onClick={() => setPopup(<AddManpowerPopup reset={() => setPopup(null)} workers={project.Workers}/>)} /></div>
-                            </div>
+                            <div className='hoverable inherit' onClick={() => setPopup(<AddManpowerPopup reset={() => setPopup(null)} workers={project.Workers} />)}><FaPlus size={20} /></div>
                         </div>
                     </div>
                 </div>
@@ -153,9 +150,9 @@ function compileDate(response, setPopup) {
 
     let tempArray = [];
     if (response.consumables) {
-        Object.keys(response.consumables).forEach((key,index) => {
+        Object.keys(response.consumables).forEach((key, index) => {
             console.log(response.consumables[key].IndentStatus);
-            
+
             tempArray.push([
                 <div key={`${key}-sl`}>{index + 1}</div>,
                 <div key={`${key}-employeeId`}>{response.consumables[key].EmployeeID}</div>,
@@ -164,7 +161,7 @@ function compileDate(response, setPopup) {
                 <div key={`${key}-reason`}>{response.consumables[key].Reason}</div>,
                 <div key={`${key}-bill`} className='hoverable' onClick={() => setPopup(<PDFPopup reset={() => setPopup(null)} pdf={response.consumables[key].BillCopy} />)}>₹{response.consumables[key].RequestedAmt}</div>
             ])
-    });
+        });
     }
     arr.push(tempArray);
 
@@ -187,13 +184,13 @@ function compileDate(response, setPopup) {
     if (response.travel) {
         Object.keys(response.travel).forEach((key) => (
             tempArray.push([
-            <div key={`${key}-sl`}>{key + 1}</div>,
-            <div key={`${key}-employeeId`}>{response.travel[key].EmployeeID}</div>,
-            <div key={`${key}-indentId`}>{response.travel[key].IndentID}</div>,
-            <div key={`${key}-source`}>{response.travel[key].Source} ({response.travel[key].FromDate.split('T')[0]})</div>,
-            <div key={`${key}-destination`}>{response.travel[key].Destination} ({response.travel[key].DestinationDate.split('T')[0]})</div>,
-            <div key={`${key}-purpose`}>{response.travel[key].Reason}</div>,
-            <div key={`${key}-bill`} className='hoverable' onClick={() => setPopup(<PDFPopup reset={() => setPopup(null)} pdf={response.travel[key].BillCopy} />)}>₹{response.travel[key].RequestedAmt}</div>
+                <div key={`${key}-sl`}>{key + 1}</div>,
+                <div key={`${key}-employeeId`}>{response.travel[key].EmployeeID}</div>,
+                <div key={`${key}-indentId`}>{response.travel[key].IndentID}</div>,
+                <div key={`${key}-source`}>{response.travel[key].Source} ({response.travel[key].FromDate.split('T')[0]})</div>,
+                <div key={`${key}-destination`}>{response.travel[key].Destination} ({response.travel[key].DestinationDate.split('T')[0]})</div>,
+                <div key={`${key}-purpose`}>{response.travel[key].Reason}</div>,
+                <div key={`${key}-bill`} className='hoverable' onClick={() => setPopup(<PDFPopup reset={() => setPopup(null)} pdf={response.travel[key].BillCopy} />)}>₹{response.travel[key].RequestedAmt}</div>
             ])
         ));
     }
@@ -203,18 +200,18 @@ function compileDate(response, setPopup) {
     if (response.equipment) {
         Object.keys(response.equipment).forEach((key) => (
             tempArray.push([
-            <div key={`${key}-sl`}>{key + 1}</div>,
-            <div key={`${key}-employeeId`}>{response.equipment[key].EmployeeID}</div>,
-            <div key={`${key}-indentId`}>{response.equipment[key].IndentID}</div>,
-            <div key={`${key}-date`}>{response.equipment[key].RequestedDate.split('T')[0]}</div>,
-            <div key={`${key}-purpose`}>{response.equipment[key].Reason}</div>,
-            <div key={`${key}-bill`} className='hoverable' onClick={() => setPopup(<PDFPopup reset={() => setPopup(null)} pdf={response.equipment[key].BillCopy} />)}>₹{response.equipment[key].RequestedAmt}</div>
+                <div key={`${key}-sl`}>{key + 1}</div>,
+                <div key={`${key}-employeeId`}>{response.equipment[key].EmployeeID}</div>,
+                <div key={`${key}-indentId`}>{response.equipment[key].IndentID}</div>,
+                <div key={`${key}-date`}>{response.equipment[key].RequestedDate.split('T')[0]}</div>,
+                <div key={`${key}-purpose`}>{response.equipment[key].Reason}</div>,
+                <div key={`${key}-bill`} className='hoverable' onClick={() => setPopup(<PDFPopup reset={() => setPopup(null)} pdf={response.equipment[key].BillCopy} />)}>₹{response.equipment[key].RequestedAmt}</div>
             ])
         ));
     }
     arr.push(tempArray);
 
-    tempArray=[];
+    tempArray = [];
     response.manpower.map((item, index) => {
         tempArray.push([
             <div key={`${item.id}-sl`}>{index + 1}</div>,

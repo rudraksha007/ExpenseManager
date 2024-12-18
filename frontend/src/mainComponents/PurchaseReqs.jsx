@@ -1,11 +1,9 @@
 import React, { useEffect } from 'react';
 import '../css/Requests.css';
 import PurchaseReqPopup from '../sideComponents/PurchaseReqs/PurchaseReqPopup';
-import { FaPlus } from 'react-icons/fa';
 import { Oval } from 'react-loader-spinner';
 import PageControls from '../sideComponents/PageControls';
 import { fetchDataWithParams } from '../assets/scripts';
-import NewPRPopup from '../sideComponents/PurchaseReqs/NewPRPopup';
 
 function PurchaseReqs() {
     const [popup, setPopup] = React.useState(null);
