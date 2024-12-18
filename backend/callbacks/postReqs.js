@@ -133,7 +133,7 @@ function getProjectInfo(req, res) {
     let tables = ['manpower', 'equipment', 'contingency', 'consumables', 'overhead', 'travel'];
     const promises = tables.map((table) => getFromDb(table, ['*'], `ProjectNo= ${projectNo}`).then((results) => {
       results.forEach(result => {
-        result.BillCopy = `pdf/${table}/${result.RequestID}`;
+        result.BillCopy = `pdf/${table}/${result.IndentID}`;
 
       });
       payload.data[table] = results;
@@ -149,12 +149,12 @@ function getProjectInfo(req, res) {
 function getBillCopy(req, res) {
   let path = req.path.split('/');
   const [table, reqId] = [path[3], path[4]];
-  getFromDb(table, ['BillCopy'], `RequestID= ${reqId}`).then((results) => {
+  getFromDb(table, ['BillCopy'], `IndentID= ${reqId}`).then((results) => {
     if (results.length === 0) {
       return sendFailedResponse(res, 'Bill copy not found', 404);
     }
-    const billCopy = results[0].BillCopy;
-    res.status(200).json({ BillCopy: billCopy.toString('base64') }).end();
+    const billCopyJson = results[0].BillCopy;
+    res.status(200).json({ BillCopy: billCopyJson}).end();
   }).catch((err) => {
     sendFailedResponse(res, err.message, 500);
   });

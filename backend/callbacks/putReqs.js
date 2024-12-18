@@ -84,7 +84,6 @@ async function addProjectIndent(req, res) {
         const buffer = await file.data;
         return Buffer.from(buffer).toString('base64');
     }));
-'"[object Object],[object Object]"'
     try {
         let query = 'INSERT INTO indents (IndentCategory, ProjectNo, IndentAmount, IndentDate, IndentedPersonID, IndentStatus) VALUES (?, ?, ?, ?, ?, ?)';
         
