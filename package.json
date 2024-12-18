@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "build": "node scripts/buildProject.js",
-    "start": "node build/backend/app.js",
+    "start": "cross-env NODE_ENV=production node build/backend/index.js",
     "dev": "concurrently \"npm run dev-frontend\" \"npm run dev-backend\"",
     "dev-frontend": "cd frontend && npm run dev",
     "dev-backend": "cd backend && npm run dev"
