@@ -249,54 +249,6 @@ function authenticate(req, res, next) {
     });
 };
 
-async function generateReport(reportType) {
-    let query = '';
-
-    if (reportType === 'general') {
-        query = `
-            SELECT 
-                p.ProjectNo, 
-                p.ProjectTitle,
-                p.TotalSanctionAmount,
-                COALESCE(SUM(i.IndentAmount), 0) AS TotalIndentAmount,
-                (p.TotalSanctionAmount - COALESCE(SUM(i.IndentAmount), 0)) AS RemainingAmount
-            FROM 
-                Projects p
-            LEFT JOIN 
-                Indents i ON p.ProjectNo = i.ProjectNo
-            GROUP BY 
-                p.ProjectNo, p.ProjectTitle, p.TotalSanctionAmount;
-        `;
-    } else if (reportType === 'category') {
-        query = `
-            SELECT 
-                p.ProjectNo, 
-                p.ProjectTitle,
-                p.TotalSanctionAmount,
-                COALESCE(SUM(p.ManpowerAllocationAmt), 0) AS ManpowerUsed,
-                COALESCE(SUM(p.ConsumablesAllocationAmt), 0) AS ConsumablesUsed,
-                COALESCE(SUM(p.ContingencyAllocationAmt), 0) AS ContingencyUsed,
-                COALESCE(SUM(p.OverheadAllocationAmt), 0) AS OverheadUsed,
-                COALESCE(SUM(p.EquipmentAllocationAmt), 0) AS EquipmentUsed,
-                COALESCE(SUM(p.TravelAllocationAmt), 0) AS TravelUsed,
-                (p.TotalSanctionAmount - (
-                    COALESCE(SUM(p.ManpowerAllocationAmt), 0) + 
-                    COALESCE(SUM(p.ConsumablesAllocationAmt), 0) + 
-                    COALESCE(SUM(p.ContingencyAllocationAmt), 0) + 
-                    COALESCE(SUM(p.OverheadAllocationAmt), 0) + 
-                    COALESCE(SUM(p.EquipmentAllocationAmt), 0) + 
-                    COALESCE(SUM(p.TravelAllocationAmt), 0)
-                )) AS RemainingAmount
-            FROM 
-                Projects p
-            GROUP BY 
-                p.ProjectNo, p.ProjectTitle, p.TotalSanctionAmount;
-        `;
-    }
-
-    return db.query(query).then(([rows]) => rows);
-}
-
 function authorize(allowedRoles) {
     return (req, res, next) => {
         if (!allowedRoles.includes(req.processed.token.role) && req.processed.token.role !== 'root') {

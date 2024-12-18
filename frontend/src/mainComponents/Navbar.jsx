@@ -1,6 +1,6 @@
 import React from 'react'
 import { NavLink, Link } from 'react-router-dom'
-import { FaBars, FaTimes, FaUserPlus, FaSignOutAlt, FaPlus, FaUser, FaTasks, FaAward } from 'react-icons/fa';
+import { FaBars, FaTimes, FaUserPlus, FaSignOutAlt, FaPlus, FaUser, FaTasks, FaAward, FaRegFileAlt } from 'react-icons/fa';
 import { useContext } from 'react';
 import person from '../assets/images/person.webp';
 
@@ -47,6 +47,7 @@ function Navbar() {
                                 <>
                                     <NavLink to='/signup' className='hoverable'> <FaUserPlus size={40} style={{ marginRight: 8 }} /> Create New User</NavLink>
                                     <NavLink to='/profiles' className='hoverable'> <FaUser size={40} style={{ marginRight: 8 }} /> All Users</NavLink>
+                                    <NavLink to='/report' className='hoverable'> <FaRegFileAlt size={40} style={{ marginRight: 8 }} /> Report</NavLink>
                                     <NavLink to='/indents/' className='hoverable'>  <FaTasks size={40} style={{ marginRight: 8 }} />Indents</NavLink>
                                     <NavLink to='/purchasereqs/' className='hoverable'> <FaAward size={40} style={{ marginRight: 8 }} /> Purchase Reqs</NavLink>
 

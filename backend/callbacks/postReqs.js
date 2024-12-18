@@ -340,4 +340,57 @@ function getPO(req, res) {
   });
 }
 
-export { login, updateIndentStatus, autoLogin, getProjects, logout, getUsers, getProjectInfo, getIndents, getBillCopy, getIndentInfo, getPR, getPRInfo, getPO, updatePRStatus };
+async function generateReport(req, res) {
+  const {reportType} = req.body;
+  if(!reportType)return sendFailedResponse(res, 'Report type not specified', 500);
+  let query = '';
+
+  if (reportType === 'general') {
+      query = `
+          SELECT 
+              p.ProjectNo, 
+              p.ProjectTitle,
+              p.TotalSanctionAmount,
+              COALESCE(SUM(i.IndentAmount), 0) AS TotalIndentAmount,
+              (p.TotalSanctionAmount - COALESCE(SUM(i.IndentAmount), 0)) AS RemainingAmount
+          FROM 
+              Projects p
+          LEFT JOIN 
+              Indents i ON p.ProjectNo = i.ProjectNo
+          GROUP BY 
+              p.ProjectNo, p.ProjectTitle, p.TotalSanctionAmount;
+      `;
+  } else if (reportType === 'category') {
+      query = `
+          SELECT 
+              p.ProjectNo, 
+              p.ProjectTitle,
+              p.TotalSanctionAmount,
+              COALESCE(SUM(p.ManpowerAllocationAmt), 0) AS ManpowerUsed,
+              COALESCE(SUM(p.ConsumablesAllocationAmt), 0) AS ConsumablesUsed,
+              COALESCE(SUM(p.ContingencyAllocationAmt), 0) AS ContingencyUsed,
+              COALESCE(SUM(p.OverheadAllocationAmt), 0) AS OverheadUsed,
+              COALESCE(SUM(p.EquipmentAllocationAmt), 0) AS EquipmentUsed,
+              COALESCE(SUM(p.TravelAllocationAmt), 0) AS TravelUsed,
+              (p.TotalSanctionAmount - (
+                  COALESCE(SUM(p.ManpowerAllocationAmt), 0) + 
+                  COALESCE(SUM(p.ConsumablesAllocationAmt), 0) + 
+                  COALESCE(SUM(p.ContingencyAllocationAmt), 0) + 
+                  COALESCE(SUM(p.OverheadAllocationAmt), 0) + 
+                  COALESCE(SUM(p.EquipmentAllocationAmt), 0) + 
+                  COALESCE(SUM(p.TravelAllocationAmt), 0)
+              )) AS RemainingAmount
+          FROM 
+              Projects p
+          GROUP BY 
+              p.ProjectNo, p.ProjectTitle, p.TotalSanctionAmount;
+      `;
+  }
+  if(!query)return sendFailedResponse(res, 'Invalid Report Type', 500);
+
+  const data = await db.query(query);
+  res.status(200).json({data: data[0]}).end();
+}
+
+
+export { login, updateIndentStatus, autoLogin, getProjects, logout, getUsers, getProjectInfo, getIndents, getBillCopy, getIndentInfo, getPR, getPRInfo, getPO, updatePRStatus, generateReport };
