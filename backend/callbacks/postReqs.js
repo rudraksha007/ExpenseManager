@@ -70,7 +70,7 @@ function getProjects(req, res) {
   getFromDb('projects', req.body.fields).then((results) => {
     const { page, text, status, fundedBy, fromDate, toDate } = req.body.filters;
     const fundedByList = [...new Set(results.map(project => project.FundedBy))];
-    results = results.filter(project => {  
+    results = results.filter(project => {
       if (!req.processed.allowedProjects.includes(project.ProjectNo)) return false;
       if (text || status || fundedBy || fromDate || toDate) {
         let isValid = true;
@@ -154,7 +154,7 @@ function getBillCopy(req, res) {
       return sendFailedResponse(res, 'Bill copy not found', 404);
     }
     const billCopyJson = results[0].BillCopy;
-    res.status(200).json({ BillCopy: billCopyJson}).end();
+    res.status(200).json({ BillCopy: billCopyJson }).end();
   }).catch((err) => {
     sendFailedResponse(res, err.message, 500);
   });
@@ -341,12 +341,12 @@ function getPO(req, res) {
 }
 
 async function generateReport(req, res) {
-  const {reportType} = req.body;
-  if(!reportType)return sendFailedResponse(res, 'Report type not specified', 500);
+  const { reportType } = req.body;
+  if (!reportType) return sendFailedResponse(res, 'Report type not specified', 500);
   let query = '';
 
   if (reportType === 'general') {
-      query = `
+    query = `
           SELECT 
               p.ProjectNo, 
               p.ProjectTitle,
@@ -361,7 +361,7 @@ async function generateReport(req, res) {
               p.ProjectNo, p.ProjectTitle, p.TotalSanctionAmount;
       `;
   } else if (reportType === 'category') {
-      query = `
+    query = `
           SELECT 
               p.ProjectNo, 
               p.ProjectTitle,
@@ -386,11 +386,25 @@ async function generateReport(req, res) {
               p.ProjectNo, p.ProjectTitle, p.TotalSanctionAmount;
       `;
   }
-  if(!query)return sendFailedResponse(res, 'Invalid Report Type', 500);
+  if (!query) return sendFailedResponse(res, 'Invalid Report Type', 500);
 
   const data = await db.query(query);
-  res.status(200).json({data: data[0]}).end();
+  res.status(200).json({ data: data[0] }).end();
+}
+
+async function getRemaining(req, res) {
+  const {ProjectNo} = req.body;
+  let query = `SELECT 
+                    RemainingManpowerAmt,RemainingTravelAmt,
+                    RemainingConsumablesAmt,RemainingContingencyAmt,
+                    RemainingOverheadAmt,RemainingEquipmentAmt
+              FROM
+                  ProjectAllocationSummary
+              WHERE
+                  ProjectNo=${ProjectNo}`
+  const data = await db.query(query);
+  res.status(200).json({data: data[0][0]}).end();
 }
 
 
-export { login, updateIndentStatus, autoLogin, getProjects, logout, getUsers, getProjectInfo, getIndents, getBillCopy, getIndentInfo, getPR, getPRInfo, getPO, updatePRStatus, generateReport };
+export { login, getRemaining, updateIndentStatus, autoLogin, getProjects, logout, getUsers, getProjectInfo, getIndents, getBillCopy, getIndentInfo, getPR, getPRInfo, getPO, updatePRStatus, generateReport };

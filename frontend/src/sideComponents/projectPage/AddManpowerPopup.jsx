@@ -14,7 +14,11 @@ function ManpowerPopup({ reset, workers }) {
     const [totalAllocation, setTotalAllocation] = useState(0);
     const { project } = useContext(ProjectContext);
     const {profile} = useContext(ProfileContext);
-
+    const [toDate, setToDate] = useState('');
+    const [fromDate, setFromDate] = useState('');
+    useEffect(()=>{
+        handleChange();
+    }, [fromDate, toDate]);
     useEffect(() => {
         async function getProfiles() {
             const data = await fetchDataWithParams('users', 'post', { filters: filter });
@@ -29,8 +33,6 @@ function ManpowerPopup({ reset, workers }) {
         }
         getProfiles();
     }, []);
-    const [fromDate, setFromDate] = useState('');
-    const [toDate, setToDate] = useState('');
     async function handleSubmit(e) {
         e.preventDefault();
         if(!e.target.checkValidity())return;
@@ -58,7 +60,7 @@ function ManpowerPopup({ reset, workers }) {
         }
     }
 
-    const handleChange = (e) => {
+    const handleChange = () => {
         if (!fromDate || !toDate) {
             return;
         }

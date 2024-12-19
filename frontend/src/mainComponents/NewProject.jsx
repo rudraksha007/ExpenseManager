@@ -1,5 +1,5 @@
 import { useLocation, useNavigate } from 'react-router-dom';
-import { fetchDataWithParams } from '../assets/scripts';
+import { fetchData, fetchDataWithParams } from '../assets/scripts';
 import '../css/NewProject.css';
 import React, { useEffect, useRef, useState } from 'react';
 import { FaTimes } from 'react-icons/fa';
@@ -8,8 +8,9 @@ function NewProject() {
     const [popup, setPopup] = useState(null);
     const navigate = useNavigate();
     const location = useLocation();
-    const {EditFormData} = location.state || {};
-    const [formData, setFormData] = useState(EditFormData?{...EditFormData, ProjectStartDate: EditFormData.ProjectStartDate.split('T')[0], ProjectEndDate: EditFormData.ProjectEndDate.split('T')[0]}:{
+    const { EditFormData } = location.state || {};
+    const [remaining, setRemaining] = useState({});
+    const [formData, setFormData] = useState(EditFormData ? { ...EditFormData, ProjectStartDate: EditFormData.ProjectStartDate.split('T')[0], ProjectEndDate: EditFormData.ProjectEndDate.split('T')[0] } : {
         ProjectTitle: '',
         ProjectNo: 0,
         ProjectStartDate: '',
@@ -29,14 +30,29 @@ function NewProject() {
     const selected = useRef({ PIs: [], CoPIs: [], Workers: [] });
     const [users, setUsers] = useState([]);
     useEffect(() => {
-        if(EditFormData){
-            console.log(EditFormData);
-            
-            setFormData(EditFormData);
-            if(EditFormData.PIs) selected.current.PIs = EditFormData.PIs;
-            if(EditFormData.CoPIs) selected.current.CoPIs = EditFormData.CoPIs;
-            if(EditFormData.Workers) selected.current.Workers = EditFormData.Workers;
+        async function setData() {
+            if (EditFormData) {
+                const data = (await fetchDataWithParams('editProject', 'post', { ProjectNo: formData.ProjectNo }));
+                const { RemainingManpowerAmt, RemainingConsumablesAmt,
+                    RemainingContingencyAmt, RemainingOverheadAmt,
+                    RemainingEquipmentAmt, RemainingTravelAmt } = data.data;
+                    ;
+                
+                
+                setRemaining({
+                    ManpowerAllocationAmt: RemainingManpowerAmt,
+                    ConsumablesAllocationAmt: RemainingConsumablesAmt,
+                    ContingencyAllocationAmt: RemainingContingencyAmt,
+                    OverheadAllocationAmt: RemainingOverheadAmt,
+                    EquipmentAllocationAmt: RemainingEquipmentAmt,
+                    TravelAllocationAmt: RemainingTravelAmt,
+                });
+                if (EditFormData.PIs) selected.current.PIs = EditFormData.PIs;
+                if (EditFormData.CoPIs) selected.current.CoPIs = EditFormData.CoPIs;
+                if (EditFormData.Workers) selected.current.Workers = EditFormData.Workers;
+            }
         }
+        setData();
         fetchDataWithParams('users', 'post', { filters: {} }).then(data => {
             setUsers(data.users);
         });
@@ -50,7 +66,7 @@ function NewProject() {
     async function setPopupContent(type) {
         const isWorker = type === 'Worker';
         const filteredUsers = isWorker ? users.filter(profile => profile.id !== 0 && profile.role !== 'Pi') : users.filter(profile => profile.role === 'Pi');
-        
+
         setPopup(
             <div className='projectPopup'>
                 <form className="projectPopupCont" id="largePopupCont">
@@ -121,22 +137,22 @@ function NewProject() {
     const handleSubmit = async (e) => {
         e.preventDefault();
         if (!e.currentTarget.checkValidity()) return;
-        if(formData.PIs.length === 0 || formData.CoPIs.length === 0 || formData.Workers.length === 0){
+        if (formData.PIs.length === 0 || formData.CoPIs.length === 0 || formData.Workers.length === 0) {
             alert('Please select at least one PI, CoPI and Worker');
             return;
         }
         let res = null;
-        if(EditFormData){
+        if (EditFormData) {
             res = await fetchDataWithParams('editProject', 'put', formData);
             console.log(formData);
-            
-        }else{
+
+        } else {
             res = await fetchDataWithParams('projects', 'put', formData);
         }
         if (res.reqStatus === 'success') {
-            alert(`Project ${EditFormData?'Saved':'Created'} Successfully`);
+            alert(`Project ${EditFormData ? 'Saved' : 'Created'} Successfully`);
             setFormData({});
-            navigate(EditFormData?`/projects/${formData.ProjectNo}`:'/');
+            navigate(EditFormData ? `/projects/${formData.ProjectNo}` : '/');
         } else {
             alert('Failed to create project: ' + res.message);
         }
@@ -172,7 +188,7 @@ function NewProject() {
                     name="ProjectTitle"
                     placeholder="Enter project title"
                     required
-                    readOnly={EditFormData?true:false}
+                    readOnly={EditFormData ? true : false}
                     onChange={handleChange}
                     value={formData.ProjectTitle || ''}
                 />
@@ -186,7 +202,7 @@ function NewProject() {
                     name="ProjectNo"
                     placeholder="Enter project number"
                     required
-                    readOnly = {EditFormData?true:false}
+                    readOnly={EditFormData ? true : false}
                     min="0"
                     onChange={handleChange}
                     value={formData.ProjectNo || ''}
@@ -308,7 +324,7 @@ function NewProject() {
                             type="number"
                             name={field}
                             placeholder={`Enter ${field.replace(/([A-Z])/g, ' $1').toLowerCase()}`}
-                            min="0"
+                            min={formData[field] - remaining[field]}
                             onChange={handleChange}
                             value={formData[field] || 0}
                             max={getMax(field)} // Dynamically adjust max for each field
@@ -317,7 +333,7 @@ function NewProject() {
                 ))}
 
                 <footer>
-                    <input type="submit" value={EditFormData? "Save Changes":"Create New Project"} className="hoverable tableTitle" />
+                    <input type="submit" value={EditFormData ? "Save Changes" : "Create New Project"} className="hoverable tableTitle" />
                 </footer>
             </form>
         </>
