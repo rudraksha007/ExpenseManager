@@ -3,7 +3,6 @@ import '../css/Login.css';
 import { useEffect,useContext, useState } from "react";
 import { ProfileContext } from "../assets/UserProfile";
 import { fetchDataWithParams } from "../assets/scripts";
-import loading from '../assets/images/loading.webp';
 import CryptoJS from 'crypto-js';
 
 function Login() {
@@ -18,8 +17,7 @@ function Login() {
         let formData = Object.fromEntries(new FormData(e.target).entries());
         formData = {...formData, password: CryptoJS.SHA256(formData.password).toString()}
         console.log(formData);
-        const data = await fetchDataWithParams('login', 'post', formData);
-        
+        const data = await fetchDataWithParams('login', 'post', formData);        
         if(data.reqStatus=='success'){            
             setProfile(data.profile);
         }

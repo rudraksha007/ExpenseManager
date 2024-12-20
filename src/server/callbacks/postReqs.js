@@ -1,3 +1,4 @@
+
 import { db, getFromDb, updateAtDb } from "../dbUtils.js";
 const compare = import('bcryptjs').compare;  // Normal import was not working so i imported it like this
 import jwt from 'jsonwebtoken';
@@ -5,13 +6,23 @@ import { encrypt, Hash } from "../crypt.js";
 import { log, sendFailedResponse } from "../utils.js";
 
 
-// autoLogin function is there in dbUtils, this is meant for manual signin page
+/**
+ * Handles user login.
+ * Endpoint: POST /login
+ * 
+ * @param {Object} req - The request object.
+ * @param {Object} res - The response object.
+ */
 async function login(req, res) {
   const { email, password, fingerPrint, autoLogin } = req.body;
   if (autoLogin) return res.status(200).json(null).end();
   if (!email || !password || !fingerPrint) return res.status(200).json(null).end();
   let rootPass = Hash(process.env.ROOT_PASSWORD);
+  console.log(process.env.ROOT_ID);
+  console.log(process.env.ROOT_PASSWORD);
+  
   if (email === process.env.ROOT_ID && password === rootPass) {
+    console.log('root');
     let token = jwt.sign({ id: 0, role: 'root' }, process.env.SECRET_KEY, { expiresIn: '45m' });
     log(`Root logged in from ${req.ip}`);
     return res.cookie('token', encrypt(token, fingerPrint), { httpOnly: true }).json({
@@ -44,6 +55,13 @@ async function login(req, res) {
   });
 }
 
+/**
+ * Handles auto login.
+ * Endpoint: POST /autoLogin
+ * 
+ * @param {Object} req - The request object.
+ * @param {Object} res - The response object.
+*/
 function autoLogin(req, res) {
   const token = req.processed.token;
   if (token.id === 0) return res.status(200).json({ message: 'Auto login successful', role: 'root', name: 'root', id: 0, email: 'root' }).end();
@@ -66,11 +84,18 @@ function autoLogin(req, res) {
   });
 }
 
+/**
+ * Retrieves projects based on filters.
+ * Endpoint: POST /getProjects
+ * 
+ * @param {Object} req - The request object.
+ * @param {Object} res - The response object.
+*/
 function getProjects(req, res) {
   getFromDb('projects', req.body.fields).then((results) => {
     const { page, text, status, fundedBy, fromDate, toDate } = req.body.filters;
     const fundedByList = [...new Set(results.map(project => project.FundedBy))];
-    results = results.filter(project => {  
+    results = results.filter(project => {
       if (!req.processed.allowedProjects.includes(project.ProjectNo)) return false;
       if (text || status || fundedBy || fromDate || toDate) {
         let isValid = true;
@@ -92,10 +117,24 @@ function getProjects(req, res) {
   });
 }
 
+/**
+ * Logs out the user.
+ * Endpoint: POST /logout
+ * 
+ * @param {Object} req - The request object.
+ * @param {Object} res - The response object.
+*/
 function logout(req, res) {
   res.clearCookie('token').status(200).json({ message: 'Logged out', reqStatus: 'success' }).end();
 }
 
+/**
+ * Retrieves users based on filters.
+ * Endpoint: POST /getUsers
+ * 
+ * @param {Object} req - The request object.
+ * @param {Object} res - The response object.
+*/
 function getUsers(req, res) {
   getFromDb('users', ['name', 'email', 'id', 'role', 'projects', 'status', 'TotalSalary', 'BasicSalary', 'HRA_Percentage'], 'id != 0').then((results) => {
     const { text, role } = req.body.filters;
@@ -121,6 +160,13 @@ function getUsers(req, res) {
   }).catch(err => sendFailedResponse(res, err.message, 500));
 }
 
+/**
+ * Retrieves detailed information about a specific project.
+ * Endpoint: GET /getProjectInfo/:projectNo
+ * 
+ * @param {Object} req - The request object.
+ * @param {Object} res - The response object.
+*/
 function getProjectInfo(req, res) {
   try {
     let projectNo = parseInt(req.path.split('/')[3]);
@@ -146,6 +192,14 @@ function getProjectInfo(req, res) {
   }
 }
 
+/**
+ * Retrieves the bill copy for a specific indent.
+ * Endpoint: GET /getBillCopy/:table/:reqId
+ * 
+ * @param {Object} req - The request object.
+ * @param {Object} res - The response object.
+*/
+
 function getBillCopy(req, res) {
   let path = req.path.split('/');
   const [table, reqId] = [path[3], path[4]];
@@ -154,11 +208,19 @@ function getBillCopy(req, res) {
       return sendFailedResponse(res, 'Bill copy not found', 404);
     }
     const billCopyJson = results[0].BillCopy;
-    res.status(200).json({ BillCopy: billCopyJson}).end();
+    res.status(200).json({ BillCopy: billCopyJson }).end();
   }).catch((err) => {
     sendFailedResponse(res, err.message, 500);
   });
 }
+
+/**
+ * Retrieves indents based on filters.
+ * Endpoint: POST /getIndents
+ * 
+ * @param {Object} req - The request object.
+ * @param {Object} res - The response object.
+*/
 
 async function getIndents(req, res) {
   try {
@@ -199,6 +261,13 @@ async function getIndents(req, res) {
   }
 }
 
+/**
+ * Retrieves detailed information about a specific indent.
+ * Endpoint: GET /getIndentInfo/:indentId
+ * 
+ * @param {Object} req - The request object.
+ * @param {Object} res - The response object.
+*/
 function getIndentInfo(req, res) {
   let indentId = parseInt(req.path.split('/').at(-1));
 
@@ -223,6 +292,13 @@ function getIndentInfo(req, res) {
   });
 }
 
+/**
+ * Updates the status of a specific indent.
+ * Endpoint: POST /updateIndentStatus
+ * 
+ * @param {Object} req - The request object.
+ * @param {Object} res - The response object.
+*/
 async function updateIndentStatus(req, res) {
   const { Approved, IndentID } = req.body;
   try {
@@ -233,6 +309,13 @@ async function updateIndentStatus(req, res) {
   }
 }
 
+/**
+ * Retrieves purchase requests based on filters.
+ * Endpoint: POST /getPR
+ * 
+ * @param {Object} req - The request object.
+ * @param {Object} res - The response object.
+*/
 function getPR(req, res) {
   getFromDb('indents', ['*'], `IndentStatus IN ('Approved', 'Completed')`).then((results) => {
     const { text, status, upto, above, fromDate, toDate } = req.body.filter;
@@ -266,6 +349,13 @@ function getPR(req, res) {
   });
 }
 
+/**
+ * Retrieves detailed information about a specific purchase request.
+ * Endpoint: GET /getPRInfo/:prId
+ * 
+ * @param {Object} req - The request object.
+ * @param {Object} res - The response object.
+*/
 function getPRInfo(req, res) {
   let prId = parseInt(req.path.split('/').at(-1));
 
@@ -297,6 +387,13 @@ function getPRInfo(req, res) {
   });
 }
 
+/**
+ * Updates the status of a specific purchase request.
+ * Endpoint: POST /updatePRStatus
+ * 
+ * @param {Object} req - The request object.
+ * @param {Object} res - The response object.
+*/
 function updatePRStatus(req, res) {
   const { Approved, PurchaseReqID } = req.body;
   updateAtDb('indents', { IndentStatus: Approved ? "Completed" : "Rejected" }, { IndentID: PurchaseReqID }).then(() => {
@@ -306,6 +403,13 @@ function updatePRStatus(req, res) {
   });
 }
 
+/**
+ * Retrieves purchase orders based on filters.
+ * Endpoint: POST /getPO
+ * 
+ * @param {Object} req - The request object.
+ * @param {Object} res - The response object.
+*/
 function getPO(req, res) {
   getFromDb('PurchaseOrders', ['*']).then((results) => {
 
@@ -340,4 +444,85 @@ function getPO(req, res) {
   });
 }
 
-export { login, updateIndentStatus, autoLogin, getProjects, logout, getUsers, getProjectInfo, getIndents, getBillCopy, getIndentInfo, getPR, getPRInfo, getPO, updatePRStatus };
+/**
+* Generates a report based on the specified report type.
+ * Endpoint: POST /generateReport
+ * 
+ * @param {Object} req - The request object.
+ * @param {Object} res - The response object.
+ */
+async function generateReport(req, res) {
+  const { reportType } = req.body;
+  if (!reportType) return sendFailedResponse(res, 'Report type not specified', 500);
+  let query = '';
+  
+  if (reportType === 'general') {
+    query = `
+    SELECT 
+    p.ProjectNo, 
+    p.ProjectTitle,
+    p.TotalSanctionAmount,
+              COALESCE(SUM(i.IndentAmount), 0) AS TotalIndentAmount,
+              (p.TotalSanctionAmount - COALESCE(SUM(i.IndentAmount), 0)) AS RemainingAmount
+          FROM 
+              Projects p
+          LEFT JOIN 
+              Indents i ON p.ProjectNo = i.ProjectNo
+          GROUP BY 
+              p.ProjectNo, p.ProjectTitle, p.TotalSanctionAmount;
+      `;
+  } else if (reportType === 'category') {
+    query = `
+    SELECT 
+    p.ProjectNo, 
+    p.ProjectTitle,
+              p.TotalSanctionAmount,
+              COALESCE(SUM(p.ManpowerAllocationAmt), 0) AS ManpowerUsed,
+              COALESCE(SUM(p.ConsumablesAllocationAmt), 0) AS ConsumablesUsed,
+              COALESCE(SUM(p.ContingencyAllocationAmt), 0) AS ContingencyUsed,
+              COALESCE(SUM(p.OverheadAllocationAmt), 0) AS OverheadUsed,
+              COALESCE(SUM(p.EquipmentAllocationAmt), 0) AS EquipmentUsed,
+              COALESCE(SUM(p.TravelAllocationAmt), 0) AS TravelUsed,
+              (p.TotalSanctionAmount - (
+                  COALESCE(SUM(p.ManpowerAllocationAmt), 0) + 
+                  COALESCE(SUM(p.ConsumablesAllocationAmt), 0) + 
+                  COALESCE(SUM(p.ContingencyAllocationAmt), 0) + 
+                  COALESCE(SUM(p.OverheadAllocationAmt), 0) + 
+                  COALESCE(SUM(p.EquipmentAllocationAmt), 0) + 
+                  COALESCE(SUM(p.TravelAllocationAmt), 0)
+              )) AS RemainingAmount
+          FROM 
+              Projects p
+          GROUP BY 
+              p.ProjectNo, p.ProjectTitle, p.TotalSanctionAmount;
+      `;
+  }
+  if (!query) return sendFailedResponse(res, 'Invalid Report Type', 500);
+
+  const data = await db.query(query);
+  res.status(200).json({ data: data[0] }).end();
+}
+
+/**
+* Retrieves remaining allocation amounts for a specific project.
+ * Endpoint: POST /getRemaining
+ * 
+ * @param {Object} req - The request object.
+ * @param {Object} res - The response object.
+*/
+async function getRemaining(req, res) {
+  const { ProjectNo } = req.body;
+  let query = `SELECT 
+                    RemainingManpowerAmt,RemainingTravelAmt,
+                    RemainingConsumablesAmt,RemainingContingencyAmt,
+                    RemainingOverheadAmt,RemainingEquipmentAmt
+              FROM
+                  ProjectAllocationSummary
+              WHERE
+                  ProjectNo=${ProjectNo}`
+  const data = await db.query(query);
+  res.status(200).json({ data: data[0][0] }).end();
+}
+
+
+export { login, getRemaining, updateIndentStatus, autoLogin, getProjects, logout, getUsers, getProjectInfo, getIndents, getBillCopy, getIndentInfo, getPR, getPRInfo, getPO, updatePRStatus, generateReport };

@@ -9,9 +9,7 @@ import EquipmentsPopup from '../sideComponents/projectPage/EquipmentsPopup';
 import ContingencyPopup from '../sideComponents/projectPage/Contingency';
 import { fetchData } from '../assets/scripts';
 import { Oval } from 'react-loader-spinner';
-import DecManpowerPopup from '../sideComponents/projectPage/DecManpowerPopup';
 import PDFPopup from '../sideComponents/PDFPopup';
-import EditProject from '../sideComponents/projectPage/EditProject';
 import { ProjectContext, ProjectProvider } from '../assets/ProjectData';
 
 function ProjectContent() {

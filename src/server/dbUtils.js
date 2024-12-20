@@ -3,14 +3,38 @@ import jwt from 'jsonwebtoken';
 import { log, sendFailedResponse } from './utils.js';
 import { decrypt } from './crypt.js';
 let db = null;
+/**
+ * Connects to the MySQL database and initializes the required tables and views.
+ * 
+ * @async
+ * @function connectDb
+ * @returns {Promise<mysql.Connection>} The MySQL database connection.
+ * @throws Will throw an error if unable to connect to the database or create tables/views.
+ * 
+ * @description
+ * This function establishes a connection to the MySQL database using the credentials
+ * provided in the environment variables. It then creates the necessary tables and views
+ * if they do not already exist. The tables include Projects, users, Indents, Manpower,
+ * Travel, Consumables, Overhead, Equipment, and Contingency. Additionally, it creates
+ * a view named ProjectAllocationSummary to summarize project allocations.
+ * 
+ * The function logs the progress of table creation and view creation. If any error occurs
+ * during the process, it logs the error and exits the process.
+ * 
+ * Environment Variables:
+ * - DB_USER: The database user.
+ * - DB_PASS: The database password.
+ * - DB_NAME: The database name.
+ * - ROOT_ID: The root user email.
+ * - ROOT_PASSWORD: The root user password.
+ */
 async function connectDb() {
     try {
         db = await mysql.createConnection({
             host: 'localhost',
             user: process.env.DB_USER,
             password: process.env.DB_PASS,
-            database: process.env.DB_NAME,
-            port: process.env.DB_PORT
+            database: process.env.DB_NAME
         });
         log('Connected to MySQL database');
         const tables = [
@@ -233,8 +257,24 @@ async function connectDb() {
         process.exit(1);
     }
 }
-
+/**
+ * Middleware to authenticate the user based on the JWT token.
+ * 
+ * @function authenticate
+ * @param {Object} req - The request object.
+ * @param {Object} res - The response object.
+ * @param {Function} next - The next middleware function.
+ * @returns {void}
+ * 
+ * @description
+ * This function checks for the presence of a JWT token in the request cookies.
+ * If the token is not present and the request path is not for login, it returns a 401 status.
+ * If the token is present, it verifies the token using the secret key and the decrypted token.
+ * If the token is invalid, it clears the token from the client side and returns a 401 status.
+ * If the token is valid, it adds the decoded token to the request object and calls the next middleware.
+ */
 function authenticate(req, res, next) {
+    if (req.method === 'GET') return next();
     const token = req.cookies.token;
     if (!token && req.path !== '/api/login')
         return res.status(401).json({ message: 'Access denied' }); // If token is not present and path is not for login
@@ -250,54 +290,19 @@ function authenticate(req, res, next) {
     });
 };
 
-async function generateReport(req, res) {
-    const reportType = req.body.reportType;
-    let query = '';
 
-    if (reportType === 'general') {
-        query = `
-            SELECT 
-                p.ProjectNo, 
-                p.ProjectTitle,
-                p.TotalSanctionAmount,
-                COALESCE(SUM(i.IndentAmount), 0) AS TotalIndentAmount,
-                (p.TotalSanctionAmount - COALESCE(SUM(i.IndentAmount), 0)) AS RemainingAmount
-            FROM 
-                Projects p
-            LEFT JOIN 
-                Indents i ON p.ProjectNo = i.ProjectNo
-            GROUP BY 
-                p.ProjectNo, p.ProjectTitle, p.TotalSanctionAmount;
-        `;
-    } else if (reportType === 'category') {
-        query = `
-            SELECT 
-                p.ProjectNo, 
-                p.ProjectTitle,
-                p.TotalSanctionAmount,
-                COALESCE(SUM(p.ManpowerAllocationAmt), 0) AS ManpowerUsed,
-                COALESCE(SUM(p.ConsumablesAllocationAmt), 0) AS ConsumablesUsed,
-                COALESCE(SUM(p.ContingencyAllocationAmt), 0) AS ContingencyUsed,
-                COALESCE(SUM(p.OverheadAllocationAmt), 0) AS OverheadUsed,
-                COALESCE(SUM(p.EquipmentAllocationAmt), 0) AS EquipmentUsed,
-                COALESCE(SUM(p.TravelAllocationAmt), 0) AS TravelUsed,
-                (p.TotalSanctionAmount - (
-                    COALESCE(SUM(p.ManpowerAllocationAmt), 0) + 
-                    COALESCE(SUM(p.ConsumablesAllocationAmt), 0) + 
-                    COALESCE(SUM(p.ContingencyAllocationAmt), 0) + 
-                    COALESCE(SUM(p.OverheadAllocationAmt), 0) + 
-                    COALESCE(SUM(p.EquipmentAllocationAmt), 0) + 
-                    COALESCE(SUM(p.TravelAllocationAmt), 0)
-                )) AS RemainingAmount
-            FROM 
-                Projects p
-            GROUP BY 
-                p.ProjectNo, p.ProjectTitle, p.TotalSanctionAmount;
-        `;
-    }
-
-    return db.query(query).then(([rows]) => rows);
-}
+/**
+ * Middleware to authorize the user based on their role.
+ * 
+ * @function authorize
+ * @param {Array<string>} allowedRoles - The roles that are allowed to access the resource.
+ * @returns {Function} The middleware function.
+ * 
+ * @description
+ * This function checks if the user's role is included in the allowed roles or if the user is a root user.
+ * If the user's role is not allowed, it returns a 403 status.
+ * If the user's role is allowed, it calls the next middleware.
+ */
 
 function authorize(allowedRoles) {
     return (req, res, next) => {
@@ -308,6 +313,21 @@ function authorize(allowedRoles) {
     };
 };
 
+/**
+ * Middleware to authorize the user based on their project access.
+ * 
+ * @function projectWiseAuthorisation
+ * @param {Object} req - The request object.
+ * @param {Object} res - The response object.
+ * @param {Function} next - The next middleware function.
+ * @returns {void}
+ * 
+ * @description
+ * This function checks if the user's role is root or SuperAdmin. If not, it retrieves the user's projects
+ * from the database and adds them to the request object. If the user has no projects, it returns a 403 status.
+ * If the user's role is root or SuperAdmin, it retrieves all project numbers from the database and adds them
+ * to the request object. It then calls the next middleware.
+ */
 const projectWiseAuthorisation = (req, res, next) => {
     if (req.processed.token.role != 'root' && req.processed.token.role != 'SuperAdmin') {
 
@@ -340,6 +360,22 @@ const projectWiseAuthorisation = (req, res, next) => {
     }
 
 };
+
+
+/**
+ * Retrieves data from the specified table in the database.
+ * 
+ * @async
+ * @function getFromDb
+ * @param {string} table - The name of the table to retrieve data from.
+ * @param {Array<string>} fields - The fields to retrieve from the table.
+ * @param {string} [where] - The optional WHERE clause to filter the data.
+ * @returns {Promise<Array<Object>>} The retrieved data.
+ * 
+ * @description
+ * This function constructs a SELECT query based on the provided table, fields, and optional WHERE clause.
+ * It executes the query and returns the retrieved data as an array of objects.
+ */
 async function getFromDb(table, fields, where) {
     let query = `SELECT ${fields.join(',')} FROM ${table}`;
     if (where) query += ` WHERE ${where}`;
@@ -347,9 +383,26 @@ async function getFromDb(table, fields, where) {
 
 }
 
+/**
+ * Updates data in the specified table in the database.
+ * 
+ * @async
+ * @function updateAtDb
+ * @deprecated This function is marked as deprecated due to instability issues.
+ * @param {string} table - The name of the table to update data in.
+ * @param {Object} fieldsDictionary - The fields and their new values to update.
+ * @param {Object} where - The WHERE clause to filter the rows to update.
+ * @returns {Promise<void>}
+ * 
+ * @description
+ * This function constructs an UPDATE query based on the provided table, fields, and WHERE clause.
+ * It executes the query to update the specified rows in the table.
+ * 
+ * This is used at some places but many times, it proves to be unsable, hance marked deprecated
+ */
 async function updateAtDb(table, fieldsDictionary, where) {
     let fields = Object.entries(fieldsDictionary).map(([key, value]) => `${key}='${value}'`).join(', ');
     let wheres = Object.entries(where).map(([key, value]) => `${key}='${value}'`).join(' AND ');
     return db.query(`UPDATE ${table} SET ${fields} WHERE ${wheres}`);
 }
-export { db, authenticate, authorize, connectDb, getFromDb, projectWiseAuthorisation, updateAtDb, generateReport };
+export { db, authenticate, authorize, connectDb, getFromDb, projectWiseAuthorisation, updateAtDb }; 

@@ -14,12 +14,14 @@ import { autoLogin, initialize } from './assets/scripts.js';
 import { ProfileContext } from './assets/UserProfile';
 import { Oval } from 'react-loader-spinner';
 import NewProject from './mainComponents/NewProject.jsx';
+import Report from './mainComponents/Report.jsx';
 
 function App() {
   const { profile, setProfile } = useContext(ProfileContext);
   const [loading, setLoading] = React.useState(true);
   const navigate = useNavigate();
   useEffect(() => {
+    initialize();
     document.title = 'Project Management System';
     async function login() {
       if(profile){return;}
@@ -50,6 +52,7 @@ function App() {
               <Route path='/projects/:id' element={<Project />} />
               <Route path='/profiles' element={<AllProfiles />} />
               <Route path='/newproject' element={<NewProject/>}/>
+              <Route path='/report' element={<Report/>}/>
             </Routes>
           </div>
         </>

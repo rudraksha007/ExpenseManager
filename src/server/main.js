@@ -1,18 +1,18 @@
+import express from "express";
+import ViteExpress from "vite-express";
 import { log } from './utils.js';
-import express from 'express';
 import dotenv from 'dotenv';
-import { login, autoLogin, getProjects, logout, getUsers, getProjectInfo, getIndents, getBillCopy, getIndentInfo, updateIndentStatus, getPR, getPO, getPRInfo, updatePRStatus } from './callbacks/postReqs.js';
+import { login, autoLogin, getProjects, logout, getUsers, getProjectInfo, getIndents, getBillCopy, getIndentInfo, updateIndentStatus, getPR, updatePRStatus, generateReport, getRemaining } from './callbacks/postReqs.js';
 import cookieParser from 'cookie-parser';
-import { db, authenticate, authorize, connectDb, projectWiseAuthorisation } from './dbUtils.js';
-import cors from 'cors';
+import { authenticate, authorize, connectDb, projectWiseAuthorisation } from './dbUtils.js';
 import { addPOrder, addProject,addProjectIndent,addPurchaseReq,addUser, editProject } from './callbacks/putReqs.js';
 import fileUpload from 'express-fileupload';
 
+const app = express();
 const hash = import('bcryptjs').hash;
 log('Starting Expense Manager Server');
 dotenv.config();
-const app = express();
-app.use(cors({ origin: 'http://localhost:5173', credentials: true }), express.json(),fileUpload(), cookieParser(), authenticate);
+app.use( express.json(),fileUpload(), cookieParser(), authenticate);
 await connectDb();
 
 //Post requests (right click on supplied function-> goto source definition to view the code)
@@ -29,6 +29,9 @@ app.post('/api/purchaseReqs', authorize(['SuperAdmin']), (req,res)=>getPR(req, r
 
 app.post('/api/indentStatus', authorize(['SuperAdmin']), (req, res) => updateIndentStatus(req, res));
 app.post('/api/purchaseReqStatus', authorize(['SuperAdmin']), (req, res) => updatePRStatus(req, res));
+app.post('/api/report', authorize(['SuperAdmin']), (req, res) => generateReport(req, res));
+app.post('/api/editProject', authorize(['SuperAdmin']), (req, res) => getRemaining(req, res));
+
 
 //Put requests (right click on supplied function-> goto source definition to view the code)
 app.put('/api/projects', authorize(['Pi','SuperAdmin']), (req, res) => addProject(req, res));
@@ -42,20 +45,6 @@ app.put('/api/purchaseReqs', authorize(['SuperAdmin']), (req, res) => addPurchas
 app.put('/api/purchaseOrders', authorize(['SuperAdmin']), (req, res) => addPOrder(req, res));
 app.put('/api/editProject', authorize(['Pi','SuperAdmin']), (req, res) => editProject(req, res));
 
-
-if (process.env.NODE_ENV === 'production') {
-  // Serve static files from React app
-  app.use(express.static(__dirname + '/../frontend/dist'));
-
-  // Handle all other routes and serve index.html for React Router
-  app.get('*', (req, res) => {
-    res.sendFile(__dirname + '/../frontend/dist/index.html');
-  });
-} else {
-  // In development, you don't serve static files from Express
-  console.log("Running in development mode. React is being served by Vite.");
-}
-
-app.listen(3000, () => {
-  log('Server running on port 3000');
-});
+ViteExpress.listen(app, 3000, () =>
+  console.log("Server is listening on port 3000..."),
+);
