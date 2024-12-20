@@ -1,0 +1,13 @@
+#pageControls{
+    display: flex;
+    justify-content: space-evenly;
+    font-size: 1.5rem;
+    font-weight: bolder;
+    align-items: center;
+    background-color: inherit;
+    margin-bottom: 10px;
+}
+#pageControls>span{
+    background-color: white;
+    width: 10%;
+}

@@ -1,0 +1,31 @@
+.dashSection{
+    box-shadow: 2px 2px 5px gray;
+    height: fit-content;
+    /* max-height: 70dvh; */
+    min-height: 50dvh;
+    border-radius: 5px;
+    padding: 10px 25px;
+    background-color: inherit;
+    color: black;
+    display: flex;
+    flex-direction: column;
+    box-sizing: border-box;
+}
+#dashBody{
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    grid-auto-rows: max-content; 
+    width: 99dvw;
+    gap: 20px;
+    height: 90dvh;
+    padding: 20px;
+    box-sizing: border-box;
+}
+#dashUserProjects{
+    text-align: center;
+}
+#dashProjectAllocationChart{
+    display: grid;
+    grid-template-columns: 45% 45%;
+    grid-auto-rows: max-content;
+}

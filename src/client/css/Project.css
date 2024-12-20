@@ -1,0 +1,68 @@
+#projectMainDiv{
+    /* height: 100%; */
+    /* width: 100%; */
+    /* padding: 10px 15px; */
+    text-align: center;
+    width: calc(100vw - 50px);
+}
+#projectDetails{
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+}
+#projectDetails>div{
+    display: flex;
+    justify-content: space-between;
+    box-sizing: border-box;
+    padding: 0 20%;
+}
+#projectTabs{
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    width: 100%;
+    
+    height: 30px;
+    border: 2px solid black;
+    margin: 10px 0 10px 0;
+    /* column-gap: 1px; */
+}
+.add{
+    display: flex;
+    justify-content: space-evenly;
+}
+#projectTabs>div{
+    background-color: rgb(0, 174, 0);
+    display: flex;
+    justify-content: space-evenly;
+    align-items: center;
+}
+#projectTabContent{
+    display:flex;
+    overflow-x: hidden;
+    width: 100%;
+}
+.projectTabContentData{
+    display: grid; 
+    flex: 0 0 100%;
+    /* grid-template-columns: 1fr repeat(4, 3fr); */
+    transition: transform 0.5s ease-in-out;
+    gap: 2px;
+    grid-auto-rows: max-content;
+}
+.projectTabContentData>div{
+    background-color: rgb(222, 222, 222);
+    padding: 5px 0;
+}
+.projectTabDataHeading{
+    background-color: green;
+    color: white;
+}
+#projectTabsActive{
+    filter: brightness(0.8);
+}
+.inherit{
+    background-color: inherit;
+    padding: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}

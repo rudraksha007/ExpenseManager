@@ -11,16 +11,35 @@
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  -webkit-text-size-adjust: 100%;
 }
-
+#root{
+  height: 100dvh;
+  width: 100%;
+  color: black;
+  /* overflow-x: hidden; */
+}
+#appMainElement{
+  max-height: 90dvh;
+  width: 100dvw;
+  z-index: 0;
+  overflow: auto;
+  box-sizing: border-box;
+}
+#appMainElement>*{
+  padding: 10px 25px;
+  box-sizing: border-box;
+  height: 90dvh;
+}
 a {
   font-weight: 500;
-  color: #646cff;
   text-decoration: inherit;
+  color: black;
+  text-decoration: none;
+  text-decoration: underline;
 }
-a:hover {
-  color: #535bf2;
+input, select, textarea{
+  background-color: rgb(222, 222, 222);
+  color-scheme: light;
 }
 
 body {
@@ -29,6 +48,8 @@ body {
   place-items: center;
   min-width: 320px;
   min-height: 100vh;
+  height: 100vh;
+  width: 100vh;
 }
 
 h1 {
@@ -43,27 +64,23 @@ button {
   font-size: 1em;
   font-weight: 500;
   font-family: inherit;
-  background-color: #1a1a1a;
+  background-color: green;
   cursor: pointer;
   transition: border-color 0.25s;
 }
-button:hover {
-  border-color: #646cff;
-}
+
 button:focus,
 button:focus-visible {
   outline: 4px auto -webkit-focus-ring-color;
 }
 
-@media (prefers-color-scheme: light) {
-  :root {
-    color: #213547;
-    background-color: #ffffff;
-  }
-  a:hover {
-    color: #747bff;
-  }
-  button {
-    background-color: #f9f9f9;
-  }
+.hoverable, button{
+  cursor: pointer;
+  transition: all 0.3s ease-in-out;
+}
+.hoverable:hover{
+  filter: brightness(90%);
+}
+.hoverable:active{
+  filter: brightness(80%);
 }

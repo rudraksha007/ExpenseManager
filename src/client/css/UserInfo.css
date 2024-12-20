@@ -1,0 +1,8 @@
+#dashUserInfoDp{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+#dashUserInfoDp>img{
+    border-radius: 50%;
+}
