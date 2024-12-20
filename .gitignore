@@ -27,3 +27,5 @@ frontend/!.vscode/extensions.json
 backend/.vscode/*
 backend/!.vscode/extensions.json
 backend/node_modules
+
+ignore
