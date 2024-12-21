@@ -45,6 +45,6 @@ app.put('/api/purchaseReqs', authorize(['SuperAdmin']), (req, res) => addPurchas
 app.put('/api/purchaseOrders', authorize(['SuperAdmin']), (req, res) => addPOrder(req, res));
 app.put('/api/editProject', authorize(['Pi','SuperAdmin']), (req, res) => editProject(req, res));
 
-ViteExpress.listen(app, 3000, () =>
-  console.log("Server is listening on port 3000..."),
+ViteExpress.listen(app, 80, () =>
+  console.log("Server is listening on port 80..."),
 );
