@@ -42,7 +42,7 @@ async function connectDb() {
                 tableName: 'Projects',
                 definition: `
                     ProjectTitle VARCHAR(255) NOT NULL,
-                    ProjectNo INT PRIMARY KEY,
+                    ProjectNo Varchar(255) PRIMARY KEY,
                     FundedBy VARCHAR(255) NOT NULL,
                     ProjectStartDate DATE NOT NULL,
                     ProjectEndDate DATE,
@@ -81,7 +81,7 @@ async function connectDb() {
                 definition: `
                     IndentID INTEGER PRIMARY KEY AUTO_INCREMENT,
                     IndentCategory VARCHAR(255),
-                    ProjectNo INTEGER,
+                    ProjectNo Varchar(255),
                     IndentAmount DOUBLE,
                     IndentedPersonId INT,
                     IndentDate DATE,
@@ -94,7 +94,7 @@ async function connectDb() {
                 tableName: 'Manpower',
                 definition: `
                     IndentID INTEGER PRIMARY KEY,
-                    ProjectNo INTEGER,
+                    ProjectNo Varchar(255),
                     ProjectTitle VARCHAR(255),
                     EmployeeID INT,
                     Workers JSON,
@@ -111,7 +111,7 @@ async function connectDb() {
                 tableName: 'Travel',
                 definition: `
                     IndentID INTEGER PRIMARY KEY,
-                    ProjectNo INTEGER,
+                    ProjectNo Varchar(255),
                     RequestedAmt DOUBLE,
                     EmployeeID INT,
                     Source VARCHAR(255),
@@ -133,7 +133,7 @@ async function connectDb() {
                 tableName: 'Consumables',
                 definition: `
                     IndentID INTEGER PRIMARY KEY,
-                    ProjectNo INTEGER,
+                    ProjectNo Varchar(255),
                     ProjectTitle VARCHAR(255),
                     RequestedAmt DOUBLE,
                     EmployeeID INT,
@@ -151,7 +151,7 @@ async function connectDb() {
                 tableName: 'Overhead',
                 definition: `
                     RequestID INTEGER PRIMARY KEY,
-                    ProjectNo INTEGER,
+                    ProjectNo Varchar(255),
                     ProjectTitle VARCHAR(255),
                     RequestedAmt DOUBLE,
                     EmployeeID INT,
@@ -169,7 +169,7 @@ async function connectDb() {
                 tableName: 'Equipment',
                 definition: `
                     IndentID INTEGER PRIMARY KEY,
-                    ProjectNo INTEGER,
+                    ProjectNo Varchar(255),
                     ProjectTitle VARCHAR(255),
                     RequestedAmt DOUBLE,
                     EmployeeID INT,
@@ -188,7 +188,7 @@ async function connectDb() {
                 tableName: 'Contingency',
                 definition: `
                     IndentID INTEGER PRIMARY KEY,
-                    ProjectNo INTEGER,
+                    ProjectNo Varchar(255),
                     ProjectTitle VARCHAR(255),
                     RequestedAmt DOUBLE,
                     EmployeeID INT,
@@ -379,6 +379,8 @@ const projectWiseAuthorisation = (req, res, next) => {
 async function getFromDb(table, fields, where) {
     let query = `SELECT ${fields.join(',')} FROM ${table}`;
     if (where) query += ` WHERE ${where}`;
+    console.log(query);
+    
     return db.query(query).then(([rows]) => rows);
 
 }

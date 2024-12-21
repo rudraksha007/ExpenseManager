@@ -169,15 +169,15 @@ function getUsers(req, res) {
 */
 function getProjectInfo(req, res) {
   try {
-    let projectNo = parseInt(req.path.split('/')[3]);
+    let projectNo = req.path.split('/')[3];
     let payload = { data: {} };
-    getFromDb('ProjectAllocationSummary', ['*'], `ProjectNo= ${projectNo}`).then((results) => {
+    getFromDb('ProjectAllocationSummary', ['*'], `ProjectNo= '${projectNo}'`).then((results) => {
       payload.data = results[0];
     }).catch((err) => {
       sendFailedResponse(res, err.message, 500);
     });
     let tables = ['manpower', 'equipment', 'contingency', 'consumables', 'overhead', 'travel'];
-    const promises = tables.map((table) => getFromDb(table, ['*'], `ProjectNo= ${projectNo}`).then((results) => {
+    const promises = tables.map((table) => getFromDb(table, ['*'], `ProjectNo= '${projectNo}'`).then((results) => {
       results.forEach(result => {
         result.BillCopy = `pdf/${table}/${result.IndentID}`;
 
@@ -229,7 +229,7 @@ async function getIndents(req, res) {
     const allowedProjects = req.processed.allowedProjects;
 
     const projectPromises = results.map(async indent => {
-      const projectResults = await getFromDb('projects', ['ProjectTitle'], `ProjectNo= ${indent.ProjectNo}`);
+      const projectResults = await getFromDb('projects', ['ProjectTitle'], `ProjectNo= '${indent.ProjectNo}'`);
       if (projectResults.length > 0) {
         indent.ProjectTitle = projectResults[0].ProjectTitle;
       }
@@ -279,7 +279,7 @@ function getIndentInfo(req, res) {
     if (!allowedProjects.includes(projectNo)) {
       return sendFailedResponse(res, 'Not authorized to view this project', 403);
     }
-    getFromDb('projects', ['ProjectTitle'], `ProjectNo= ${projectNo}`).then((projectResults) => {
+    getFromDb('projects', ['ProjectTitle'], `ProjectNo= '${projectNo}'`).then((projectResults) => {
       if (projectResults.length > 0) {
         payload.data.ProjectTitle = projectResults[0].ProjectTitle;
       }

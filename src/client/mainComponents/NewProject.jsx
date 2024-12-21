@@ -12,7 +12,7 @@ function NewProject() {
     const [remaining, setRemaining] = useState({});
     const [formData, setFormData] = useState(EditFormData ? { ...EditFormData, ProjectStartDate: EditFormData.ProjectStartDate.split('T')[0], ProjectEndDate: EditFormData.ProjectEndDate.split('T')[0] } : {
         ProjectTitle: '',
-        ProjectNo: 0,
+        ProjectNo: '',
         ProjectStartDate: '',
         ProjectEndDate: '',
         SanctionOrderNo: '',
@@ -198,7 +198,7 @@ function NewProject() {
                     Project No:<span style={{ color: 'red' }}>*</span>
                 </label>
                 <input
-                    type="number"
+                    type="text"
                     name="ProjectNo"
                     placeholder="Enter project number"
                     required
