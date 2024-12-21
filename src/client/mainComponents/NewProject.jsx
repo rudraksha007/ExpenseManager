@@ -137,8 +137,8 @@ function NewProject() {
     const handleSubmit = async (e) => {
         e.preventDefault();
         if (!e.currentTarget.checkValidity()) return;
-        if (formData.PIs.length === 0 || formData.CoPIs.length === 0 || formData.Workers.length === 0) {
-            alert('Please select at least one PI, CoPI and Worker');
+        if (formData.PIs.length === 0 || formData.Workers.length === 0) {
+            alert('Please select at least one PI and Worker');
             return;
         }
         let res = null;

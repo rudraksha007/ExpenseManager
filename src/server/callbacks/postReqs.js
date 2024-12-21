@@ -1,4 +1,3 @@
-
 import { db, getFromDb, updateAtDb } from "../dbUtils.js";
 const compare = import('bcryptjs').compare;  // Normal import was not working so i imported it like this
 import jwt from 'jsonwebtoken';
