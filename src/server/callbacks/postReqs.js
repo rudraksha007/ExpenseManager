@@ -92,7 +92,7 @@ function autoLogin(req, res) {
  * @param {Object} res - The response object.
 */
 function getProjects(req, res) {
-  getFromDb('projects', req.body.fields).then((results) => {
+  getFromDb('Projects', req.body.fields).then((results) => {
     const { page, text, status, fundedBy, fromDate, toDate } = req.body.filters;
     const fundedByList = [...new Set(results.map(project => project.FundedBy))];
     results = results.filter(project => {
@@ -229,7 +229,7 @@ async function getIndents(req, res) {
     const allowedProjects = req.processed.allowedProjects;
 
     const projectPromises = results.map(async indent => {
-      const projectResults = await getFromDb('projects', ['ProjectTitle'], `ProjectNo= '${indent.ProjectNo}'`);
+      const projectResults = await getFromDb('Projects', ['ProjectTitle'], `ProjectNo= '${indent.ProjectNo}'`);
       if (projectResults.length > 0) {
         indent.ProjectTitle = projectResults[0].ProjectTitle;
       }
@@ -279,7 +279,7 @@ function getIndentInfo(req, res) {
     if (!allowedProjects.includes(projectNo)) {
       return sendFailedResponse(res, 'Not authorized to view this project', 403);
     }
-    getFromDb('projects', ['ProjectTitle'], `ProjectNo= '${projectNo}'`).then((projectResults) => {
+    getFromDb('Projects', ['ProjectTitle'], `ProjectNo= '${projectNo}'`).then((projectResults) => {
       if (projectResults.length > 0) {
         payload.data.ProjectTitle = projectResults[0].ProjectTitle;
       }
@@ -367,7 +367,7 @@ function getPRInfo(req, res) {
     if (!allowedProjects.includes(projectNo)) {
       return sendFailedResponse(res, 'Not authorized to view this project', 403);
     }
-    getFromDb('projects', ['ProjectTitle'], `ProjectNo= ${projectNo}`).then((projectResults) => {
+    getFromDb('Projects', ['ProjectTitle'], `ProjectNo= ${projectNo}`).then((projectResults) => {
       if (projectResults.length > 0) {
         payload.data.ProjectTitle = projectResults[0].ProjectTitle;
       }
