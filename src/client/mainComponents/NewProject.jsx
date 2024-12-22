@@ -10,7 +10,9 @@ function NewProject() {
     const location = useLocation();
     const { EditFormData } = location.state || {};
     const [remaining, setRemaining] = useState({});
-    const [formData, setFormData] = useState(EditFormData ? { ...EditFormData, ProjectStartDate: EditFormData.ProjectStartDate.split('T')[0], ProjectEndDate: EditFormData.ProjectEndDate.split('T')[0] } : {
+    const [formData, setFormData] = useState(EditFormData ? 
+        { ...EditFormData, ProjectStartDate: EditFormData.ProjectStartDate.split('T')[0], 
+            ProjectEndDate: EditFormData.ProjectEndDate.split('T')[0] } : {
         ProjectTitle: '',
         ProjectNo: '',
         ProjectStartDate: '',
@@ -287,7 +289,7 @@ function NewProject() {
                     onClick={() => setPopupContent('PI')}
                 />
                 <label>
-                    CoPIs:<span style={{ color: 'red' }}>*</span>
+                    CoPIs:
                 </label>
                 <input
                     type="text"

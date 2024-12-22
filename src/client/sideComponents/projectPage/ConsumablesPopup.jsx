@@ -39,7 +39,7 @@ function ConsumablesPopup({ reset }) {
                     <input type="date" id="RequestedDate" name="RequestedDate" max={today} required />
 
                     <label htmlFor="ProjectNo">Project No:</label>
-                    <input type="number" id="ProjectNo" name="ProjectNo" readOnly value={ProjectNo} onChange={()=>{}} />
+                    <input type="text" id="ProjectNo" name="ProjectNo" readOnly value={ProjectNo} onChange={()=>{}} />
 
                     <label htmlFor="ProjectTitle">Project Title:</label>
                     <input type="text" id="ProjectTitle" name="ProjectTitle" readOnly value={ProjectTitle} onChange={()=>{}} />

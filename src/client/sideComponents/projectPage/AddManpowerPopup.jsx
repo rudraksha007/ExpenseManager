@@ -88,7 +88,7 @@ function ManpowerPopup({ reset, workers }) {
                             <form className='largePopupForm' onSubmit={(e) => handleSubmit(e)} id='manpowerForm' >
                                 <div className='largePopupDetails' style={{ gridTemplateColumns: '1fr 2fr 1fr 2fr' }}>
                                     <label htmlFor="ProjectNo">Project No:</label>
-                                    <input type="number" id="ProjectNo" name="ProjectNo" readOnly required value={project.ProjectNo} />
+                                    <input type="text" id="ProjectNo" name="ProjectNo" readOnly required value={project.ProjectNo} />
 
                                     <label htmlFor="ProjectTitle">Project Title:</label>
                                     <input type="text" id="ProjectTitle" name="ProjectTitle" readOnly required value={project.ProjectTitle} />

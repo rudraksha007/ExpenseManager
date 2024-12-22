@@ -517,7 +517,7 @@ async function getRemaining(req, res) {
               FROM
                   ProjectAllocationSummary
               WHERE
-                  ProjectNo=${ProjectNo}`
+                  ProjectNo='${ProjectNo}'`
   const data = await db.query(query);
   res.status(200).json({ data: data[0][0] }).end();
 }
