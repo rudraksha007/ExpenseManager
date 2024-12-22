@@ -2,7 +2,7 @@ import React, { useContext, useEffect } from 'react';
 import '../../css/Popup.css';
 import { FaTimes } from 'react-icons/fa';
 import { closePopup } from '../../assets/popup';
-import { fetchDataWithFileUpload, fetchDataWithParams } from '../../assets/scripts';
+import { fetchDataWithFileUpload } from '../../assets/scripts';
 import { ProjectContext } from '../../assets/ProjectData';
 import { ProfileContext } from '../../assets/UserProfile';
 import { Oval } from 'react-loader-spinner';

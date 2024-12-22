@@ -11,6 +11,7 @@ import { fetchData } from '../assets/scripts';
 import { Oval } from 'react-loader-spinner';
 import PDFPopup from '../sideComponents/PDFPopup';
 import { ProjectContext, ProjectProvider } from '../assets/ProjectData';
+import PIPop from '../sideComponents/projectPage/PIPop';
 
 function ProjectContent() {
     let { id } = useParams();
@@ -67,8 +68,24 @@ function ProjectContent() {
                         <div><b>Total Sanction Amount:</b> <span>₹{project.TotalSanctionAmount}</span></div>
                         <div><b>Project Start Date:</b> <span>{new Date(project.ProjectStartDate).toLocaleDateString()}</span></div>
                         <div><b>Project End Date:</b> <span>{new Date(project.ProjectEndDate).toLocaleDateString()}</span></div>
-                        <div style={{display: 'grid', gridTemplateColumns: '1fr 1fr', textAlign: 'left'}}><b>PI Name:</b> <span style={{backgroundColor: 'white', textAlign: 'right'}} className='hoverable'>Click to See list</span></div>
-                        <div style={{display: 'grid', gridTemplateColumns: '1fr 1fr', textAlign: 'left'}}><b>Co-PIs:</b> <span style={{backgroundColor: 'white', textAlign: 'right'}} className='hoverable'> Click to See list</span></div>
+                        <div style=
+                            {{display: 'grid', gridTemplateColumns: '1fr 1fr', textAlign: 'left'}}>
+                            <b>PI Name:</b> 
+                            <span style=
+                                {{backgroundColor: 'white', textAlign: 'right'}} className='hoverable'
+                                onClick={()=>setPopup(<PIPop reset={() => setPopup(null)} data={project.PIs} type='PIs' />)}>
+                                Click to See list
+                            </span>
+                        </div>
+                        <div style=
+                            {{display: 'grid', gridTemplateColumns: '1fr 1fr', textAlign: 'left'}}>
+                            <b>Co-PIs:</b> 
+                            <span style=
+                                {{backgroundColor: 'white', textAlign: 'right'}} className='hoverable'
+                                onClick={()=>setPopup(<PIPop reset={() => setPopup(null)} data={project.CoPIs} type='Co-PIs' />)}> 
+                                Click to See list
+                            </span>
+                        </div>
                         <div><b>Manpower Allocation Amt:</b> <span>₹{project.ManpowerAllocationAmt}</span></div>
                         <div><b>Consumables Allocation Amt:</b> <span>₹{project.ConsumablesAllocationAmt}</span></div>
                         <div><b>Contingency Allocation Amt:</b> <span>₹{project.ContingencyAllocationAmt}</span></div>
@@ -147,70 +164,70 @@ function compileDate(response, setPopup) {
     let arr = [];
 
     let tempArray = [];
-    if (response.consumables) {
-        Object.keys(response.consumables).forEach((key, index) => {
-            console.log(response.consumables[key].IndentStatus);
+    if (response.Consumables) {
+        Object.keys(response.Consumables).forEach((key, index) => {
+            console.log(response.Consumables[key].IndentStatus);
 
             tempArray.push([
                 <div key={`${key}-sl`}>{index + 1}</div>,
-                <div key={`${key}-employeeId`}>{response.consumables[key].EmployeeID}</div>,
-                <div key={`${key}-indentId`}>{response.consumables[key].IndentID}</div>,
-                <div key={`${key}-date`}>{response.consumables[key].RequestedDate.split('T')[0]}</div>,
-                <div key={`${key}-reason`}>{response.consumables[key].Reason}</div>,
-                <div key={`${key}-bill`} className='hoverable' onClick={() => setPopup(<PDFPopup reset={() => setPopup(null)} pdf={response.consumables[key].BillCopy} />)}>₹{response.consumables[key].RequestedAmt}</div>
+                <div key={`${key}-employeeId`}>{response.Consumables[key].EmployeeID}</div>,
+                <div key={`${key}-indentId`}>{response.Consumables[key].IndentID}</div>,
+                <div key={`${key}-date`}>{response.Consumables[key].RequestedDate.split('T')[0]}</div>,
+                <div key={`${key}-reason`}>{response.Consumables[key].Reason}</div>,
+                <div key={`${key}-bill`} className='hoverable' onClick={() => setPopup(<PDFPopup reset={() => setPopup(null)} pdf={response.Consumables[key].BillCopy} />)}>₹{response.Consumables[key].RequestedAmt}</div>
             ])
         });
     }
     arr.push(tempArray);
 
     tempArray = [];
-    if (response.contingency) {
-        Object.keys(response.contingency).forEach((key) => (
+    if (response.Contingency) {
+        Object.keys(response.Contingency).forEach((key) => (
             tempArray.push([
                 <div key={`${key}-sl`}>{key + 1}</div>,
-                <div key={`${key}-employeeId`}>{response.contingency[key].EmployeeID}</div>,
-                <div key={`${key}-indentId`}>{response.contingency[key].IndentID}</div>,
-                <div key={`${key}-date`}>{response.contingency[key].RequestedDate.split('T')[0]}</div>,
-                <div key={`${key}-reason`}>{response.contingency[key].Reason}</div>,
-                <div key={`${key}-bill`} className='hoverable' onClick={() => setPopup(<PDFPopup reset={() => setPopup(null)} pdf={response.contingency[key].BillCopy} />)}>₹{response.contingency[key].RequestedAmt}</div>
+                <div key={`${key}-employeeId`}>{response.Contingency[key].EmployeeID}</div>,
+                <div key={`${key}-indentId`}>{response.Contingency[key].IndentID}</div>,
+                <div key={`${key}-date`}>{response.Contingency[key].RequestedDate.split('T')[0]}</div>,
+                <div key={`${key}-reason`}>{response.Contingency[key].Reason}</div>,
+                <div key={`${key}-bill`} className='hoverable' onClick={() => setPopup(<PDFPopup reset={() => setPopup(null)} pdf={response.Contingency[key].BillCopy} />)}>₹{response.Contingency[key].RequestedAmt}</div>
             ])
         ));
     }
     arr.push(tempArray);
 
     tempArray = []
-    if (response.travel) {
-        Object.keys(response.travel).forEach((key) => (
+    if (response.Travel) {
+        Object.keys(response.Travel).forEach((key) => (
             tempArray.push([
                 <div key={`${key}-sl`}>{key + 1}</div>,
-                <div key={`${key}-employeeId`}>{response.travel[key].EmployeeID}</div>,
-                <div key={`${key}-indentId`}>{response.travel[key].IndentID}</div>,
-                <div key={`${key}-source`}>{response.travel[key].Source} ({response.travel[key].FromDate.split('T')[0]})</div>,
-                <div key={`${key}-destination`}>{response.travel[key].Destination} ({response.travel[key].DestinationDate.split('T')[0]})</div>,
-                <div key={`${key}-purpose`}>{response.travel[key].Reason}</div>,
-                <div key={`${key}-bill`} className='hoverable' onClick={() => setPopup(<PDFPopup reset={() => setPopup(null)} pdf={response.travel[key].BillCopy} />)}>₹{response.travel[key].RequestedAmt}</div>
+                <div key={`${key}-employeeId`}>{response.Travel[key].EmployeeID}</div>,
+                <div key={`${key}-indentId`}>{response.Travel[key].IndentID}</div>,
+                <div key={`${key}-source`}>{response.Travel[key].Source} ({response.Travel[key].FromDate.split('T')[0]})</div>,
+                <div key={`${key}-destination`}>{response.Travel[key].Destination} ({response.Travel[key].DestinationDate.split('T')[0]})</div>,
+                <div key={`${key}-purpose`}>{response.Travel[key].Reason}</div>,
+                <div key={`${key}-bill`} className='hoverable' onClick={() => setPopup(<PDFPopup reset={() => setPopup(null)} pdf={response.Travel[key].BillCopy} />)}>₹{response.Travel[key].RequestedAmt}</div>
             ])
         ));
     }
     arr.push(tempArray);
 
     tempArray = [];
-    if (response.equipment) {
-        Object.keys(response.equipment).forEach((key) => (
+    if (response.Equipment) {
+        Object.keys(response.Equipment).forEach((key) => (
             tempArray.push([
                 <div key={`${key}-sl`}>{key + 1}</div>,
-                <div key={`${key}-employeeId`}>{response.equipment[key].EmployeeID}</div>,
-                <div key={`${key}-indentId`}>{response.equipment[key].IndentID}</div>,
-                <div key={`${key}-date`}>{response.equipment[key].RequestedDate.split('T')[0]}</div>,
-                <div key={`${key}-purpose`}>{response.equipment[key].Reason}</div>,
-                <div key={`${key}-bill`} className='hoverable' onClick={() => setPopup(<PDFPopup reset={() => setPopup(null)} pdf={response.equipment[key].BillCopy} />)}>₹{response.equipment[key].RequestedAmt}</div>
+                <div key={`${key}-employeeId`}>{response.Equipment[key].EmployeeID}</div>,
+                <div key={`${key}-indentId`}>{response.Equipment[key].IndentID}</div>,
+                <div key={`${key}-date`}>{response.Equipment[key].RequestedDate.split('T')[0]}</div>,
+                <div key={`${key}-purpose`}>{response.Equipment[key].Reason}</div>,
+                <div key={`${key}-bill`} className='hoverable' onClick={() => setPopup(<PDFPopup reset={() => setPopup(null)} pdf={response.Equipment[key].BillCopy} />)}>₹{response.Equipment[key].RequestedAmt}</div>
             ])
         ));
     }
     arr.push(tempArray);
 
     tempArray = [];
-    response.manpower.map((item, index) => {
+    response.Manpower.map((item, index) => {
         tempArray.push([
             <div key={`${item.id}-sl`}>{index + 1}</div>,
             <div key={`${item.id}-employeeId`}>{item.EmployeeID}</div>,
@@ -223,14 +240,14 @@ function compileDate(response, setPopup) {
     arr.push(tempArray);
 
     tempArray = [];
-    if (response.overhead) {
-        Object.keys(response.overhead).forEach((key) => (
+    if (response.Overhead) {
+        Object.keys(response.Overhead).forEach((key) => (
             tempArray.push([
                 <div key={`${key}-sl`}>{key + 1}</div>,
-                <div key={`${key}-requestId`}>{response.overhead[key].RequestID}</div>,
-                <div key={`${key}-indentId`}>{response.overhead[key].IndentID}</div>,
-                <div key={`${key}-date`}>{response.overhead[key].RequestedDate.split('T')[0]}</div>,
-                <div key={`${key}-bill`} className='hoverable' onClick={() => setPopup(<PDFPopup reset={() => setPopup(null)} pdf={response.overhead[key].BillCopy} />)}>₹{response.overhead[key].RequestedAmt}</div>
+                <div key={`${key}-requestId`}>{response.Overhead[key].RequestID}</div>,
+                <div key={`${key}-indentId`}>{response.Overhead[key].IndentID}</div>,
+                <div key={`${key}-date`}>{response.Overhead[key].RequestedDate.split('T')[0]}</div>,
+                <div key={`${key}-bill`} className='hoverable' onClick={() => setPopup(<PDFPopup reset={() => setPopup(null)} pdf={response.Overhead[key].BillCopy} />)}>₹{response.Overhead[key].RequestedAmt}</div>
             ])
         ));
     }

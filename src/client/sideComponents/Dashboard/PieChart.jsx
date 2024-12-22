@@ -5,7 +5,6 @@ import {
     ArcElement,
     Tooltip,
     Legend,
-    elements,
 } from "chart.js";
 
 // Register required Chart.js components

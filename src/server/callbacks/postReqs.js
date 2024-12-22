@@ -168,18 +168,17 @@ function getUsers(req, res) {
 */
 function getProjectInfo(req, res) {
   try {
-    let projectNo = req.path.split('/')[3];
+    let projectNo = req.path.split('api/projects/')[1];
     let payload = { data: {} };
     getFromDb('ProjectAllocationSummary', ['*'], `ProjectNo= '${projectNo}'`).then((results) => {
       payload.data = results[0];
     }).catch((err) => {
       sendFailedResponse(res, err.message, 500);
     });
-    let tables = ['manpower', 'equipment', 'contingency', 'consumables', 'overhead', 'travel'];
+    let tables = ['Manpower', 'Equipment', 'Contingency', 'Consumables', 'Overhead', 'Travel'];
     const promises = tables.map((table) => getFromDb(table, ['*'], `ProjectNo= '${projectNo}'`).then((results) => {
       results.forEach(result => {
         result.BillCopy = `pdf/${table}/${result.IndentID}`;
-
       });
       payload.data[table] = results;
     }));

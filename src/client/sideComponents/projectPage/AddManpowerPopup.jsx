@@ -1,7 +1,7 @@
 import React, { useContext, useEffect, useRef, useState } from 'react';
 import '../../css/Popup.css';
 import { FaTimes } from 'react-icons/fa';
-import { fetchData, fetchDataWithParams } from '../../assets/scripts';
+import { fetchDataWithParams } from '../../assets/scripts';
 import { Oval } from 'react-loader-spinner';
 import { closePopup } from '../../assets/popup';
 import { ProjectContext } from '../../assets/ProjectData';

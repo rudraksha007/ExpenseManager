@@ -1,6 +1,6 @@
 import React from 'react'
 import { NavLink, Link } from 'react-router-dom'
-import { FaBars, FaTimes, FaUserPlus, FaSignOutAlt, FaPlus, FaUser, FaTasks, FaAward, FaRegFileAlt } from 'react-icons/fa';
+import { FaTimes, FaUserPlus, FaSignOutAlt, FaPlus, FaUser, FaTasks, FaAward, FaRegFileAlt } from 'react-icons/fa';
 import { useContext } from 'react';
 import person from '../assets/images/person.webp';
 

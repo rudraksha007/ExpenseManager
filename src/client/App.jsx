@@ -1,6 +1,6 @@
 import React, { useContext, useEffect } from 'react';
 import './css/LoadingScreen.css';
-import { Routes, Route, useNavigate, useLocation } from 'react-router-dom';
+import { Routes, Route, useNavigate } from 'react-router-dom';
 import Navbar from './mainComponents/Navbar';
 import Dash from './mainComponents/Dash';
 import Login from './mainComponents/Login';

@@ -1,5 +1,4 @@
-import { Oval } from 'react-loader-spinner';
-import { fetchData, fetchDataWithParams } from '../assets/scripts';
+import { fetchDataWithParams } from '../assets/scripts';
 import '../css/Dash.css';
 import PieChart from '../sideComponents/Dashboard/PieChart';
 import UserProjects from "../sideComponents/Dashboard/UserProjects";

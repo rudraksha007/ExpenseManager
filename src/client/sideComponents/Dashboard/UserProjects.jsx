@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import '../../css/UserProjects.css';
 import { fetchDataWithParams } from '../../assets/scripts';
-import { Oval } from 'react-loader-spinner';
 import { ProfileContext } from '../../assets/UserProfile';
 import { useContext } from 'react';
 import { Link } from 'react-router-dom';
