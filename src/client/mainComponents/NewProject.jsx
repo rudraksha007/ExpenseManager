@@ -49,12 +49,21 @@ function NewProject() {
                     EquipmentAllocationAmt: RemainingEquipmentAmt,
                     TravelAllocationAmt: RemainingTravelAmt,
                 });
-                if (EditFormData.PIs) selected.current.PIs = EditFormData.PIs;
-                if (EditFormData.CoPIs) selected.current.CoPIs = EditFormData.CoPIs;
-                if (EditFormData.Workers) selected.current.Workers = EditFormData.Workers;
             }
         }
         setData();
+        if (EditFormData.PIs) {
+            selected.current.PIs = EditFormData.PIs;
+            formData.PIs = EditFormData.PIs;
+        }
+        if (EditFormData.CoPIs) {
+            selected.current.CoPIs = EditFormData.CoPIs;
+            formData.CoPIs = EditFormData.CoPIs;
+        }
+        if (EditFormData.Workers) {
+            selected.current.Workers = EditFormData.Workers;
+            formData.Workers = EditFormData.Workers;
+        }
         fetchDataWithParams('users', 'post', { filters: {} }).then(data => {
             setUsers(data.users);
         });
@@ -154,7 +163,7 @@ function NewProject() {
         if (res.reqStatus === 'success') {
             alert(`Project ${EditFormData ? 'Saved' : 'Created'} Successfully`);
             setFormData({});
-            navigate(EditFormData ? `/projects/${formData.ProjectNo}` : '/');
+            navigate(EditFormData ? `/projects/${encodeURIComponent(formData.ProjectNo)}` : '/');
         } else {
             alert('Failed to create project: ' + res.message);
         }
@@ -165,8 +174,6 @@ function NewProject() {
             ...formData,
             [e.target.name]: e.target.value
         });
-        console.log('ran');
-
         if (e.target.name.includes("AllocationAmt")) {
             if (Number(e.target.value) > getMax(e.target.name)) {
                 console.log('invalid');

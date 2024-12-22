@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useRef, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import '../../css/Popup.css';
 import { FaTimes } from 'react-icons/fa';
 import { fetchDataWithParams } from '../../assets/scripts';
@@ -13,10 +13,10 @@ function ManpowerPopup({ reset, workers }) {
     const [loading, setLoading] = useState(true);
     const [totalAllocation, setTotalAllocation] = useState(0);
     const { project } = useContext(ProjectContext);
-    const {profile} = useContext(ProfileContext);
+    const { profile } = useContext(ProfileContext);
     const [toDate, setToDate] = useState('');
     const [fromDate, setFromDate] = useState('');
-    useEffect(()=>{
+    useEffect(() => {
         handleChange();
     }, [fromDate, toDate]);
     useEffect(() => {
@@ -35,8 +35,8 @@ function ManpowerPopup({ reset, workers }) {
     }, []);
     async function handleSubmit(e) {
         e.preventDefault();
-        if(!e.target.checkValidity())return;
-        if(totalAllocation>project.RemainingManpowerAmt){
+        if (!e.target.checkValidity()) return;
+        if (totalAllocation > project.RemainingManpowerAmt) {
             alert('Total allocation exceeds Allocated Manpower Amount');
             return;
         }
@@ -49,7 +49,7 @@ function ManpowerPopup({ reset, workers }) {
         });
         let formData = Object.fromEntries(new FormData(e.target));
         formData = { ...formData, workers: selectedWorkers, EmployeeID: profile.id, RequestedAmt: totalAllocation };
-        
+
         let result = await fetchDataWithParams('manpower', 'put', formData);
         if (result.reqStatus === 'success') {
             alert('Manpower added successfully');
@@ -72,9 +72,9 @@ function ManpowerPopup({ reset, workers }) {
             }
         });
         const diffInDays = (new Date(toDate) - new Date(fromDate)) / (1000 * 60 * 60 * 24) + 1;
-        total *= diffInDays;        
+        total *= diffInDays;
         setTotalAllocation((total / 30).toFixed(2));
-        
+
     }
 
     return (
@@ -94,11 +94,11 @@ function ManpowerPopup({ reset, workers }) {
                                     <input type="text" id="ProjectTitle" name="ProjectTitle" readOnly required value={project.ProjectTitle} />
 
                                     <label htmlFor="fromDate">From Date:</label>
-                                    <input type="date" id="fromDate" name="fromDate" max={toDate} value={fromDate} onChange={(e) =>{ setFromDate(e.currentTarget.value); handleChange(e)}} required />
+                                    <input type="date" id="fromDate" name="fromDate" max={toDate} value={fromDate} onChange={(e) => { setFromDate(e.currentTarget.value); handleChange(e) }} required />
                                     <label htmlFor="toDate">To Date:</label>
-                                    <input type="date" id="toDate" name="toDate" min={fromDate} value={toDate} onChange={(e) => {setToDate(e.currentTarget.value); handleChange(e)}} required />
+                                    <input type="date" id="toDate" name="toDate" min={fromDate} value={toDate} onChange={(e) => { setToDate(e.currentTarget.value); handleChange(e) }} required />
                                     <label htmlFor="totalAllocation">Total Allocation:</label>
-                                    <input type="number" id="totalAllocation" name='totalAllocation' required readOnly value={totalAllocation} max={project.RemainingManpowerAmt}/>
+                                    <input type="number" id="totalAllocation" name='totalAllocation' required readOnly value={totalAllocation} max={project.RemainingManpowerAmt} />
                                 </div>
                                 <hr style={{ border: '1px solid black' }} />
                                 <div className="largePopupDetails" style={{ display: 'grid', gridTemplateColumns: '1fr 2fr 1fr 2fr' }}>
@@ -117,9 +117,11 @@ function ManpowerPopup({ reset, workers }) {
                                         onChange={(e) => setFilter({ ...filter, role: e.target.value })}
                                     >
                                         <option value="">Select Designation</option>
-                                        <option value="Engineer">Engineer</option>
-                                        <option value="Manager">Manager</option>
-                                        <option value="Technician">Technician</option>
+                                        <option value="JRK">JRF</option>
+                                        <option value="SRK">SRF</option>
+                                        <option value="RA">RA</option>
+                                        <option value="Pi">PI</option>
+                                        <option value="SuperAdmin">Techanican</option>
                                     </select>
                                 </div>
                                 <div className='table' style={{ gridTemplateColumns: '1fr 3fr 6fr 3fr 3fr' }}>
@@ -131,7 +133,7 @@ function ManpowerPopup({ reset, workers }) {
                                     {
                                         Object.entries(profiles).map(([id, profile]) => {
                                             if (profile.role === 'SuperAdmin' || profile.role === 'Pi') return null;
-                                            if (workers.includes(JSON.stringify({ id: profile.id, name: profile.name }))) return null;
+                                            if (!workers.includes(JSON.stringify({ id: profile.id, name: profile.name }))) return null;
                                             return (
                                                 <React.Fragment key={profile.id}>
                                                     <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>

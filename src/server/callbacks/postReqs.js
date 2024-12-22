@@ -175,14 +175,28 @@ function getProjectInfo(req, res) {
     }).catch((err) => {
       sendFailedResponse(res, err.message, 500);
     });
-    let tables = ['Manpower', 'Equipment', 'Contingency', 'Consumables', 'Overhead', 'Travel'];
-    const promises = tables.map((table) => getFromDb(table, ['*'], `ProjectNo= '${projectNo}'`).then((results) => {
-      results.forEach(result => {
-        result.BillCopy = `pdf/${table}/${result.IndentID}`;
-      });
-      payload.data[table] = results;
-    }));
-    Promise.all(promises).then(() => { res.status(200).json(payload).end(); }).catch((err) => {
+    getFromDb('CombinedIndents', [
+      'IndentType',
+      'IndentID',
+      'ProjectNo',
+      'ProjectTitle',
+      'EmployeeID',
+      'Workers',
+      'Source',
+      'FromDate',
+      'Destination',
+      'DestinationDate',
+      'Traveler',
+      'Items',
+      'RequestedAmt',
+      'Reason',
+      'Remark',
+      'RequestedDate',
+      'IndentStatus'
+    ], `ProjectNo= '${projectNo}'`).then((results) => {      
+      payload.data.indents = results;
+      res.status(200).json(payload).end();
+    }).catch((err) => {
       sendFailedResponse(res, err.message, 500);
     });
   } catch (err) {

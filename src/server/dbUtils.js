@@ -249,6 +249,151 @@ async function connectDb() {
                     p.OverheadAllocationAmt, p.EquipmentAllocationAmt;
             `);
             log('ProjectAllocationSummary view created');
+            await db.query('DROP VIEW IF EXISTS CombinedIndents;');
+            await db.query(`
+                CREATE VIEW CombinedIndents AS
+                SELECT 
+                    'Manpower' AS IndentType,
+                    i.IndentID,
+                    i.ProjectNo,
+                    m.ProjectTitle,
+                    m.EmployeeID,
+                    m.Workers,
+                    NULL AS Source,
+                    m.JoiningDate AS FromDate,
+                    NULL AS Destination,
+                    m.EndDate AS DestinationDate,
+                    NULL AS Traveler,
+                    NULL AS Items,
+                    m.RequestedAmt,
+                    NULL AS Reason,
+                    NULL AS Remark,
+                    m.JoiningDate AS RequestedDate,
+                    NULL AS BillCopy,
+                    i.IndentStatus
+                FROM Indents i
+                JOIN Manpower m ON i.IndentID = m.IndentID
+
+                UNION ALL
+
+                SELECT 
+                    'Travel' AS IndentType,
+                    i.IndentID,
+                    i.ProjectNo,
+                    NULL AS ProjectTitle,
+                    t.EmployeeID,
+                    NULL AS Workers,
+                    t.Source,
+                    t.FromDate,
+                    t.Destination,
+                    t.DestinationDate,
+                    t.Traveler,
+                    NULL AS Items,
+                    t.RequestedAmt,
+                    t.Reason,
+                    t.Remark,
+                    t.RequestedDate,
+                    t.BillCopy,
+                    i.IndentStatus
+                FROM Indents i
+                JOIN Travel t ON i.IndentID = t.IndentID
+
+                UNION ALL
+
+                SELECT 
+                    'Consumables' AS IndentType,
+                    i.IndentID,
+                    i.ProjectNo,
+                    c.ProjectTitle,
+                    c.EmployeeID,
+                    NULL AS Workers,
+                    NULL AS Source,
+                    NULL AS FromDate,
+                    NULL AS Destination,
+                    NULL AS DestinationDate,
+                    NULL AS Traveler,
+                    NULL AS Items,
+                    c.RequestedAmt,
+                    c.Reason,
+                    c.Remark,
+                    c.RequestedDate,
+                    c.BillCopy,
+                    i.IndentStatus
+                FROM Indents i
+                JOIN Consumables c ON i.IndentID = c.IndentID
+
+                UNION ALL
+
+                SELECT 
+                    'Overhead' AS IndentType,
+                    i.IndentID,
+                    i.ProjectNo,
+                    o.ProjectTitle,
+                    o.EmployeeID,
+                    NULL AS Workers,
+                    NULL AS Source,
+                    NULL AS FromDate,
+                    NULL AS Destination,
+                    NULL AS DestinationDate,
+                    NULL AS Traveler,
+                    NULL AS Items,
+                    o.RequestedAmt,
+                    o.Reason,
+                    NULL AS Remark,
+                    o.RequestedDate,
+                    o.BillCopy,
+                    i.IndentStatus
+                FROM Indents i
+                JOIN Overhead o ON i.IndentID = o.IndentID
+
+                UNION ALL
+
+                SELECT 
+                    'Equipment' AS IndentType,
+                    i.IndentID,
+                    i.ProjectNo,
+                    e.ProjectTitle,
+                    e.EmployeeID,
+                    NULL AS Workers,
+                    NULL AS Source,
+                    NULL AS FromDate,
+                    NULL AS Destination,
+                    NULL AS DestinationDate,
+                    NULL AS Traveler,
+                    e.Items,
+                    e.RequestedAmt,
+                    e.Reason,
+                    e.Remark,
+                    e.RequestedDate,
+                    e.BillCopy,
+                    i.IndentStatus
+                FROM Indents i
+                JOIN Equipment e ON i.IndentID = e.IndentID
+
+                UNION ALL
+
+                SELECT 
+                    'Contingency' AS IndentType,
+                    i.IndentID,
+                    i.ProjectNo,
+                    c.ProjectTitle,
+                    c.EmployeeID,
+                    NULL AS Workers,
+                    NULL AS Source,
+                    NULL AS FromDate,
+                    NULL AS Destination,
+                    NULL AS DestinationDate,
+                    NULL AS Traveler,
+                    NULL AS Items,
+                    c.RequestedAmt,
+                    c.Reason,
+                    c.Remark,
+                    c.RequestedDate,
+                    c.BillCopy,
+                    i.IndentStatus
+                FROM Indents i
+                JOIN Contingency c ON i.IndentID = c.IndentID;
+            `);
             log('SQL Binding Complete');
         })();
         return db;
@@ -378,9 +523,7 @@ const projectWiseAuthorisation = (req, res, next) => {
  */
 async function getFromDb(table, fields, where) {
     let query = `SELECT ${fields.join(',')} FROM ${table}`;
-    if (where) query += ` WHERE ${where}`;
-    console.log(query);
-    
+    if (where) query += ` WHERE ${where}`;    
     return db.query(query).then(([rows]) => rows);
 
 }

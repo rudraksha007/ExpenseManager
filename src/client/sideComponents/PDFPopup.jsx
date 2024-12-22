@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { FaTimes } from 'react-icons/fa';
-import { fetchData, fetchDataWithParams } from '../assets/scripts';
+import { fetchData } from '../assets/scripts';
 import { Oval } from 'react-loader-spinner';
 
 function PDFPopup({ reset, pdf }) {
