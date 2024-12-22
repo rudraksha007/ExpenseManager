@@ -5,7 +5,7 @@ import { FaTimes } from 'react-icons/fa';
 function PIPop({ reset, data, type }) {
     return (
         <div className='projectPopup'>
-            <div className="projectPopupCont" id="largePopupCont">
+            <div className="projectPopupCont">
 
                 <FaTimes size={30} style={{ position: 'absolute', right: 10, top: 10, cursor: 'pointer' }} onClick={() => reset()} />
                 <h2>{type}</h2>

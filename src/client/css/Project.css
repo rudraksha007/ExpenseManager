@@ -9,11 +9,11 @@
     display: grid;
     grid-template-columns: 1fr 1fr;
 }
-#projectDetails>div{
-    display: flex;
-    justify-content: space-between;
-    box-sizing: border-box;
-    padding: 0 20%;
+#projectDetails>*:nth-child(even){
+    text-align: right;
+}
+#projectDetails>*:nth-child(odd){
+    text-align: left;
 }
 #projectTabs{
     display: grid;

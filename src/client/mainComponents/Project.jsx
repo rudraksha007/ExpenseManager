@@ -61,38 +61,37 @@ function ProjectContent() {
                         }
                     })} /></h1>
 
-                    <div id="projectDetails">
-                        <div><b>Funded By:</b> <span>{project.FundedBy}</span></div>
-                        <div><b>Project Id:</b> <span>{id}</span></div>
-                        <div><b>Title:</b> <span>{project.ProjectTitle}</span></div>
-                        <div><b>Sanction Order No:</b> <span>{project.SanctionOrderNo}</span></div>
-                        <div><b>Total Sanction Amount:</b> <span>₹{project.TotalSanctionAmount}</span></div>
-                        <div><b>Project Start Date:</b> <span>{new Date(project.ProjectStartDate).toLocaleDateString()}</span></div>
-                        <div><b>Project End Date:</b> <span>{new Date(project.ProjectEndDate).toLocaleDateString()}</span></div>
-                        <div style=
-                            {{display: 'grid', gridTemplateColumns: '1fr 1fr', textAlign: 'left'}}>
-                            <b>PI Name:</b> 
-                            <span style=
-                                {{backgroundColor: 'white', textAlign: 'right'}} className='hoverable'
-                                onClick={()=>setPopup(<PIPop reset={() => setPopup(null)} data={project.PIs} type='PIs' />)}>
-                                Click to See list
-                            </span>
-                        </div>
-                        <div style=
-                            {{display: 'grid', gridTemplateColumns: '1fr 1fr', textAlign: 'left'}}>
-                            <b>Co-PIs:</b> 
-                            <span style=
-                                {{backgroundColor: 'white', textAlign: 'right'}} className='hoverable'
-                                onClick={()=>setPopup(<PIPop reset={() => setPopup(null)} data={project.CoPIs} type='Co-PIs' />)}> 
-                                Click to See list
-                            </span>
-                        </div>
-                        <div><b>Manpower Allocation Amt:</b> <span>₹{project.ManpowerAllocationAmt}</span></div>
-                        <div><b>Consumables Allocation Amt:</b> <span>₹{project.ConsumablesAllocationAmt}</span></div>
-                        <div><b>Contingency Allocation Amt:</b> <span>₹{project.ContingencyAllocationAmt}</span></div>
-                        <div><b>Overhead Allocation Amt:</b> <span>₹{project.OverheadAllocationAmt}</span></div>
-                        <div><b>Equipment Allocation Amt:</b> <span>₹{project.EquipmentAllocationAmt}</span></div>
-                        <div><b>Travel Allocation Amt:</b> <span>₹{project.TravelAllocationAmt}</span></div>
+                    <div id="projectDetails" style={{display: 'grid', gridTemplateColumns: '2fr 3fr 2fr 3fr', textAlign: 'left', columnGap:'20px' }}>
+                        <b>Funded By:</b>
+                        <span>{project.FundedBy}</span>
+                        <b>Project Id:</b>
+                        <span>{id}</span>
+                        <b>Title:</b>
+                        <span>{project.ProjectTitle}</span>
+                        <b>Sanction Order No:</b>
+                        <span>{project.SanctionOrderNo}</span>
+                        <b>Total Sanction Amount:</b>
+                        <span>₹{project.TotalSanctionAmount}</span>
+                        <b>Project Start Date:</b>
+                        <span>{new Date(project.ProjectStartDate).toLocaleDateString()}</span>
+                        <b>Project End Date:</b>
+                        <span>{new Date(project.ProjectEndDate).toLocaleDateString()}</span>
+                        <b>PI Name:</b>
+                        <span style={{backgroundColor: 'white', textAlign: 'right'}} className='hoverable' onClick={() => setPopup(<PIPop reset={() => setPopup(null)} data={project.PIs} type='PIs' />)}>Click to See list</span>
+                        <b>Co-PIs:</b>
+                        <span style={{backgroundColor: 'white', textAlign: 'right'}} className='hoverable' onClick={() => setPopup(<PIPop reset={() => setPopup(null)} data={project.CoPIs} type='Co-PIs' />)}>Click to See list</span>
+                        <b>Manpower Allocation Amt:</b>
+                        <span>₹{project.ManpowerAllocationAmt}</span>
+                        <b>Consumables Allocation Amt:</b>
+                        <span>₹{project.ConsumablesAllocationAmt}</span>
+                        <b>Contingency Allocation Amt:</b>
+                        <span>₹{project.ContingencyAllocationAmt}</span>
+                        <b>Overhead Allocation Amt:</b>
+                        <span>₹{project.OverheadAllocationAmt}</span>
+                        <b>Equipment Allocation Amt:</b>
+                        <span>₹{project.EquipmentAllocationAmt}</span>
+                        <b>Travel Allocation Amt:</b>
+                        <span>₹{project.TravelAllocationAmt}</span>
                     </div>
                     <div id="projectTabs" style={{ color: 'white' }}>
                         <div className="hoverable" id='projectTabsActive' onClick={() => setActiveTab('Consumables')}><b>Consumables</b></div>
