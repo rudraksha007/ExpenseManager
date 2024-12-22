@@ -32,7 +32,7 @@ function AllProjects() {
                         <div>{project.ProjectStartDate.split('T')[0]}</div>
                         <div>{project.ProjectEndDate.split('T')[0]}</div>
                         <div className='allProjectsActions'>
-                            <Link to={`/projects/${project.ProjectNo}`} title="View Project Details"><FaEdit size={20} /></Link>
+                            <Link to={`/projects/${encodeURIComponent(project.ProjectNo)}`} title="View Project Details"><FaEdit size={20} /></Link>
                         </div>
                     </React.Fragment>
                 )

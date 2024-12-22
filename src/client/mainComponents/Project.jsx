@@ -15,6 +15,7 @@ import PIPop from '../sideComponents/projectPage/PIPop';
 
 function ProjectContent() {
     let { id } = useParams();
+    id = decodeURIComponent(id);
     const navigate = useNavigate();
     const [activeTab, setActiveTab] = useState('Consumables');
     const [table, setTable] = useState([]);
