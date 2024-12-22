@@ -365,7 +365,7 @@ function getPRInfo(req, res) {
     if (!allowedProjects.includes(projectNo)) {
       return sendFailedResponse(res, 'Not authorized to view this project', 403);
     }
-    getFromDb('Projects', ['ProjectTitle'], `ProjectNo= ${projectNo}`).then((projectResults) => {
+    getFromDb('Projects', ['ProjectTitle'], `ProjectNo= '${projectNo}'`).then((projectResults) => {
       if (projectResults.length > 0) {
         payload.data.ProjectTitle = projectResults[0].ProjectTitle;
       }

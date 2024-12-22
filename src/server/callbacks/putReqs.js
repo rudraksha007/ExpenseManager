@@ -218,7 +218,7 @@ async function addPurchaseReq(req, res){
 
 async function addPOrder(req, res) {
     const { ExpenseID, ExpenseDate, ExpenseAmount, ExpenseDescription, ProjectNo } = req.body;
-    await getFromDb('projects', ['*'], `ProjectNo=${ProjectNo}`).then((results) => {
+    await getFromDb('projects', ['*'], `ProjectNo='${ProjectNo}'`).then((results) => {
         if (results.length === 0) {
             sendFailedResponse(res, 'Project not found', 404);
             return;
