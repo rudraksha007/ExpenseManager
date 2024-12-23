@@ -87,7 +87,7 @@ async function addProjectIndent(req, res) {
     try {
         let query = 'INSERT INTO Indents (IndentCategory, ProjectNo, IndentAmount, IndentDate, IndentedPersonID, IndentStatus) VALUES (?, ?, ?, ?, ?, ?)';
         
-        const result = await db.query(query, [req.path.split('/').at(-1), parseInt(ProjectNo), parseInt(RequestedAmt), RequestedDate, req.processed.token.id, 'Pending']);        
+        const result = await db.query(query, [req.path.split('/').at(-1), ProjectNo, parseInt(RequestedAmt), RequestedDate, req.processed.token.id, 'Pending']);        
         const IndentID = result[0].insertId;
         if (!IndentID) {
             return sendFailedResponse(res, 'Failed to generate IndentID', 500);
