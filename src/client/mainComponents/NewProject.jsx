@@ -52,17 +52,19 @@ function NewProject() {
             }
         }
         setData();
-        if (EditFormData.PIs) {
-            selected.current.PIs = EditFormData.PIs;
-            formData.PIs = EditFormData.PIs;
-        }
-        if (EditFormData.CoPIs) {
-            selected.current.CoPIs = EditFormData.CoPIs;
-            formData.CoPIs = EditFormData.CoPIs;
-        }
-        if (EditFormData.Workers) {
-            selected.current.Workers = EditFormData.Workers;
-            formData.Workers = EditFormData.Workers;
+        if(EditFormData){
+            if (EditFormData.PIs) {
+                selected.current.PIs = EditFormData.PIs;
+                formData.PIs = EditFormData.PIs;
+            }
+            if (EditFormData.CoPIs) {
+                selected.current.CoPIs = EditFormData.CoPIs;
+                formData.CoPIs = EditFormData.CoPIs;
+            }
+            if (EditFormData.Workers) {
+                selected.current.Workers = EditFormData.Workers;
+                formData.Workers = EditFormData.Workers;
+            }
         }
         fetchDataWithParams('users', 'post', { filters: {} }).then(data => {
             setUsers(data.users);
