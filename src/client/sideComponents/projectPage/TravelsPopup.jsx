@@ -9,6 +9,8 @@ import { Oval } from 'react-loader-spinner';
 
 function TravelsPopup({ reset }) {
     const { ProjectNo, ProjectTitle, RemainingTravelAmt } = (useContext(ProjectContext)).project;
+    console.log(ProjectNo);
+    
     const {id, name} = useContext(ProfileContext).profile;
     const [loading, setLoading] = React.useState(false);
     const today = new Date().toISOString().split('T')[0];
@@ -42,9 +44,6 @@ function TravelsPopup({ reset }) {
                     
                     <label htmlFor="RequestedDate">Requested Date:</label>
                     <input type="date" id="RequestedDate" name="RequestedDate" max={today} required />
-
-                    <label htmlFor="IndentID">Project No:</label>
-                    <input type="number" id="IndentID" name="IndentID" readOnly value={ProjectNo}/>
 
                     <label htmlFor="EmployeeName">Employee Name:</label>
                     <input type="text" id="EmployeeName" name="EmployeeName" required readOnly value={name}/>
