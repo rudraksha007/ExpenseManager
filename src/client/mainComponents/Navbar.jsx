@@ -43,7 +43,7 @@ function Navbar() {
                                 <p><b>LoggedIn As:</b> {profile ? profile.role : ""}</p>
                             </div>
                             <NavLink to='/newproject' className='hoverable'> <FaPlus size={40} style={{ marginRight: 8 }} /> Create New Project</NavLink>
-                            {profile && (profile.role == 'admin' || profile.role == 'superadmin' || profile.role == 'root') ?
+                            {profile && (profile.role == 'admin' || profile.role == 'SuperAdmin' || profile.role == 'root') ?
                                 <>
                                     <NavLink to='/signup' className='hoverable'> <FaUserPlus size={40} style={{ marginRight: 8 }} /> Create New User</NavLink>
                                     <NavLink to='/profiles' className='hoverable'> <FaUser size={40} style={{ marginRight: 8 }} /> All Users</NavLink>
