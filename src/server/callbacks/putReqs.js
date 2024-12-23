@@ -96,23 +96,23 @@ async function addProjectIndent(req, res) {
         switch (req.path.split('/').at(-1)) {
             case 'consumables':
                 query = 'INSERT INTO Consumables (IndentID, ProjectNo, ProjectTitle, RequestedAmt, EmployeeID, Reason, Remark, RequestedDate, BillCopy) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)';
-                values = [IndentID, parseInt(ProjectNo), ProjectTitle, parseInt(RequestedAmt), EmployeeID, Reason, Remarks, RequestedDate, JSON.stringify(billBase64Strings)];
+                values = [IndentID, ProjectNo, ProjectTitle, parseFloat(RequestedAmt), EmployeeID, Reason, Remarks, RequestedDate, JSON.stringify(billBase64Strings)];
                 break;
             case 'equipment':
                 query = 'INSERT INTO Equipment ( ProjectNo, ProjectTitle, RequestedAmt, EmployeeID, Reason, IndentID, RequestedDate, Items, BillCopy, Remark) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)';
-                values = [ parseInt(ProjectNo), ProjectTitle, parseInt(RequestedAmt), EmployeeID, Reason, IndentID, RequestedDate, Items, JSON.stringify(billBase64Strings), Remarks];
+                values = [ ProjectNo, ProjectTitle, parseFloat(RequestedAmt), EmployeeID, Reason, IndentID, RequestedDate, Items, JSON.stringify(billBase64Strings), Remarks];
                 break;
             case 'overhead':
                 query = 'INSERT INTO Overhead (IndentID, ProjectNo, ProjectTitle, RequestedAmt, Reason, EmployeeID, RequestedDate, BillCopy, Remark) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)';
-                values = [parseInt(ProjectNo), ProjectTitle, parseInt(RequestedAmt), IndentID, Reason, EmployeeID, RequestedDate, JSON.stringify(billBase64Strings), Remarks];
+                values = [ProjectNo, ProjectTitle, parseFloat(RequestedAmt), IndentID, Reason, EmployeeID, RequestedDate, JSON.stringify(billBase64Strings), Remarks];
                 break;
             case 'travel':
                 query = 'INSERT INTO Travel (IndentID, ProjectNo, RequestedAmt, EmployeeID, Source, FromDate, Destination, DestinationDate, Reason, Remark, RequestedDate, Traveler, BillCopy) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)';
-                values = [IndentID, parseInt(ProjectNo), parseInt(RequestedAmt), EmployeeID, Source, FromDate, Destination, DestinationDate, Reason, Remarks, RequestedDate, EmployeeID, JSON.stringify(billBase64Strings)];
+                values = [IndentID,ProjectNo, parseFloat(RequestedAmt), EmployeeID, Source, FromDate, Destination, DestinationDate, Reason, Remarks, RequestedDate, EmployeeID, JSON.stringify(billBase64Strings)];
                 break;
             case 'contingency':
                 query = 'INSERT INTO Contingency (IndentID, ProjectNo, ProjectTitle, RequestedAmt, EmployeeID, Reason, RequestedDate, BillCopy, Remark) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)';
-                values = [IndentID, parseInt(ProjectNo), ProjectTitle, parseInt(RequestedAmt), EmployeeID, Reason, RequestedDate, JSON.stringify(billBase64Strings), Remarks];
+                values = [IndentID, ProjectNo, ProjectTitle, parseFloat(RequestedAmt), EmployeeID, Reason, RequestedDate, JSON.stringify(billBase64Strings), Remarks];
                 break;
             default:
                 {sendFailedResponse(res, 'Invalid indent category', 400);return}
@@ -133,12 +133,12 @@ async function addManpower(req, res) {
 
         // Insert into the 'indents' table
         let query = 'INSERT INTO Indents (IndentCategory, ProjectNo, IndentAmount, IndentDate, IndentedPersonID, IndentStatus) VALUES (?, ?, ?, ?, ?, ?)';
-        const result = await db.query(query, ['manpower', parseInt(ProjectNo), parseFloat(RequestedAmt), new Date(), req.processed.token.id, 'Pending']);
+        const result = await db.query(query, ['manpower', ProjectNo, parseFloat(RequestedAmt), new Date(), req.processed.token.id, 'Pending']);
         const IndentID = result[0].insertId;
 
         // Insert into the 'manpower' table
         query = 'INSERT INTO Manpower (IndentID, ProjectNo, ProjectTitle, EmployeeID, Workers, JoiningDate, EndDate, RequestedAmt) VALUES (?, ?, ?, ?, ?, ?, ?, ?)';
-        const values = [IndentID, parseInt(ProjectNo), ProjectTitle, parseInt(EmployeeID), JSON.stringify(workers), fromDate, toDate, parseFloat(RequestedAmt)];
+        const values = [IndentID, ProjectNo, ProjectTitle, parseInt(EmployeeID), JSON.stringify(workers), fromDate, toDate, parseFloat(RequestedAmt)];
         await db.query(query, values);
 
         res.status(201).json({ message: 'Manpower added successfully' }).end();
