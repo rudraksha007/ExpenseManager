@@ -18,7 +18,7 @@ function Login() {
         formData = {...formData, password: CryptoJS.SHA256(formData.password).toString()}
         console.log(formData);
         const data = await fetchDataWithParams('login', 'post', formData);        
-        if(data.reqStatus=='success'){            
+        if(data.reqStatus=='success'){
             setProfile(data.profile);
         }
         else{

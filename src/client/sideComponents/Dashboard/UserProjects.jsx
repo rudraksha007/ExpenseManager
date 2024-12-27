@@ -19,12 +19,11 @@ function UserProjects() {
             let projectList = data.map((project, index) => (
                 <React.Fragment key={project.ProjectNo}>
                     <div>{index + 1}</div>
-                    <div>{project.ProjectTitle}</div>
+                    <div>{project.ProjectTitle.length > 60 ? `${project.ProjectTitle.substring(0, 60)}...` : project.ProjectTitle}</div>
                     <div>{new Date(project.ProjectEndDate) >= new Date() ? 'Active' : 'Inactive'}</div>
-                    <div>{profile.role!=='Pi'?profile.role:project.PIs.includes(JSON.stringify({id:profile.id, name: profile.name}))?'PI':'CoPI'}</div>
+                    <div>{profile.role !== 'Pi' ? profile.role : project.PIs.includes(JSON.stringify({ id: profile.id, name: profile.name })) ? 'PI' : 'CoPI'}</div>
                     <Link to={`/projects/${encodeURIComponent(project.ProjectNo)}`} title="View Project Details" className='hoverable'><FaEdit size={20} /></Link>
                 </React.Fragment>
-
             ));
             setProjects(projectList);
             setLoading(false);

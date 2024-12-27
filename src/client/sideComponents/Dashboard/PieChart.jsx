@@ -26,7 +26,12 @@ function PieChart({ title, labels, numbers }) {
         maintainAspectRatio: true,
     };
     const data = {
-        labels: labels, /* ["Red", "Blue", "Yellow"] */
+        labels: labels.map((label)=>{
+            if(label.length>30){
+                return label.substring(0,30)+'...';
+            }
+            return label;
+        }), /* ["Red", "Blue", "Yellow"] */
         datasets: [
             {
                 label: title,

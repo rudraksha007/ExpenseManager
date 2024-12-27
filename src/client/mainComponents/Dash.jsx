@@ -38,6 +38,7 @@ function Dash() {
                             :
                             <p style={{ color: 'red', fontStyle: 'italic', border: '1px solid black', padding: '10px', textAlign: 'center' }}>No data found for PI Fund</p>}
                     </div>
+                    <div></div>
                     <div className="dashSection" >
                         {Object.keys(chartData.AgencyFund).length > 0 ?
                             <PieChart title={'Agency Fund'}
