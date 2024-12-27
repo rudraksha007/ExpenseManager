@@ -30,12 +30,16 @@ let db = null;
  */
 async function connectDb() {
     try {
-        db = await mysql.createConnection({
+        db = mysql.createPool({
+            connectionLimit: 1,
             host: 'localhost',
             user: process.env.DB_USER,
             password: process.env.DB_PASS,
-            database: process.env.DB_NAME
+            database: process.env.DB_NAME,
+            waitForConnections: true,
+            idleTimeout: 0
         });
+        db = await db.getConnection();
         log('Connected to MySQL database');
         const tables = [
             {
