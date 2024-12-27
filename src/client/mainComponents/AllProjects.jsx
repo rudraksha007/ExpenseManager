@@ -7,6 +7,7 @@ import React from 'react';
 import { Oval } from 'react-loader-spinner';
 import PageControls from '../sideComponents/PageControls';
 import { ProfileContext } from '../assets/UserProfile.jsx';
+import { formatNumber } from 'chart.js/helpers';
 
 function AllProjects() {
 
@@ -26,8 +27,9 @@ function AllProjects() {
                 l.push(
                     <React.Fragment key={project.ProjectNo}>
                         <div>{index + 1}</div>
+                        <div>{project.ProjectNo}</div>
                         <div>{project.ProjectTitle}</div>
-                        <div>{project.TotalSanctionamount}</div>
+                        <div>{formatNumber(project.TotalSanctionamount)}</div>
                         <div>{project.FundedBy}</div>
                         <div>{project.ProjectStartDate.split('T')[0]}</div>
                         <div>{project.ProjectEndDate.split('T')[0]}</div>
@@ -88,8 +90,9 @@ function AllProjects() {
                         </label>
                         <label><input type="submit" value="Apply" id='applyFilter' onClick={() => getProjects()} /></label>
                     </div>
-                    <div id="allProjectsTable" className='table'>
+                    <div id="allProjectsTable" className='table' style={{gridTemplateColumns: '1fr 2fr 4fr 2fr 2fr 2fr 2fr 2fr'}}>
                         <div className='tableTitle'>Sl.</div>
+                        <div className='tableTitle'>Project No.</div>
                         <div className='tableTitle'>Title</div>
                         <div className='tableTitle'>Capital</div>
                         <div className='tableTitle'>Funded By</div>

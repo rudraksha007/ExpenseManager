@@ -19,7 +19,7 @@ async function login(req, res) {
   let rootPass = Hash(process.env.ROOT_PASSWORD);
   console.log(process.env.ROOT_ID);
   console.log(process.env.ROOT_PASSWORD);
-  
+
   if (email === process.env.ROOT_ID && password === rootPass) {
     console.log('root');
     let token = jwt.sign({ id: 0, role: 'root' }, process.env.SECRET_KEY, { expiresIn: '45m' });
@@ -193,7 +193,7 @@ function getProjectInfo(req, res) {
       'Remark',
       'RequestedDate',
       'IndentStatus'
-    ], `ProjectNo= '${projectNo}'`).then((results) => {      
+    ], `ProjectNo= '${projectNo}'`).then((results) => {
       payload.data.indents = results;
       res.status(200).json(payload).end();
     }).catch((err) => {
@@ -467,7 +467,7 @@ async function generateReport(req, res) {
   const { reportType } = req.body;
   if (!reportType) return sendFailedResponse(res, 'Report type not specified', 500);
   let query = '';
-  
+
   if (reportType === 'general') {
     query = `
     SELECT 
@@ -508,6 +508,32 @@ async function generateReport(req, res) {
           GROUP BY 
               p.ProjectNo, p.ProjectTitle, p.TotalSanctionAmount;
       `;
+  }
+  else if (reportType === 'yearly') {
+    const { year, ProjectNo } = req.body;
+    if (!year || !ProjectNo) return sendFailedResponse(res, 'Year or ProjectNo not specified', 500);
+    query = `SELECT 
+    ci.IndentType AS Category,
+    pa.ManpowerAllocationAmt + pa.TravelAllocationAmt + pa.ConsumablesAllocationAmt + 
+    pa.ContingencyAllocationAmt + pa.OverheadAllocationAmt + pa.EquipmentAllocationAmt AS Allocation,
+    SUM(ci.RequestedAmt) AS IndentedProposed,
+    SUM(CASE WHEN ci.IndentStatus = 'Completed' THEN ci.RequestedAmt ELSE 0 END) AS Paid,
+    SUM(CASE WHEN ci.IndentStatus IN ('Approved', 'Pending') THEN ci.RequestedAmt ELSE 0 END) AS Committed,
+    (pa.ManpowerAllocationAmt + pa.TravelAllocationAmt + pa.ConsumablesAllocationAmt + 
+     pa.ContingencyAllocationAmt + pa.OverheadAllocationAmt + pa.EquipmentAllocationAmt - 
+     SUM(ci.RequestedAmt)) AS Available
+FROM 
+    CombinedIndents ci
+LEFT JOIN 
+    ProjectAllocationSummary pa ON ci.ProjectNo = pa.ProjectNo
+WHERE 
+    ci.ProjectNo = '${ProjectNo}'
+    AND ci.RequestedDate BETWEEN '${year}-01-01' AND '${parseInt(year)+1}-01-01'
+GROUP BY 
+    ci.IndentType, pa.ManpowerAllocationAmt, pa.TravelAllocationAmt, 
+    pa.ConsumablesAllocationAmt, pa.ContingencyAllocationAmt, pa.OverheadAllocationAmt, 
+    pa.EquipmentAllocationAmt;
+`
   }
   if (!query) return sendFailedResponse(res, 'Invalid Report Type', 500);
 
