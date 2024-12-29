@@ -73,7 +73,7 @@ async function connectDb() {
                     password VARCHAR(255) NOT NULL,
                     projects JSON,
                     status INT,
-                    role ENUM('Techanican', 'JRK', 'SRK', 'RA', 'Pi', 'SuperAdmin'),
+                    role ENUM('Techanican', 'JRF', 'SRF', 'RA', 'Pi', 'SuperAdmin'),
                     BasicSalary DECIMAL(10, 2),
                     HRA_Percentage DECIMAL(5, 2),
                     TotalSalary DECIMAL(10, 2) GENERATED ALWAYS AS (BasicSalary + (BasicSalary * HRA_Percentage / 100)) VIRTUAL,
@@ -487,7 +487,7 @@ const projectWiseAuthorisation = (req, res, next) => {
 
             projects = projects[0].projects;
             let arr = [];
-            projects.forEach(ele => arr.push(Number(ele)))
+            projects.forEach(ele => arr.push(ele));
             req.processed.allowedProjects = arr;
             next();
             return;

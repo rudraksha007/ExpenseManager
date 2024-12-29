@@ -12,6 +12,8 @@ import { Oval } from 'react-loader-spinner';
 import PDFPopup from '../sideComponents/PDFPopup';
 import { ProjectContext, ProjectProvider } from '../assets/ProjectData';
 import PIPop from '../sideComponents/projectPage/PIPop';
+import Loading from '../assets/Loading';
+import { formatNumber } from 'chart.js/helpers';
 
 function ProjectContent() {
     let { id } = useParams();
@@ -27,7 +29,6 @@ function ProjectContent() {
         setLoading(true);
         let response = await fetchData(`projects/${id}`, 'post');
         if (response.reqStatus != 'success') { alert('Error: ' + response.message); setLoading(false); return; }
-        console.log(response.data);
         setTable(compileData(response.data, setPopup));
         setProject(response.data);
         document.title = `Project: ${response.data.ProjectTitle}`;
@@ -39,7 +40,7 @@ function ProjectContent() {
     }, [popup]);
     return (
         <>
-            {loading ? <Oval color='black' height={80} strokeWidth={5} /> :
+            {loading ? <Loading position={'absolute'}/> :
                 <div id='projectMainDiv'>
                     {popup}
                     <h1>Project Details <FaEdit size={40} className='hoverable' title='Edit' style={{ position: 'absolute', right: 20 }} onClick={() => navigate('/newproject', {
@@ -58,7 +59,7 @@ function ProjectContent() {
                         <b>Sanction Order No:</b>
                         <span>{project.SanctionOrderNo}</span>
                         <b>Total Sanction Amount:</b>
-                        <span>₹{project.TotalSanctionAmount}</span>
+                        <span>₹{formatNumber(project.TotalSanctionAmount)}</span>
                         <b>Project Start Date:</b>
                         <span>{new Date(project.ProjectStartDate).toLocaleDateString()}</span>
                         <b>Project End Date:</b>
@@ -68,17 +69,17 @@ function ProjectContent() {
                         <b>Co-PIs:</b>
                         <span style={{backgroundColor: 'white', textAlign: 'right'}} className='hoverable' onClick={() => setPopup(<PIPop reset={() => setPopup(null)} data={project.CoPIs} type='Co-PIs' />)}>Click to See list</span>
                         <b>Manpower Allocation Amt:</b>
-                        <span>₹{project.ManpowerAllocationAmt}</span>
+                        <span>₹{formatNumber(project.ManpowerAllocationAmt)}</span>
                         <b>Consumables Allocation Amt:</b>
-                        <span>₹{project.ConsumablesAllocationAmt}</span>
+                        <span>₹{formatNumber(project.ConsumablesAllocationAmt)}</span>
                         <b>Contingency Allocation Amt:</b>
-                        <span>₹{project.ContingencyAllocationAmt}</span>
+                        <span>₹{formatNumber(project.ContingencyAllocationAmt)}</span>
                         <b>Overhead Allocation Amt:</b>
-                        <span>₹{project.OverheadAllocationAmt}</span>
+                        <span>₹{formatNumber(project.OverheadAllocationAmt)}</span>
                         <b>Equipment Allocation Amt:</b>
-                        <span>₹{project.EquipmentAllocationAmt}</span>
+                        <span>₹{formatNumber(project.EquipmentAllocationAmt)}</span>
                         <b>Travel Allocation Amt:</b>
-                        <span>₹{project.TravelAllocationAmt}</span>
+                        <span>₹{formatNumber(project.TravelAllocationAmt)}</span>
                     </div>
                     <div id="projectTabs" style={{ color: 'white' }}>
                         <div className="hoverable" id={activeTab=='Consumables'?'projectTabsActive':''} onClick={() => setActiveTab('Consumables')}><b>Consumables</b></div>
@@ -150,9 +151,7 @@ function ProjectContent() {
 function compileData(data, setPopup) {    
     let compiled = {Consumables: [], Contingency: [], Travel: [], Equipment: [], Manpower: [], Overhead: []};
     data.indents.map((item) => {
-        if(item.IndentStatus == 'Rejected') return;
-        console.log(item.BillCopy);
-        
+        if(item.IndentStatus == 'Rejected') return;        
         switch (item.IndentType) {
             case 'Consumables':
                 compiled.Consumables.push(
@@ -162,7 +161,7 @@ function compileData(data, setPopup) {
                         <div>{item.IndentID}</div>
                         <div>{new Date(item.RequestedDate).toLocaleDateString()}</div>
                         <div>{item.Reason}</div>
-                        <div className='hoverable' onClick={() => setPopup(<PDFPopup reset={() => setPopup(null)} pdf={`pdf/Consumables/${item.IndentID}`} />)}>View</div>
+                        <div className='hoverable' onClick={() => setPopup(<PDFPopup reset={() => setPopup(null)} pdf={`pdf/Consumables/${item.IndentID}`} />)}>{item.RequestedAmt}</div>
                     </React.Fragment>
                 );
                 break;
@@ -174,7 +173,7 @@ function compileData(data, setPopup) {
                         <div>{item.IndentID}</div>
                         <div>{new Date(item.RequestedDate).toLocaleDateString()}</div>
                         <div>{item.Reason}</div>
-                        <div className='hoverable' onClick={() => setPopup(<PDFPopup reset={() => setPopup(null)} pdf={`pdf/Contingency/${item.IndentID}`} />)}>View</div>
+                        <div className='hoverable' onClick={() => setPopup(<PDFPopup reset={() => setPopup(null)} pdf={`pdf/Contingency/${item.IndentID}`} />)}>{item.RequestedAmt}</div>
                     </React.Fragment>
                 );
                 break;
@@ -187,7 +186,7 @@ function compileData(data, setPopup) {
                         <div>{item.Source} ({new Date(item.FromDate).toLocaleDateString()})</div>
                         <div>{item.Destination} ({new Date(item.DestinationDate).toLocaleDateString()})</div>
                         <div>{item.Reason}</div>
-                        <div className='hoverable' onClick={() => setPopup(<PDFPopup reset={() => setPopup(null)} pdf={`pdf/Travel/${item.IndentID}`} />)}>View</div>
+                        <div className='hoverable' onClick={() => setPopup(<PDFPopup reset={() => setPopup(null)} pdf={`pdf/Travel/${item.IndentID}`} />)}>{item.RequestedAmt}</div>
                     </React.Fragment>
                 );
                 break;
@@ -199,7 +198,7 @@ function compileData(data, setPopup) {
                         <div>{item.IndentID}</div>
                         <div>{new Date(item.RequestedDate).toLocaleDateString()}</div>
                         <div>{item.Reason}</div>
-                        <div className='hoverable' onClick={() => setPopup(<PDFPopup reset={() => setPopup(null)} pdf={`pdf/Equipment/${item.IndentID}`} />)}>View</div>
+                        <div className='hoverable' onClick={() => setPopup(<PDFPopup reset={() => setPopup(null)} pdf={`pdf/Equipment/${item.IndentID}`} />)}>{item.RequestedAmt}</div>
                     </React.Fragment>
                 );
                 break;
@@ -223,7 +222,7 @@ function compileData(data, setPopup) {
                         <div>{item.IndentId}</div>
                         <div>{new Date(item.Date).toLocaleDateString()}</div>
                         <div>{item.Purpose}</div>
-                        <div className='hoverable' onClick={() => setPopup(<PDFPopup reset={() => setPopup(null)} pdf={`pdf/Overhead${item.IndentID}`} />)}>View</div>
+                        <div className='hoverable' onClick={() => setPopup(<PDFPopup reset={() => setPopup(null)} pdf={`pdf/Overhead${item.IndentID}`} />)}>{item.RequestedAmt}</div>
                     </React.Fragment>
                 );
                 break;

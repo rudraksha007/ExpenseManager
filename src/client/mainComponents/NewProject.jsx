@@ -1,5 +1,5 @@
 import { useLocation, useNavigate } from 'react-router-dom';
-import { fetchData, fetchDataWithParams } from '../assets/scripts';
+import { fetchDataWithParams } from '../assets/scripts';
 import '../css/NewProject.css';
 import React, { useEffect, useRef, useState } from 'react';
 import { FaTimes } from 'react-icons/fa';
@@ -135,17 +135,18 @@ function NewProject() {
     // Function to calculate the remaining budget (max value for each allocation input)
     const getMax = (allocationField) => {
         // Calculate the total allocated amount excluding the one field being edited
-        const totalAllocated = Object.keys(formData).reduce((sum, key) => {
-            // Sum all allocation amounts except the one currently being modified
+        let totalAllocated = 0;
+        Object.keys(formData).forEach(key => {
             if (key.includes("AllocationAmt") && key !== allocationField) {
-                sum += Number(formData[key]);
+                totalAllocated += Number(formData[key]);
             }
-            return sum;
-        }, 0);
-
-        // The remaining available amount for the allocation field
+        });
         return formData.TotalSanctionAmount - totalAllocated;
     };
+
+    function getMin(allocationField) {        
+        return EditFormData[allocationField] - remaining[allocationField];
+    }
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -204,7 +205,6 @@ function NewProject() {
                     value={formData.ProjectTitle || ''}
                 />
 
-                {/* Project No */}
                 <label>
                     Project No:<span style={{ color: 'red' }}>*</span>
                 </label>
@@ -219,7 +219,6 @@ function NewProject() {
                     value={formData.ProjectNo || ''}
                 />
 
-                {/* Project Start Date */}
                 <label>
                     Project Start Date:<span style={{ color: 'red' }}>*</span>
                 </label>
@@ -233,7 +232,6 @@ function NewProject() {
                     max={formData.ProjectEndDate || ''}
                 />
 
-                {/* Project End Date */}
                 <label>
                     Project End Date:<span style={{ color: 'red' }}>*</span>
                 </label>
@@ -247,7 +245,6 @@ function NewProject() {
                     min={formData.ProjectStartDate || ''}
                 />
 
-                {/* Sanction Order No */}
                 <label>
                     Sanction Order No:<span style={{ color: 'red' }}>*</span>
                 </label>
@@ -260,7 +257,6 @@ function NewProject() {
                     value={formData.SanctionOrderNo || ''}
                 />
 
-                {/* Total Sanction Amount */}
                 <label>
                     Total Sanction Amount:<span style={{ color: 'red' }}>*</span>
                 </label>
@@ -270,11 +266,11 @@ function NewProject() {
                     placeholder="Enter total sanction amount"
                     required
                     min="0"
+                    step="0.01"
                     onChange={handleChange}
                     value={formData.TotalSanctionAmount || ''}
                 />
 
-                {/* Funded By */}
                 <label>
                     Funded By:<span style={{ color: 'red' }}>*</span>
                 </label>
@@ -318,30 +314,89 @@ function NewProject() {
                     onClick={() => setPopupContent('Worker')}
                 />
 
-                {/* Allocation Amounts */}
-                {[
-                    'ManpowerAllocationAmt',
-                    'ConsumablesAllocationAmt',
-                    'ContingencyAllocationAmt',
-                    'OverheadAllocationAmt',
-                    'EquipmentAllocationAmt',
-                    'TravelAllocationAmt',
-                ].map((field) => (
-                    <React.Fragment key={field}>
-                        <label>
-                            {field.replace(/([A-Z])/g, ' $1')}:
-                        </label>
-                        <input
-                            type="number"
-                            name={field}
-                            placeholder={`Enter ${field.replace(/([A-Z])/g, ' $1').toLowerCase()}`}
-                            min={formData[field] - remaining[field]}
-                            onChange={handleChange}
-                            value={formData[field] || 0}
-                            max={getMax(field)} // Dynamically adjust max for each field
-                        />
-                    </React.Fragment>
-                ))}
+                <label>
+                    Manpower Allocation Amt:
+                </label>
+                <input
+                    type="number"
+                    name="ManpowerAllocationAmt"
+                    placeholder="Enter manpower allocation amount"
+                    min={getMin('ManpowerAllocationAmt')}
+                    step="0.01"
+                    onChange={handleChange}
+                    value={formData.ManpowerAllocationAmt || 0}
+                    max={getMax('ManpowerAllocationAmt')}
+                />
+
+                <label>
+                    Consumables Allocation Amt:
+                </label>
+                <input
+                    type="number"
+                    name="ConsumablesAllocationAmt"
+                    placeholder="Enter consumables allocation amount"
+                    min={getMin('ConsumablesAllocationAmt')}
+                    step="0.01"
+                    onChange={handleChange}
+                    value={formData.ConsumablesAllocationAmt || 0}
+                    max={getMax('ConsumablesAllocationAmt')}
+                />
+
+                <label>
+                    Contingency Allocation Amt:
+                </label>
+                <input
+                    type="number"
+                    name="ContingencyAllocationAmt"
+                    placeholder="Enter contingency allocation amount"
+                    min={getMin('ContingencyAllocationAmt')}
+                    step="0.01"
+                    onChange={handleChange}
+                    value={formData.ContingencyAllocationAmt || 0}
+                    max={getMax('ContingencyAllocationAmt')}
+                />
+
+                <label>
+                    Overhead Allocation Amt:
+                </label>
+                <input
+                    type="number"
+                    name="OverheadAllocationAmt"
+                    placeholder="Enter overhead allocation amount"
+                    min={getMin('OverheadAllocationAmt')}
+                    step="0.01"
+                    onChange={handleChange}
+                    value={formData.OverheadAllocationAmt || 0}
+                    max={getMax('OverheadAllocationAmt')}
+                />
+
+                <label>
+                    Equipment Allocation Amt:
+                </label>
+                <input
+                    type="number"
+                    name="EquipmentAllocationAmt"
+                    placeholder="Enter equipment allocation amount"
+                    min={getMin('EquipmentAllocationAmt')}
+                    step="0.01"
+                    onChange={handleChange}
+                    value={formData.EquipmentAllocationAmt || 0}
+                    max={getMax('EquipmentAllocationAmt')}
+                />
+
+                <label>
+                    Travel Allocation Amt:
+                </label>
+                <input
+                    type="number"
+                    name="TravelAllocationAmt"
+                    placeholder="Enter travel allocation amount"
+                    min={getMin('TravelAllocationAmt')}
+                    step="0.01"
+                    onChange={handleChange}
+                    value={formData.TravelAllocationAmt || 0}
+                    max={getMax('TravelAllocationAmt')}
+                />
 
                 <footer>
                     <input type="submit" value={EditFormData ? "Save Changes" : "Create New Project"} className="hoverable tableTitle" />

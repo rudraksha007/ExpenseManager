@@ -37,8 +37,8 @@ function Signup() {
                     <label className="loginInput hoverable">Designation:
                         <select name='role' required defaultValue={"Pi"}>
                             <option value="" disabled>Select</option>
-                            <option value="JRK">JRF</option>
-                            <option value="SRK">SRF</option>
+                            <option value="JRF">JRF</option>
+                            <option value="SRF">SRF</option>
                             <option value="RA">RA</option>
                             <option value="Pi">PI</option>
                             <option value="SuperAdmin">Techanican</option>

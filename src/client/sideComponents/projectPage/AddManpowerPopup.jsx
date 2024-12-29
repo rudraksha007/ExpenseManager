@@ -76,7 +76,8 @@ function ManpowerPopup({ reset, workers }) {
         setTotalAllocation((total / 30).toFixed(2));
 
     }
-
+    console.log(project);
+    
     return (
         <div className='projectPopup'>
             <div className="projectPopupCont" id='largePopupCont'>
@@ -94,9 +95,9 @@ function ManpowerPopup({ reset, workers }) {
                                     <input type="text" id="ProjectTitle" name="ProjectTitle" readOnly required value={project.ProjectTitle} />
 
                                     <label htmlFor="fromDate">From Date:</label>
-                                    <input type="date" id="fromDate" name="fromDate" max={toDate} value={fromDate} onChange={(e) => { setFromDate(e.currentTarget.value); handleChange(e) }} required />
+                                    <input type="date" id="fromDate" name="fromDate" max={toDate} value={fromDate} min={project.ProjectStartDate.split('T')[0]} onChange={(e) => { setFromDate(e.currentTarget.value); handleChange(e) }} required />
                                     <label htmlFor="toDate">To Date:</label>
-                                    <input type="date" id="toDate" name="toDate" min={fromDate} value={toDate} onChange={(e) => { setToDate(e.currentTarget.value); handleChange(e) }} required />
+                                    <input type="date" id="toDate" name="toDate" min={fromDate} value={toDate} max={project.ProjectEndDate.split('T')[0]} onChange={(e) => { setToDate(e.currentTarget.value); handleChange(e) }} required />
                                     <label htmlFor="totalAllocation">Total Allocation:</label>
                                     <input type="number" id="totalAllocation" name='totalAllocation' required readOnly value={totalAllocation} max={project.RemainingManpowerAmt} />
                                 </div>

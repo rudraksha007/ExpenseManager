@@ -235,5 +235,28 @@ async function addPOrder(req, res) {
 }
 
 
+async function editUser(req, res) {
+    try {
+        const { id, name, email, password, role, BasicSalary, HRA_Percentage } = req.body;
+        let ProfilePic = null;
 
-export { addProject, editProject, addUser, addProjectIndent,addPurchaseReq, addPOrder, addTravel };
+        if (req.files && req.files.ProfilePic) {
+            const file = req.files.ProfilePic;
+            ProfilePic = file.data;
+        }
+
+        const query = `UPDATE users SET name = ?, email = ?, password = ?, role = ?, BasicSalary = ?, HRA_Percentage = ?, ProfilePic = ? WHERE id = ?`;
+        
+        await db.query(query, [
+            name, email, password, role, 
+            parseFloat(BasicSalary), parseFloat(HRA_Percentage), ProfilePic, parseInt(id)
+        ]);
+        
+        res.status(200).json({ message: 'User updated successfully' }).end();
+    } catch (err) {
+        sendFailedResponse(res, err.message, 500);
+    }
+}
+
+
+export { addProject, editProject, addUser, addProjectIndent,addPurchaseReq, addPOrder, addTravel,editUser };

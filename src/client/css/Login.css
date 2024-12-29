@@ -2,7 +2,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    height: 90dvh;
+    min-height: 90dvh;
 }
 #loginMainDiv>form{
     display: flex;
@@ -16,6 +16,7 @@
 }
 #inputDiv{
     height: 65%;
+    overflow-y: auto;
 }
 #loginMainDiv>form>h1{
     text-align: center;

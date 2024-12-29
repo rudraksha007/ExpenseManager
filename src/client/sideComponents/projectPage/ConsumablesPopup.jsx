@@ -11,7 +11,6 @@ function ConsumablesPopup({ reset }) {
     const { ProjectNo, ProjectTitle, RemainingConsumablesAmt, AllocatedConsumables } = (useContext(ProjectContext)).project;
     const {profile} = useContext(ProfileContext);
     const today = new Date().toISOString().split('T')[0];
-    const [IndentId, setIndentId] = React.useState(null);
     const [loading, setLoading] = React.useState(false);
 
     const handleSubmit = async (e) => {

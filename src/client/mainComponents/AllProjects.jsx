@@ -4,10 +4,10 @@ import { FaEdit } from 'react-icons/fa';
 import { useState, useEffect, useRef, useContext } from 'react';
 import { fetchDataWithParams } from '../assets/scripts.js';
 import React from 'react';
-import { Oval } from 'react-loader-spinner';
 import PageControls from '../sideComponents/PageControls';
 import { ProfileContext } from '../assets/UserProfile.jsx';
 import { formatNumber } from 'chart.js/helpers';
+import Loading from '../assets/Loading.jsx';
 
 function AllProjects() {
 
@@ -18,7 +18,6 @@ function AllProjects() {
     const [filter, setFilter] = useState({ page: 1, text: '', status: '', fundedBy: '', fromDate: '', toDate: '' });
     const { profile } = useContext(ProfileContext);
     async function getProjects() {
-        // const data = await fetchDataWithParams(`projects`, { page: filter.page, count: 25 });
         let data = (await fetchDataWithParams('projects', 'post', { id: profile.id, fields: ['ProjectNo', 'ProjectTitle', 'ProjectStartDate', 'ProjectEndDate', 'TotalSanctionamount', 'FundedBy'], filters: filter }));
         if (data.reqStatus == 'success') {
             setAgencies(data.agencies);
@@ -52,7 +51,8 @@ function AllProjects() {
     }, []);
     return (
         <>
-            {loading ? <Oval color='black' height={80} strokeWidth={5} /> :
+            {loading ? <Loading position={'absolute'}/> :
+            
                 <div id='allProjectsContent'>
                     <h1>Projects </h1>
                     <PageControls page={filter.page} setPage={(page) => setFilter({ ...filter, page: page })} total={total.current} max={25} />

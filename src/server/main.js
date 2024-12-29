@@ -5,7 +5,7 @@ import dotenv from 'dotenv';
 import { login, autoLogin, getProjects, logout, getUsers, getProjectInfo, getIndents, getBillCopy, getIndentInfo, updateIndentStatus, getPR, updatePRStatus, generateReport, getRemaining } from './callbacks/postReqs.js';
 import cookieParser from 'cookie-parser';
 import { authenticate, authorize, connectDb, projectWiseAuthorisation } from './dbUtils.js';
-import { addPOrder, addProject,addProjectIndent,addPurchaseReq,addUser, editProject } from './callbacks/putReqs.js';
+import { addPOrder, addProject,addProjectIndent,addPurchaseReq,addUser, editProject, editUser } from './callbacks/putReqs.js';
 import fileUpload from 'express-fileupload';
 
 const app = express();
@@ -44,6 +44,7 @@ app.put('/api/manpower', (req, res) => addProjectIndent(req, res));
 app.put('/api/purchaseReqs', authorize(['SuperAdmin']), (req, res) => addPurchaseReq(req, res));
 app.put('/api/purchaseOrders', authorize(['SuperAdmin']), (req, res) => addPOrder(req, res));
 app.put('/api/editProject', authorize(['Pi','SuperAdmin']), (req, res) => editProject(req, res));
+app.put('/api/editProfile', authorize(['Pi','SuperAdmin']), (req, res) => editUser(req, res));
 
 ViteExpress.listen(app, 80, () =>
   console.log("Server is listening on port 80..."),
