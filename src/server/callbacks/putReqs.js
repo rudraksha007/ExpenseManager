@@ -46,6 +46,26 @@ async function editProject(req, res) {
 
         const query = 'UPDATE Projects SET  ProjectStartDate = ?, ProjectEndDate = ?, SanctionOrderNo = ?, TotalSanctionAmount = ?, PIs = ?, CoPIs = ?, Workers = ?, ManpowerAllocationAmt = ?, ConsumablesAllocationAmt = ?, ContingencyAllocationAmt = ?, OverheadAllocationAmt = ?, EquipmentAllocationAmt = ?, TravelAllocationAmt = ?, FundedBy = ? WHERE ProjectNo = ?';
 
+        const existingProject = await getFromDb('Projects', ['PIs', 'CoPIs', 'Workers'], `ProjectNo='${ProjectNo}'`);
+        console.log(existingProject);
+        const existingPIs = existingProject[0].PIs.map(pi => JSON.parse(pi));
+        const existingCoPIs = existingProject[0].CoPIs.map(coPi => JSON.parse(coPi));
+        const existingWorkers = existingProject[0].Workers.map(worker => JSON.parse(worker));
+
+        const removedPIs = existingPIs.filter(existingPI => !PIs.some(newPI => newPI.id === existingPI.id));
+        const removedCoPIs = existingCoPIs.filter(existingCoPI => !CoPIs.some(newCoPI => newCoPI.id === existingCoPI.id));
+        const removedWorkers = existingWorkers.filter(existingWorker => !Workers.some(newWorker => newWorker.id === existingWorker.id));
+
+        
+        await Promise.all([...removedPIs, ...removedCoPIs, ...removedWorkers].map(async (removedUser) => {
+            const updateUserProjectsQuery = 'UPDATE users SET projects = JSON_REMOVE(projects, JSON_UNQUOTE(JSON_SEARCH(projects, "one", ?))) WHERE id = ?';
+            try {
+            await db.query(updateUserProjectsQuery, [ProjectNo, removedUser.id]);
+            } catch (err) {
+            return sendFailedResponse(res, err.message, 500);
+            }
+        }));
+
         await db.query(query,
             [ ProjectStartDate, ProjectEndDate, SanctionOrderNo,
             parseFloat(TotalSanctionAmount), JSON.stringify(PIs), JSON.stringify(CoPIs), JSON.stringify(Workers), parseFloat(ManpowerAllocationAmt),
@@ -55,6 +75,8 @@ async function editProject(req, res) {
 
         res.status(200).json({ message: 'Project updated successfully' }).end();
     } catch (err) {
+        console.log(err);
+        
         sendFailedResponse(res, err.message, 500);
     }
 }

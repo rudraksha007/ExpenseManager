@@ -14,11 +14,6 @@ async function fetchData(url, method) {
 
 async function fetchDataWithParams(url, method, data) {
     try {
-        await new Promise((resolve, reject) => {
-            setTimeout(() => {
-                resolve();  
-            }, 1000);
-        });
         const response = await fetch('/api/' + url,
             {
                 method: method,
