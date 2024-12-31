@@ -145,7 +145,7 @@ function NewProject() {
     };
 
     function getMin(allocationField) {        
-        return EditFormData[allocationField] - remaining[allocationField];
+        return EditFormData? EditFormData[allocationField] - remaining[allocationField]:0;
     }
 
     const handleSubmit = async (e) => {
