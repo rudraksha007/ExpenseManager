@@ -529,12 +529,59 @@ LEFT JOIN
     ProjectAllocationSummary pa ON ci.ProjectNo = pa.ProjectNo
 WHERE 
     ci.ProjectNo = '${ProjectNo}'
-    AND ci.RequestedDate BETWEEN '${year}-01-01' AND '${parseInt(year)+1}-01-01'
+    AND ci.RequestedDate BETWEEN '${year}-04-01' AND '${parseInt(year)+1}-03-31'
 GROUP BY 
     ci.IndentType, pa.ManpowerAllocationAmt, pa.TravelAllocationAmt, 
     pa.ConsumablesAllocationAmt, pa.ContingencyAllocationAmt, pa.OverheadAllocationAmt, 
     pa.EquipmentAllocationAmt;
 `
+  }
+
+  else if (reportType === 'quarterly'){
+    let { year, ProjectNo, quarter } = req.body;
+    if (!year || !ProjectNo || !quarter) return sendFailedResponse(res, 'Year, ProjectNo or quarter not specified', 500);
+
+    let startMonth, endMonth;
+    if (quarter === 1) {
+      startMonth = '04';
+      endMonth = '06';
+    } else if (quarter === 2) {
+      startMonth = '07';
+      endMonth = '09';
+    } else if (quarter === 3) {
+      startMonth = '10';
+      endMonth = '12';
+    } else if (quarter === 4) {
+      startMonth = '01';
+      endMonth = '03';
+      year = parseInt(year) + 1; // Adjust year for Q4
+    } else {
+      return sendFailedResponse(res, 'Invalid quarter specified', 500);
+    }
+
+    query = `
+      SELECT 
+        ci.IndentType AS Category,
+        pa.ManpowerAllocationAmt + pa.TravelAllocationAmt + pa.ConsumablesAllocationAmt + 
+        pa.ContingencyAllocationAmt + pa.OverheadAllocationAmt + pa.EquipmentAllocationAmt AS Allocation,
+        SUM(ci.RequestedAmt) AS IndentedProposed,
+        SUM(CASE WHEN ci.IndentStatus = 'Completed' THEN ci.RequestedAmt ELSE 0 END) AS Paid,
+        SUM(CASE WHEN ci.IndentStatus IN ('Approved', 'Pending') THEN ci.RequestedAmt ELSE 0 END) AS Committed,
+        (pa.ManpowerAllocationAmt + pa.TravelAllocationAmt + pa.ConsumablesAllocationAmt + 
+         pa.ContingencyAllocationAmt + pa.OverheadAllocationAmt + pa.EquipmentAllocationAmt - 
+         SUM(ci.RequestedAmt)) AS Available
+      FROM 
+        CombinedIndents ci
+      LEFT JOIN 
+        ProjectAllocationSummary pa ON ci.ProjectNo = pa.ProjectNo
+      WHERE 
+        ci.ProjectNo = '${ProjectNo}'
+        AND ci.RequestedDate BETWEEN '${year}-${startMonth}-01' AND '${year}-${endMonth}-31'
+      GROUP BY 
+        ci.IndentType, pa.ManpowerAllocationAmt, pa.TravelAllocationAmt, 
+        pa.ConsumablesAllocationAmt, pa.ContingencyAllocationAmt, pa.OverheadAllocationAmt, 
+        pa.EquipmentAllocationAmt;
+    `;
   }
   if (!query) return sendFailedResponse(res, 'Invalid Report Type', 500);
 

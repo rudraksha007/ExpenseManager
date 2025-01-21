@@ -5,6 +5,7 @@ import Category from "../sideComponents/Reports/Category";
 import General from "../sideComponents/Reports/General";
 import Save from "../sideComponents/Reports/Save";
 import Yearly from "../sideComponents/Reports/Yearly";
+import Quarterly from "../sideComponents/Reports/Quarterly";
 
 function Report() {
     const [loading, setLoading] = useState(false);
@@ -14,6 +15,7 @@ function Report() {
     const [year, setYear] = useState(new Date().getFullYear());
     const [projectNo, setProjectNo] = useState('');
     const [timer, setTimer] = useState(null);
+    const [quarter, setQuarter] = useState('1');
 
     const fetchProjects = async () => {
         setLoading(true);
@@ -39,12 +41,12 @@ function Report() {
             load();
             setTimer(null);
         }, 500));
-    }, [type, year, projectNo]);
+    }, [type, year, projectNo, quarter]);
 
     async function load() {
-        if (type == 'yearly' && (!year || !projectNo)) { return; }
+        if ((type == 'yearly'||type=='quarterly') && (!year || !projectNo)) { return; }
         setLoading(true);
-        const data = await fetchDataWithParams('report', 'post', { reportType: type, year: year, ProjectNo: projectNo });
+        const data = await fetchDataWithParams('report', 'post', { reportType: type, year: year, ProjectNo: projectNo,quarter: parseInt(quarter) });
         console.log(data);
         if (data.reqStatus == 'success') {
             setData(data.data);
@@ -57,7 +59,7 @@ function Report() {
         <>
             {loading ? <Loading position={'absolute'} /> :
                 <div>
-                    <form id="head" style={{ width: '100%', display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: 5, boxSizing: 'border-box', padding: 10 }}
+                    <form id="head" style={{ width: '100%', display: 'grid', gridTemplateColumns: 'repeat(8, 1fr)', gap: 5, boxSizing: 'border-box', padding: 10 }}
                         onSubmit={(e) => load(e)}>
                         <label htmlFor="type">Select Category</label>
                         <select name="type" id="type" onChange={(e) => setType(e.target.value)} value={type}>
@@ -65,8 +67,9 @@ function Report() {
                             <option value="general">General</option>
                             <option value="category">Category</option>
                             <option value="yearly">Yearly</option>
+                            <option value="quarterly">Quarterly</option>
                         </select>
-                        {type == 'yearly' ?
+                        {type == 'yearly' || type == 'quarterly'?
                             <>
                                 <label htmlFor="projectNo">Select Project No</label>
                                 <select name="projectNo" id="projectNo" value={projectNo} onChange={(e) => setProjectNo(e.target.value)}>
@@ -79,13 +82,26 @@ function Report() {
                                 </select>
                                 <label htmlFor="year">Select Year</label>
                                 <input type="number" id="year" name="year" min="2000" value={year} onChange={(e) => setYear(e.target.value)} />
+                                {
+                                    type=='quarterly'?
+                                    <>
+                                    <select name="quarter" id="quarter" value={quarter} onChange={(e) => setQuarter(e.target.value)}>
+                                    <option value="1" defaultChecked>Q1</option>
+                                    <option value="2">Q2</option>
+                                    <option value="3">Q3</option>
+                                    <option value="4">Q4</option>
+                                </select>
+                                    </>:
+                                    <></>
+                                }
                             </> : <></>}
                         {data ? <Save data={data} type={type} /> : <></>}
                     </form>
                     {!type || !data ? <></> :
                         type == 'category' ? <Category data={data} /> :
-                            type == 'general' ? <General data={data} /> :
-                                <Yearly data={data} />
+                        type == 'general' ? <General data={data} /> :
+                        type == 'yearly' ? <Yearly data={data} />:
+                        <Quarterly data={data} />
                     }
                 </div>
             }
