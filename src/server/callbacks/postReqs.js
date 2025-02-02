@@ -91,7 +91,7 @@ function autoLogin(req, res) {
  * @param {Object} res - The response object.
 */
 function getProjects(req, res) {
-  getFromDb('Projects', req.body.fields).then((results) => {
+  getFromDb('Projects', req.body.fields).then((results) => {  
     const { page, text, status, fundedBy, fromDate, toDate } = req.body.filters;
     const fundedByList = [...new Set(results.map(project => project.FundedBy))];
     results = results.filter(project => {
@@ -114,6 +114,8 @@ function getProjects(req, res) {
     res.status(200).json({ projects: results, total: results.length, agencies: fundedByList }).end();
   }).catch((err) => {
     res.status(500).json({ message: 'Error fetching projects', err: err.message }).end();
+    console.log(err);
+    
   });
 }
 
@@ -136,8 +138,10 @@ function logout(req, res) {
  * @param {Object} res - The response object.
 */
 function getUsers(req, res) {
-  getFromDb('users', ['name', 'email', 'id', 'role', 'projects', 'status', 'TotalSalary', 'BasicSalary', 'HRA_Percentage'], 'id != 0').then((results) => {
+  getFromDb('users', ['name', 'email', 'id', 'role', 'projects', 'status', 'TotalSalary', 'BasicSalary', 'HRA_Percentage'], "id != '0'").then((results) => {
     const { text, role } = req.body.filters;
+    // console.log(results);
+    
     if (text || role) {
       let actual = [];
       results.forEach(user => {

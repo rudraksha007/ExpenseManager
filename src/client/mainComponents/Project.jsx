@@ -8,7 +8,6 @@ import ConsumablesPopup from '../sideComponents/projectPage/ConsumablesPopup';
 import EquipmentsPopup from '../sideComponents/projectPage/EquipmentsPopup';
 import ContingencyPopup from '../sideComponents/projectPage/Contingency';
 import { fetchData } from '../assets/scripts';
-import { Oval } from 'react-loader-spinner';
 import PDFPopup from '../sideComponents/PDFPopup';
 import { ProjectContext, ProjectProvider } from '../assets/ProjectData';
 import PIPop from '../sideComponents/projectPage/PIPop';
@@ -29,8 +28,10 @@ function ProjectContent() {
         setLoading(true);
         let response = await fetchData(`projects/${id}`, 'post');
         if (response.reqStatus != 'success') { alert('Error: ' + response.message); setLoading(false); return; }
-        setTable(compileData(response.data, setPopup));
-        setProject(response.data);
+        setTable(compileData(response.data, setPopup));        
+        setProject({...response.data, PIs: JSON.parse(response.data.PIs), 
+            CoPIs: JSON.parse(response.data.CoPIs),
+            Workers: JSON.parse(response.data.Workers)});
         document.title = `Project: ${response.data.ProjectTitle}`;
         setLoading(false);
     }
@@ -138,7 +139,10 @@ function ProjectContent() {
                             <span className="tableTitle">To Date</span>
                             <span className="tableTitle">Total</span>
                             {table.Manpower}
-                            <div className='hoverable inherit' onClick={() => setPopup(<AddManpowerPopup reset={() => setPopup(null)} workers={project.Workers} />)}><FaPlus size={20} /></div>
+                            <div className='hoverable inherit' onClick={() => setPopup(<AddManpowerPopup 
+                                reset={() => setPopup(null)} workers={project.Workers} />)}>
+                                    <FaPlus size={20} />
+                            </div>
                         </div>
                     </div>
                 </div>

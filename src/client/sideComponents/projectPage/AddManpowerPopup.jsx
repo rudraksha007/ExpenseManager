@@ -24,9 +24,10 @@ function ManpowerPopup({ reset, workers }) {
             const data = await fetchDataWithParams('users', 'post', { filters: filter });
             if (data) {
                 let dict = {};
-                data.users.forEach(user => {
-                    dict[user.id] = user;
+                data.users.forEach((user, i) => {
+                    dict[encodeURIComponent(user.id)] = {...user, projects: JSON.parse(user.projects)};
                 });
+                // console.log(dict);
                 setProfiles(dict);
             }
             setLoading(false);
@@ -68,7 +69,7 @@ function ManpowerPopup({ reset, workers }) {
         let total = 0;
         checkboxes.forEach(checkbox => {
             if (checkbox.checked) {
-                total += parseFloat(profiles[JSON.parse(checkbox.value).id].TotalSalary);
+                total += parseFloat(profiles[encodeURIComponent(JSON.parse(checkbox.value).id)].TotalSalary);
             }
         });
         const diffInDays = (new Date(toDate) - new Date(fromDate)) / (1000 * 60 * 60 * 24) + 1;
@@ -76,7 +77,6 @@ function ManpowerPopup({ reset, workers }) {
         setTotalAllocation((total / 30).toFixed(2));
 
     }
-    console.log(project);
     
     return (
         <div className='projectPopup'>
@@ -118,8 +118,6 @@ function ManpowerPopup({ reset, workers }) {
                                         onChange={(e) => setFilter({ ...filter, role: e.target.value })}
                                     >
                                         <option value="">Select Designation</option>
-                                        <option value="JRK">JRF</option>
-                                        <option value="SRK">SRF</option>
                                         <option value="RA">RA</option>
                                         <option value="Pi">PI</option>
                                         <option value="SuperAdmin">Techanican</option>
@@ -131,10 +129,11 @@ function ManpowerPopup({ reset, workers }) {
                                     <div className="tableTitle">Name</div>
                                     <div className="tableTitle">Designation</div>
                                     <div className="tableTitle">Salary</div>
-                                    {
+                                    {                                        
                                         Object.entries(profiles).map(([id, profile]) => {
-                                            if (profile.role === 'SuperAdmin' || profile.role === 'Pi') return null;
+                                            if (profile.role === 'SuperAdmin' || profile.role === 'Pi') return null;                                            
                                             if (!workers.includes(JSON.stringify({ id: profile.id, name: profile.name }))) return null;
+                                            
                                             return (
                                                 <React.Fragment key={profile.id}>
                                                     <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>

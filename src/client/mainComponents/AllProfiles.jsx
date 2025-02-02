@@ -48,7 +48,9 @@ function AllProfiles() {
         if (data.reqStatus == 'success') {
             let l = [];
             total.current = data.total;
-            data.users.map((profile, index) => {
+            // console.log(data);
+            
+            data.users.map(async (profile, index) => {
                 let style = {};
                 if (profile.role == 'Pi') {
                     style = { backgroundColor: 'rgb(200, 200, 250)' };
@@ -56,6 +58,7 @@ function AllProfiles() {
                 else if (profile.role == 'SuperAdmin') {
                     style = { backgroundColor: 'rgb(250, 200, 200)' };
                 }
+                let projects = profile.projects ? (await JSON.parse(profile.projects)).length : 0;
                 l.push(
                     <React.Fragment key={profile.id}>
                         <div style={style}>{index + 1}</div>
@@ -63,7 +66,7 @@ function AllProfiles() {
                         <div style={style}>{profile.role}</div>
                         <div style={style}>{profile.email}</div>
                         <div style={style}>{profile.id}</div>
-                        <div style={style}>{profile.projects.length}</div>
+                        <div style={style}>{projects|| 0}</div>
                         <div className='allProfilesActions hoverable' style={style} onClick={(e) => { editProfile(profile) }}>
                             <FaEdit size={20} />
                         </div>

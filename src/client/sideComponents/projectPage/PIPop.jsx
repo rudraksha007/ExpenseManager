@@ -16,10 +16,10 @@ function PIPop({ reset, data, type }) {
                         data.map((item, index) => {
                             let parsed = JSON.parse(item);  
                             return (
-                                <>
+                                <React.Fragment key={index}>
                                     <div>{parsed.id}</div>
                                     <div>{parsed.name}</div>
-                                </>
+                                </React.Fragment>
                             );
                         })
                     }

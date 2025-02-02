@@ -6,7 +6,6 @@ import { fetchDataWithParams } from "../assets/scripts";
 import CryptoJS from 'crypto-js';
 
 function Login() {
-    // {/*onSubmit={handleSubmit(onSubmit)}*/ }
     const {profile, setProfile} = useContext(ProfileContext);
     const [loading, setLoading] = useState(false);
     const navigate = useNavigate();

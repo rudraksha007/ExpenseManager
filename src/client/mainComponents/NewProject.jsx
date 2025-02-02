@@ -52,18 +52,22 @@ function NewProject() {
             }
         }
         setData();
-        if(EditFormData){
+        if(EditFormData){    
+            let dum = null;        
             if (EditFormData.PIs) {
-                selected.current.PIs = EditFormData.PIs;
-                formData.PIs = EditFormData.PIs;
+                dum = JSON.parse(EditFormData.PIs);
+                selected.current.PIs = dum;
+                formData.PIs = dum;
             }
             if (EditFormData.CoPIs) {
-                selected.current.CoPIs = EditFormData.CoPIs;
-                formData.CoPIs = EditFormData.CoPIs;
+                dum = JSON.parse(EditFormData.CoPIs);
+                selected.current.CoPIs = dum;
+                formData.CoPIs = dum;
             }
             if (EditFormData.Workers) {
-                selected.current.Workers = EditFormData.Workers;
-                formData.Workers = EditFormData.Workers;
+                dum = JSON.parse(EditFormData.Workers);
+                selected.current.Workers = dum;
+                formData.Workers = dum;
             }
         }
         fetchDataWithParams('users', 'post', { filters: {} }).then(data => {

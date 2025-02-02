@@ -42,50 +42,50 @@ async function addProject(req, res) {
 
 async function editProject(req, res) {
     try {
+        await db.beginTransaction();
+
         const { ProjectNo, ProjectStartDate, ProjectEndDate, SanctionOrderNo, TotalSanctionAmount, PIs, CoPIs, Workers, ManpowerAllocationAmt, ConsumablesAllocationAmt, ContingencyAllocationAmt, OverheadAllocationAmt, EquipmentAllocationAmt, TravelAllocationAmt, FundedBy } = req.body;
 
-        const query = 'UPDATE Projects SET  ProjectStartDate = ?, ProjectEndDate = ?, SanctionOrderNo = ?, TotalSanctionAmount = ?, PIs = ?, CoPIs = ?, Workers = ?, ManpowerAllocationAmt = ?, ConsumablesAllocationAmt = ?, ContingencyAllocationAmt = ?, OverheadAllocationAmt = ?, EquipmentAllocationAmt = ?, TravelAllocationAmt = ?, FundedBy = ? WHERE ProjectNo = ?';
+        const query = 'UPDATE Projects SET ProjectStartDate = ?, ProjectEndDate = ?, SanctionOrderNo = ?, TotalSanctionAmount = ?, PIs = ?, CoPIs = ?, Workers = ?, ManpowerAllocationAmt = ?, ConsumablesAllocationAmt = ?, ContingencyAllocationAmt = ?, OverheadAllocationAmt = ?, EquipmentAllocationAmt = ?, TravelAllocationAmt = ?, FundedBy = ? WHERE ProjectNo = ?';
 
-        const existingProject = await getFromDb('Projects', ['PIs', 'CoPIs', 'Workers'], `ProjectNo='${ProjectNo}'`);
-        console.log(existingProject);
-        const existingPIs = existingProject[0].PIs.map(pi => JSON.parse(pi));
-        const existingCoPIs = existingProject[0].CoPIs.map(coPi => JSON.parse(coPi));
-        const existingWorkers = existingProject[0].Workers.map(worker => JSON.parse(worker));
+        const existingProject = await db.query('SELECT PIs, CoPIs, Workers FROM Projects WHERE ProjectNo = ?', [ProjectNo]);
+        
+        const existingPIs = existingProject[0].PIs ? JSON.parse(existingProject[0].PIs) : [];
+        const existingCoPIs = existingProject[0].CoPIs ? JSON.parse(existingProject[0].CoPIs) : [];
+        const existingWorkers = existingProject[0].Workers ? JSON.parse(existingProject[0].Workers) : [];
 
         const removedPIs = existingPIs.filter(existingPI => !PIs.some(newPI => newPI.id === existingPI.id));
         const removedCoPIs = existingCoPIs.filter(existingCoPI => !CoPIs.some(newCoPI => newCoPI.id === existingCoPI.id));
         const removedWorkers = existingWorkers.filter(existingWorker => !Workers.some(newWorker => newWorker.id === existingWorker.id));
 
-        
         await Promise.all([...removedPIs, ...removedCoPIs, ...removedWorkers].map(async (removedUser) => {
             const updateUserProjectsQuery = 'UPDATE users SET projects = JSON_REMOVE(projects, JSON_UNQUOTE(JSON_SEARCH(projects, "one", ?))) WHERE id = ?';
-            try {
             await db.query(updateUserProjectsQuery, [ProjectNo, removedUser.id]);
-            } catch (err) {
-            return sendFailedResponse(res, err.message, 500);
-            }
         }));
 
-        await db.query(query,
-            [ ProjectStartDate, ProjectEndDate, SanctionOrderNo,
-            parseFloat(TotalSanctionAmount), JSON.stringify(PIs), JSON.stringify(CoPIs), JSON.stringify(Workers), parseFloat(ManpowerAllocationAmt),
-            parseFloat(ConsumablesAllocationAmt), parseFloat(ContingencyAllocationAmt),
-            parseFloat(OverheadAllocationAmt), parseFloat(EquipmentAllocationAmt),
-            parseFloat(TravelAllocationAmt), FundedBy, ProjectNo]);
+        await db.query(query, [
+            ProjectStartDate, ProjectEndDate, SanctionOrderNo, parseFloat(TotalSanctionAmount), JSON.stringify(PIs), JSON.stringify(CoPIs), JSON.stringify(Workers), parseFloat(ManpowerAllocationAmt),
+            parseFloat(ConsumablesAllocationAmt), parseFloat(ContingencyAllocationAmt), parseFloat(OverheadAllocationAmt), parseFloat(EquipmentAllocationAmt), parseFloat(TravelAllocationAmt), FundedBy, ProjectNo
+        ]);
 
+        await db.commit();
         res.status(200).json({ message: 'Project updated successfully' }).end();
     } catch (err) {
-        console.log(err);
-        
+        await db.rollback();
         sendFailedResponse(res, err.message, 500);
-    }
+    } 
+    // finally {
+    //     db.release();
+    // }
 }
 
 function addUser(req, res) {
     let x = { ...req.body, projects: '[]', status: 1 };
     const { id, name, email, password, projects, role, BasicSalary, HRA_Percentage } = x;
+    console.log(parseFloat(BasicSalary)||0, parseFloat(HRA_Percentage)||0);
+    
     const query = 'INSERT INTO users(id, name, email, password, projects, status, role, BasicSalary, HRA_Percentage) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)';
-    db.query(query, [parseInt(id), name, email, password, projects, 1, role, parseFloat(BasicSalary), parseFloat(HRA_Percentage)]).then(result => {
+    db.query(query, [id, name, email, password, projects, 1, role, parseFloat(BasicSalary)||0, parseFloat(HRA_Percentage)||0]).then(result => {
         res.status(201).json({ message: 'Profile added successfully' }).end();
     }).catch(err => {
         sendFailedResponse(res, err.message, 500);
@@ -228,7 +228,7 @@ async function addPurchaseReq(req, res){
         }
         const { ProjectNo, IndentAmount } = indent;
         const query = 'INSERT INTO purchaserequests (PurchaseReqID, PRDate, ProjectNo, IndentID, PurchaseRequestAmount, PRRequestor, PRStatus) VALUES (?, ?, ?, ?, ?, ?, ?)';
-        db.query(query, [parseInt(IndentID), PRDate, parseInt(ProjectNo), parseInt(IndentID), IndentAmount, PRRequestor, 'Pending']).then(result => {
+        db.query(query, [parseInt(IndentID), PRDate, ProjectNo, IndentID, IndentAmount, PRRequestor, 'Pending']).then(result => {
             res.status(201).json({ message: 'Purchase request added successfully' }).end();
         }).catch(err => {
             sendFailedResponse(res, err.message, 500);
@@ -246,7 +246,7 @@ async function addPOrder(req, res) {
             return;
         }
         const query = 'INSERT INTO expenses (ExpenseID, ExpenseDate, ExpenseAmount, ExpenseDescription, ProjectNo) VALUES (?, ?, ?, ?, ?)';
-        db.query(query, [parseInt(ExpenseID), ExpenseDate, parseInt(ExpenseAmount), ExpenseDescription, parseInt(ProjectNo)]).then(result => {
+        db.query(query, [parseInt(ExpenseID), ExpenseDate, parseFloat(ExpenseAmount), ExpenseDescription, ProjectNo]).then(result => {
             res.status(201).json({ message: 'Expense added successfully' }).end();
         }).catch(err => {
             sendFailedResponse(res, err.message, 500);
@@ -271,7 +271,7 @@ async function editUser(req, res) {
         
         await db.query(query, [
             name, email, password, role, 
-            parseFloat(BasicSalary), parseFloat(HRA_Percentage), ProfilePic, parseInt(id)
+            parseFloat(BasicSalary), parseFloat(HRA_Percentage), ProfilePic, id
         ]);
         
         res.status(200).json({ message: 'User updated successfully' }).end();

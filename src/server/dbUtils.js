@@ -46,7 +46,7 @@ async function connectDb() {
                 tableName: 'Projects',
                 definition: `
                     ProjectTitle VARCHAR(255) NOT NULL,
-                    ProjectNo Varchar(255) PRIMARY KEY,
+                    ProjectNo VARCHAR(255) PRIMARY KEY,
                     FundedBy VARCHAR(255) NOT NULL,
                     ProjectStartDate DATE NOT NULL,
                     ProjectEndDate DATE,
@@ -67,10 +67,10 @@ async function connectDb() {
             {
                 tableName: 'users',
                 definition: `
-                    id INT PRIMARY KEY,
+                    id VARCHAR(255) PRIMARY KEY,
                     name VARCHAR(255) NOT NULL,
-                    email VARCHAR(255) UNIQUE KEY,
-                    password VARCHAR(255) NOT NULL,
+                    email VARCHAR(255) UNIQUE,
+                    password VARCHAR(255),
                     projects JSON,
                     status INT,
                     role ENUM('Techanican', 'JRF', 'SRF', 'RA', 'Pi', 'SuperAdmin'),
@@ -78,16 +78,16 @@ async function connectDb() {
                     HRA_Percentage DECIMAL(5, 2),
                     TotalSalary DECIMAL(10, 2) GENERATED ALWAYS AS (BasicSalary + (BasicSalary * HRA_Percentage / 100)) VIRTUAL,
                     ProfilePic LONGBLOB
-            `
+                `
             },
             {
                 tableName: 'Indents',
                 definition: `
                     IndentID INTEGER PRIMARY KEY AUTO_INCREMENT,
                     IndentCategory VARCHAR(255),
-                    ProjectNo Varchar(255),
+                    ProjectNo VARCHAR(255),
                     IndentAmount DOUBLE,
-                    IndentedPersonId INT,
+                    IndentedPersonId VARCHAR(255),
                     IndentDate DATE,
                     IndentStatus ENUM('Pending', 'Approved', 'Rejected', 'Completed'),
                     FOREIGN KEY (ProjectNo) REFERENCES Projects(ProjectNo),
@@ -98,9 +98,9 @@ async function connectDb() {
                 tableName: 'Manpower',
                 definition: `
                     IndentID INTEGER PRIMARY KEY,
-                    ProjectNo Varchar(255),
+                    ProjectNo VARCHAR(255),
                     ProjectTitle VARCHAR(255),
-                    EmployeeID INT,
+                    EmployeeID VARCHAR(255),
                     Workers JSON,
                     JoiningDate DATE,
                     EndDate DATE,
@@ -115,9 +115,9 @@ async function connectDb() {
                 tableName: 'Travel',
                 definition: `
                     IndentID INTEGER PRIMARY KEY,
-                    ProjectNo Varchar(255),
+                    ProjectNo VARCHAR(255),
                     RequestedAmt DOUBLE,
-                    EmployeeID INT,
+                    EmployeeID VARCHAR(255),
                     Source VARCHAR(255),
                     FromDate DATE,
                     Destination VARCHAR(255),
@@ -125,8 +125,8 @@ async function connectDb() {
                     Reason VARCHAR(255),
                     Remark VARCHAR(1000),
                     RequestedDate DATE,
-                    Traveler INT,
-                    BillCopy JSON, 
+                    Traveler VARCHAR(255),
+                    BillCopy JSON,
                     FOREIGN KEY (EmployeeID) REFERENCES users(id),
                     FOREIGN KEY (Traveler) REFERENCES users(id),
                     FOREIGN KEY (ProjectNo) REFERENCES Projects(ProjectNo),
@@ -137,10 +137,10 @@ async function connectDb() {
                 tableName: 'Consumables',
                 definition: `
                     IndentID INTEGER PRIMARY KEY,
-                    ProjectNo Varchar(255),
+                    ProjectNo VARCHAR(255),
                     ProjectTitle VARCHAR(255),
                     RequestedAmt DOUBLE,
-                    EmployeeID INT,
+                    EmployeeID VARCHAR(255),
                     Reason VARCHAR(255),
                     Remark VARCHAR(1000),
                     RequestedDate DATE,
@@ -155,10 +155,10 @@ async function connectDb() {
                 tableName: 'Overhead',
                 definition: `
                     RequestID INTEGER PRIMARY KEY,
-                    ProjectNo Varchar(255),
+                    ProjectNo VARCHAR(255),
                     ProjectTitle VARCHAR(255),
                     RequestedAmt DOUBLE,
-                    EmployeeID INT,
+                    EmployeeID VARCHAR(255),
                     Reason VARCHAR(255),
                     IndentID INTEGER,
                     RequestedDate DATE,
@@ -173,10 +173,10 @@ async function connectDb() {
                 tableName: 'Equipment',
                 definition: `
                     IndentID INTEGER PRIMARY KEY,
-                    ProjectNo Varchar(255),
+                    ProjectNo VARCHAR(255),
                     ProjectTitle VARCHAR(255),
                     RequestedAmt DOUBLE,
-                    EmployeeID INT,
+                    EmployeeID VARCHAR(255),
                     Reason VARCHAR(255),
                     RequestedDate DATE,
                     Items JSON,
@@ -192,10 +192,10 @@ async function connectDb() {
                 tableName: 'Contingency',
                 definition: `
                     IndentID INTEGER PRIMARY KEY,
-                    ProjectNo Varchar(255),
+                    ProjectNo VARCHAR(255),
                     ProjectTitle VARCHAR(255),
                     RequestedAmt DOUBLE,
-                    EmployeeID INT,
+                    EmployeeID VARCHAR(255),
                     Reason VARCHAR(255),
                     RequestedDate DATE,
                     Remark VARCHAR(1000),
@@ -207,6 +207,7 @@ async function connectDb() {
                 `
             }
         ];
+        
         // Queries to create tables if they don't exist
         await (async () => { // async is required to print the logs in correct order
             for (const table of tables) {
@@ -484,12 +485,14 @@ const projectWiseAuthorisation = (req, res, next) => {
             if (projects.length == 0) {
                 return sendFailedResponse(res, 'Permission denied', 403);
             }
-
-            projects = projects[0].projects;
-            let arr = [];
-            projects.forEach(ele => arr.push(ele));
-            req.processed.allowedProjects = arr;
+            projects = JSON.parse(projects[0].projects);
+            if(projects.length>0){
+                let arr = [];
+                projects.forEach(ele => arr.push(ele));
+                req.processed.allowedProjects = arr;
+            }
             next();
+            
             return;
         }).catch((err) => {
             return sendFailedResponse(res, err.message, 500);
@@ -527,7 +530,9 @@ const projectWiseAuthorisation = (req, res, next) => {
  */
 async function getFromDb(table, fields, where) {
     let query = `SELECT ${fields.join(',')} FROM ${table}`;
-    if (where) query += ` WHERE ${where}`;    
+    if (where) query += ` WHERE ${where}`;   
+    // console.log(query);
+     
     return db.query(query).then(([rows]) => rows);
 
 }

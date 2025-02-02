@@ -12,7 +12,7 @@ function Dash() {
         async function fetchProjects() {
             setLoading(true);
             let data = (await fetchDataWithParams('projects', 'post', { fields: ['ProjectNo', 'ProjectTitle', 'TotalSanctionAmount', 'FundedBy', 'PIs'], filters: {} }));
-            data = data.projects;
+            data = data.projects;            
             setChartData(compile(data));
             setLoading(false);
         }
@@ -55,13 +55,12 @@ function Dash() {
 export default Dash;
 
 function compile(data) {
-    let chartData = { projectFund: {}, PIFund: {}, AgencyFund: {} };
-
+    let chartData = { projectFund: {}, PIFund: {}, AgencyFund: {} };    
     data.forEach(project => {
         chartData.projectFund[project.ProjectTitle] = project.TotalSanctionAmount;
-        project.PIs.forEach(pi => {
-
-            pi = JSON.parse(pi);
+        const pis = JSON.parse(project.PIs);
+        pis.forEach(Pi => {
+            let pi = JSON.parse(Pi);
             if (chartData.PIFund[`${pi.name}(${pi.id})`]) {
                 chartData.PIFund[`${pi.name}(${pi.id})`] += project.TotalSanctionAmount;
             } else {

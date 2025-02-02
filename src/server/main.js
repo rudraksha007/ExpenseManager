@@ -33,6 +33,7 @@ app.post('/api/report', authorize(['SuperAdmin']), (req, res) => generateReport(
 app.post('/api/editProject', authorize(['SuperAdmin']), (req, res) => getRemaining(req, res));
 
 
+
 //Put requests (right click on supplied function-> goto source definition to view the code)
 app.put('/api/projects', authorize(['Pi','SuperAdmin']), (req, res) => addProject(req, res));
 app.put('/api/users', authorize(['SuperAdmin']), (req, res) => addUser(req, res));
