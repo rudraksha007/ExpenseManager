@@ -241,7 +241,7 @@ function getBillCopy(req, res) {
 
 async function getIndents(req, res) {
   try {
-    let results = await getFromDb('indents', ['*']);
+    let results = await getFromDb('Indents', ['*']);
     const { text, status, upto, above, fromDate, toDate, fundedBy } = req.body.filters;
     const allowedProjects = req.processed.allowedProjects;
 
@@ -289,7 +289,7 @@ function getIndentInfo(req, res) {
   let indentId = parseInt(req.path.split('/').at(-1));
 
   let payload = { data: {} };
-  getFromDb('indents', ['*'], `IndentID= ${indentId}`).then((results) => {
+  getFromDb('Indents', ['*'], `IndentID= ${indentId}`).then((results) => {
     payload.data = results[0];
     const projectNo = results[0].ProjectNo;
     const allowedProjects = req.processed.allowedProjects;
@@ -319,7 +319,7 @@ function getIndentInfo(req, res) {
 async function updateIndentStatus(req, res) {
   const { Approved, IndentID } = req.body;
   try {
-    await updateAtDb('indents', { IndentStatus: Approved ? "Approved" : "Rejected" }, { IndentID: IndentID })
+    await updateAtDb('Indents', { IndentStatus: Approved ? "Approved" : "Rejected" }, { IndentID: IndentID })
     res.status(200).json({ message: 'Indent updated' }).end();
   } catch (err) {
     sendFailedResponse(res, err.message, 500);
@@ -334,7 +334,7 @@ async function updateIndentStatus(req, res) {
  * @param {Object} res - The response object.
 */
 function getPR(req, res) {
-  getFromDb('indents', ['*'], `IndentStatus IN ('Approved', 'Completed')`).then((results) => {
+  getFromDb('Indents', ['*'], `IndentStatus IN ('Approved', 'Completed')`).then((results) => {
     const { text, status, upto, above, fromDate, toDate } = req.body.filter;
     if (text || status || upto || above || fromDate || toDate) {
       results = results.filter(pr => {
@@ -388,7 +388,7 @@ function getPRInfo(req, res) {
       if (projectResults.length > 0) {
         payload.data.ProjectTitle = projectResults[0].ProjectTitle;
       }
-      getFromDb('indents', ['IndentCategory'], `IndentID= ${payload.data.IndentID}`).then((indentResults) => {
+      getFromDb('Indents', ['IndentCategory'], `IndentID= ${payload.data.IndentID}`).then((indentResults) => {
         if (indentResults.length > 0) {
           payload.data.IndentCategory = indentResults[0].IndentCategory;
         }
@@ -413,7 +413,7 @@ function getPRInfo(req, res) {
 */
 function updatePRStatus(req, res) {
   const { Approved, PurchaseReqID } = req.body;
-  updateAtDb('indents', { IndentStatus: Approved ? "Completed" : "Rejected" }, { IndentID: PurchaseReqID }).then(() => {
+  updateAtDb('Indents', { IndentStatus: Approved ? "Completed" : "Rejected" }, { IndentID: PurchaseReqID }).then(() => {
     res.status(200).json({ message: 'Purchase request updated' }).end();
   }).catch(err => {
     sendFailedResponse(res, err.message, 500);
