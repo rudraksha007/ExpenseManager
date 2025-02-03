@@ -12,7 +12,7 @@ function Dash() {
         async function fetchProjects() {
             setLoading(true);
             let data = (await fetchDataWithParams('projects', 'post', { fields: ['ProjectNo', 'ProjectTitle', 'TotalSanctionAmount', 'FundedBy', 'PIs'], filters: {} }));
-            data = data.projects;            
+            data = data.projects;
             setChartData(compile(data));
             setLoading(false);
         }
@@ -55,12 +55,26 @@ function Dash() {
 export default Dash;
 
 function compile(data) {
-    let chartData = { projectFund: {}, PIFund: {}, AgencyFund: {} };    
+    let chartData = { projectFund: {}, PIFund: {}, AgencyFund: {} };
     data.forEach(project => {
         chartData.projectFund[project.ProjectTitle] = project.TotalSanctionAmount;
-        const pis = JSON.parse(project.PIs);
+        let pis = [];
+        try {
+            pis = JSON.parse(project.PIs);
+            if (!Array.isArray(pis)) {
+                pis = [pis];
+            }
+        } catch (e) {
+            console.error('Error parsing PIs:', e);
+        }
+
         pis.forEach(Pi => {
-            let pi = JSON.parse(Pi);
+            let pi = Pi;
+            try {
+                pi = JSON.parse(Pi);
+            } catch (e) {
+                // console.error('Error parsing individual PI:', e);
+            }
             if (chartData.PIFund[`${pi.name}(${pi.id})`]) {
                 chartData.PIFund[`${pi.name}(${pi.id})`] += project.TotalSanctionAmount;
             } else {

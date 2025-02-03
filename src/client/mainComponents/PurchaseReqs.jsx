@@ -4,6 +4,7 @@ import PurchaseReqPopup from '../sideComponents/PurchaseReqs/PurchaseReqPopup';
 import { Oval } from 'react-loader-spinner';
 import PageControls from '../sideComponents/PageControls';
 import { fetchDataWithParams } from '../assets/scripts';
+import Loading from '../assets/Loading';
 
 function PurchaseReqs() {
     const [popup, setPopup] = React.useState(null);
@@ -53,7 +54,7 @@ function PurchaseReqs() {
 
     return (
         <>
-            {loading ? <Oval color='black' height={80} strokeWidth={5} /> :
+            {loading ? <Loading position={'absolute'}/> :
                 <div id='allInputsContent'>
                     {popup}
                     <h1>All Purchase Requests</h1>

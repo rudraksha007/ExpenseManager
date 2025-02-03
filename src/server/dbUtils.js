@@ -32,12 +32,16 @@ async function connectDb() {
     try {
         db = mysql.createPool({
             connectionLimit: 1,
-            host: 'localhost',
-            user: process.env.DB_USER,
+            host: '51.20.67.74',
+            // user: process.env.DB_USER,
+            user: 'rudr',
             password: process.env.DB_PASS,
             database: process.env.DB_NAME,
             waitForConnections: true,
-            idleTimeout: 0
+            idleTimeout: 0,
+            ssl: {
+                rejectUnauthorized: false
+            }
         });
         db = await db.getConnection();
         log('Connected to MySQL database');

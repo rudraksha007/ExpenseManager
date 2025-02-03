@@ -4,26 +4,27 @@ import IndentPopup from '../sideComponents/projectPage/IndentPopup';
 import { Oval } from 'react-loader-spinner';
 import PageControls from '../sideComponents/PageControls';
 import { fetchDataWithParams } from '../assets/scripts';
+import Loading from '../assets/Loading';
 
 function Indents() {
     const [popup, setPopup] = React.useState(null);
     const [indents, setIndents] = React.useState([]);
     const [loading, setLoading] = React.useState(true);
-    const [filter, setFilter] = useState({page:1, text:'', status:'', fundedBy:'', fromDate:'', toDate:'', upto:0, above:0});
+    const [filter, setFilter] = useState({ page: 1, text: '', status: '', fundedBy: '', fromDate: '', toDate: '', upto: 0, above: 0 });
 
     const total = useRef(0);
-    const[page, setPage] = React.useState(1);
+    const [page, setPage] = React.useState(1);
     useEffect(() => {
         document.title = 'All Indents';
-        if(popup) return;
+        if (popup) return;
         async function fetchIndents() {
             try {
                 setLoading(true);
-                const data = await fetchDataWithParams('indents', 'post', {filters:filter, count: 25});
+                const data = await fetchDataWithParams('indents', 'post', { filters: filter, count: 25 });
                 total.current = data.indents.length;
                 let l = [];
                 console.log(data.indents);
-                
+
                 data.indents.map((indent, index) => {
                     let color = {};
                     switch (indent.IndentStatus) {
@@ -50,12 +51,12 @@ function Indents() {
                             </div>
                         </React.Fragment>
                     )
-            });
+                });
                 setIndents(l);
             } catch (error) {
                 console.error('Error fetching indents:', error);
             }
-            finally{
+            finally {
                 setLoading(false);
             }
         }
@@ -64,11 +65,11 @@ function Indents() {
     }, [popup, filter]);
     return (
         <>
-            {loading ? <Oval color='black' height={80} strokeWidth={5}/> :
+            {loading ? <Loading position={'absolute'} /> :
                 <div id='allInputsContent'>
                     {popup}
                     <h1>All Indents</h1>
-                    <PageControls page={page} setPage={setPage} total={total.current} max={25}/>
+                    <PageControls page={page} setPage={setPage} total={total.current} max={25} />
                     <div id="indentsTable" className='table'>
                         <div className='tableTitle'>Sl.</div>
                         <div className='tableTitle'>Project No</div>
