@@ -25,7 +25,9 @@ function ManpowerPopup({ reset, workers }) {
             if (data) {
                 let dict = {};
                 data.users.forEach((user, i) => {
-                    dict[encodeURIComponent(user.id)] = {...user, projects: JSON.parse(user.projects)};
+                    console.log(user );
+                    
+                    dict[encodeURIComponent(user.id)] = {...user, projects: user.projects};
                 });
                 // console.log(dict);
                 setProfiles(dict);

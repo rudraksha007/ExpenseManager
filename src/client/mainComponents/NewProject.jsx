@@ -53,25 +53,38 @@ function NewProject() {
         }
         setData();
         if(EditFormData){    
-            let dum = null;        
-            if (EditFormData.PIs) {
-                dum = JSON.parse(EditFormData.PIs);
-                selected.current.PIs = dum;
-                formData.PIs = dum;
+            let dum = [];                    
+            if (Array.isArray(EditFormData.PIs) && EditFormData.PIs.length > 0) {
+                selected.current.PIs = EditFormData.PIs;
+                // console.log(EditFormData.PIs);
+                
+            } else {
+                selected.current.PIs = [];
             }
-            if (EditFormData.CoPIs) {
-                dum = JSON.parse(EditFormData.CoPIs);
-                selected.current.CoPIs = dum;
-                formData.CoPIs = dum;
+            if (Array.isArray(EditFormData.CoPIs) && EditFormData.CoPIs.length > 0) {
+                selected.current.CoPIs = EditFormData.CoPIs;
+            } else {
+                selected.current.CoPIs = [];
             }
-            if (EditFormData.Workers) {
-                dum = JSON.parse(EditFormData.Workers);
+            if (Array.isArray(EditFormData.Workers) && EditFormData.Workers.length > 0) {
+                selected.current.Workers = EditFormData.Workers;
                 selected.current.Workers = dum;
-                formData.Workers = dum;
+            } else {
+                selected.current.Workers = [];
             }
+            setFormData({
+                ...formData,
+                PIs: selected.current.PIs,
+                CoPIs: selected.current.CoPIs,
+                Workers: selected.current.Workers
+            });
+            // console.log(formData);
+            
         }
         fetchDataWithParams('users', 'post', { filters: {} }).then(data => {
             setUsers(data.users);
+            // console.log(data.users);
+            
         });
     }, []);
 
@@ -97,6 +110,10 @@ function NewProject() {
                         <div className="tableTitle">Salary</div>
                         {filteredUsers.map((profile) => {
                             if (!isWorker && ((type === 'PI' && formData.CoPIs.includes(JSON.stringify({ id: profile.id, name: profile.name }))) || (type === 'CoPI' && formData.PIs.includes(JSON.stringify({ id: profile.id, name: profile.name }))))) return null;
+                            console.log(selected.current.PIs);
+                            console.log(JSON.stringify({ id: profile.id, name: profile.name }));
+                            
+                            
                             return (
                                 <React.Fragment key={profile.id}>
                                     <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>

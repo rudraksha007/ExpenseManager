@@ -28,10 +28,23 @@ function ProjectContent() {
         setLoading(true);
         let response = await fetchData(`projects/${id}`, 'post');
         if (response.reqStatus != 'success') { alert('Error: ' + response.message); setLoading(false); return; }
-        setTable(compileData(response.data, setPopup));        
-        setProject({...response.data, PIs: JSON.parse(response.data.PIs), 
-            CoPIs: JSON.parse(response.data.CoPIs),
-            Workers: JSON.parse(response.data.Workers)});
+        setTable(compileData(response.data, setPopup));
+        try {
+            setProject({
+            ...response.data,
+            PIs: Array.isArray(response.data.PIs) ? response.data.PIs : [],
+            CoPIs: Array.isArray(response.data.CoPIs) ? response.data.CoPIs : [],
+            Workers: Array.isArray(response.data.Workers) ? response.data.Workers : []
+            });
+        } catch (error) {
+            console.error('Error parsing project data:', error);
+            setProject({
+            ...response.data,
+            PIs: [],
+            CoPIs: [],
+            Workers: []
+            });
+        }
         document.title = `Project: ${response.data.ProjectTitle}`;
         setLoading(false);
     }
