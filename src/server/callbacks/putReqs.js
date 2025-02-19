@@ -107,8 +107,7 @@ async function addProjectIndent(req, res) {
         return Buffer.from(buffer).toString('base64');
     }));
     try {
-        let query = 'INSERT INTO Indents (IndentCategory, ProjectNo, IndentAmount, IndentDate, IndentedPersonID, IndentStatus) VALUES (?, ?, ?, ?, ?, ?)';
-        
+        let query = 'INSERT INTO Indents (IndentCategory, ProjectNo, IndentAmount, IndentDate, IndentedPersonID, IndentStatus) VALUES (?, ?, ?, ?, ?, ?)';        
         const result = await db.query(query, [req.path.split('/').at(-1), ProjectNo, parseInt(RequestedAmt), RequestedDate, req.processed.token.id, 'Pending']);        
         const IndentID = result[0].insertId;
         if (!IndentID) {
