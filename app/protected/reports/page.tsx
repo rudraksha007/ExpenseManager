@@ -19,7 +19,7 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Loader2 } from "lucide-react";
 import { CategoryReport } from "@/components/reports/category-report";
-import { GeneralReport } from "@/components/reports/general-report";
+import { GeneralReport, GeneralReportProps, ProjectReport } from "@/components/reports/general-report";
 import { YearlyReport } from "@/components/reports/yearly-report";
 import { QuarterlyReport } from "@/components/reports/quarterly-report";
 
@@ -30,7 +30,7 @@ interface Project {
 
 export default function ReportsPage() {
   const [loading, setLoading] = useState(false);
-  const [reportData, setReportData] = useState<any>(null);
+  const [reportData, setReportData] = useState<{data: ProjectReport[]; reportType: 'general'| 'category'|'quarterly'|'yearly'|null}>({data: [], reportType: null});
   const [reportType, setReportType] = useState("");
   const [projects, setProjects] = useState<Project[]>([]);
   const [selectedYear, setSelectedYear] = useState<number>(new Date().getFullYear());
@@ -38,12 +38,10 @@ export default function ReportsPage() {
   const [selectedQuarter, setSelectedQuarter] = useState("1");
 
   useEffect(() => {
-    fetchProjects();
-  }, []);
-
-  useEffect(() => {
+    setLoading(true);
+    if(!projects||!projects.length)fetchProjects();
     if (!reportType) return;
-    
+    setReportData({data: [], reportType: null});
     const timer = setTimeout(() => {
       generateReport();
     }, 500);
@@ -53,11 +51,13 @@ export default function ReportsPage() {
 
   const fetchProjects = async () => {
     try {
+      console.log("Fetching projects...");
+      
       setLoading(true);
       const response = await fetch("/api/projects");
-      const data = await response.json();
-      if (data.success) {
-        setProjects(data.projects.map((proj: any) => ({
+      if (response.ok) {
+        const data = await response.json();
+        setProjects(data.map((proj: any) => ({
           ProjectNo: proj.ProjectNo,
           ProjectTitle: proj.ProjectTitle
         })));
@@ -73,13 +73,15 @@ export default function ReportsPage() {
   };
 
   const generateReport = async () => {
+    if (!reportType || reportType == '') return;
     if ((reportType === "yearly" || reportType === "quarterly") && (!selectedYear || !selectedProject)) {
+      setLoading(false);
       return;
     }
 
     try {
       setLoading(true);
-      const response = await fetch("/api/reports", {
+      const response = await fetch("/api/report", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -92,9 +94,10 @@ export default function ReportsPage() {
         }),
       });
 
-      const data = await response.json();
-      if (data.success) {
-        setReportData(data.data);
+      if (response.ok) {
+        const data = await response.json();
+        console.log(data);
+        setReportData(data);
       } else {
         throw new Error("Failed to generate report");
       }
@@ -210,10 +213,12 @@ export default function ReportsPage() {
 
       {reportData && !loading && (
         <div className="grid gap-6">
-          {reportType === "category" && <CategoryReport data={reportData} />}
-          {reportType === "general" && <GeneralReport data={reportData} />}
-          {reportType === "yearly" && <YearlyReport data={reportData} />}
-          {reportType === "quarterly" && <QuarterlyReport data={reportData} />}
+          {/**@ts-ignore*/}
+          {reportType === "category" && reportData.reportType== 'category'&& <CategoryReport projects={reportData.data} />}
+          {reportType === "general" && reportData.reportType== 'general'&& <GeneralReport projects={reportData.data} />}
+          {reportType === "yearly" && reportData.reportType== 'yearly'&& <YearlyReport data={reportData.data} />}
+          {/**@ts-ignore*/}
+          {reportType === "quarterly" && reportData.reportType== 'quarterly'&& <QuarterlyReport data={reportData.data} />}
         </div>
       )}
     </div>
