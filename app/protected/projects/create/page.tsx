@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import {
   Card,
   CardContent,
@@ -26,6 +26,8 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Checkbox } from "@/components/ui/checkbox";
+import { toast } from "@/hooks/use-toast";
+import { Project } from "@prisma/client";
 
 interface FormData {
   ProjectTitle: string;
@@ -51,6 +53,7 @@ interface User {
   id: string;
   name: string;
   email: string;
+  isAdmin: boolean;
 }
 
 export default function CreateProjectPage() {
@@ -76,19 +79,57 @@ export default function CreateProjectPage() {
 
   const [users, setUsers] = useState<User[]>([]);
   const [popupContent, setPopupContent] = useState<string | null>(null);
-  const selected = useRef({ PIs: [], CoPIs: [], Workers: [] });
+  const selected = useRef<{ PIs: User[], CoPIs: User[] }>({ PIs: [], CoPIs: [] });
   const [remaining, setRemaining] = useState<Record<string, number>>({});
-  const [editMode] = useState(false);
+  const [editMode, setEditMode] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const search = useSearchParams();
 
   useEffect(() => {
     // Fetch users
     const fetchUsers = async () => {
+      setLoading(true);
       try {
         const response = await fetch("/api/users");
         const data = await response.json();
-        setUsers(data.users);
+        setUsers(data);
+        if (search.get('id')) {
+          setEditMode(true);
+          const projectNo = decodeURIComponent(search.get('id') as string);
+          const project = await fetch(`/api/projects/${projectNo}`);
+          const projectData = await project.json() as Project;
+          setFormData({
+            ProjectTitle: projectData.ProjectTitle,
+            ProjectNo: projectData.ProjectNo,
+            ProjectStartDate: projectData.ProjectStartDate.toString().split('T')[0],
+            ProjectEndDate: projectData.ProjectEndDate?.toString().split('T')[0]||"",
+            SanctionOrderNo: projectData.SanctionOrderNo,
+            TotalSanctionAmount: projectData.TotalSanctionAmount,
+            FundedBy: projectData.FundedBy[0],
+            //@ts-ignore
+            PIs: projectData.PIs,
+            //@ts-ignore
+            CoPIs: projectData.CoPIs,
+            Workers: projectData.Workers,
+            ManpowerAllocationAmt: projectData.ManpowerAllocationAmt,
+            ConsumablesAllocationAmt: projectData.ConsumablesAllocationAmt,
+            ContingencyAllocationAmt: projectData.ContingencyAllocationAmt,
+            OverheadAllocationAmt: projectData.OverheadAllocationAmt,
+            EquipmentAllocationAmt: projectData.EquipmentAllocationAmt,
+            TravelAllocationAmt: projectData.TravelAllocationAmt,
+          });
+          // console.log(projectData);
+          
+          //@ts-ignore
+          // selected.current.PIs = projectData.PIs;
+          //@ts-ignore
+          selected.current = {PIs: projectData.PIs, CoPIs: projectData.CoPIs};
+        }
       } catch (error) {
         console.error("Failed to fetch users:", error);
+      }
+      finally {
+        setLoading(false);
       }
     };
 
@@ -125,42 +166,75 @@ export default function CreateProjectPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (formData.PIs.length === 0 || formData.Workers.length === 0) {
-      alert("Please select at least one PI and Worker");
+    // console.log(formData);
+
+    setLoading(true);
+    if (formData.PIs.length === 0) {
+      toast({
+        title: "Error",
+        description: "Please select at least one PI",
+        variant: 'destructive'
+      });
       return;
     }
 
     try {
-      const response = await fetch("/api/projects", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(formData),
-      });
+      let response;
+      if(editMode) {
+        response = await fetch("/api/projects/edit", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(formData),
+        });
+      } else {
+        response = await fetch("/api/projects/create", {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(formData),
+        });
+      }
 
       if (response.ok) {
-        alert("Project Created Successfully");
-        router.push("/projects");
+        toast({
+          title: "Success",
+          description: `Project ${editMode ? "Edited" : "Created"} Successfully`,
+          variant: 'default'
+        });
+        router.push("/protected/dashboard");
       } else {
         const error = await response.json();
-        alert(`Failed to create project: ${error.message}`);
+        toast({
+          title: "Error",
+          description: `Failed to ${editMode ? "edit" : "create"} project: ${error.msg}`,
+          variant: 'destructive'
+        });
       }
-    } catch (error) {
-      alert("Failed to create project. Please try again.");
+        } catch (error) {
+      toast({
+        title: "Error",
+        description: `Failed to ${editMode ? "edit" : "create"} project. Please try again.`,
+        variant: 'destructive'
+      });
+        }
+        finally {
+      setLoading(false);
     }
   };
 
   const handleUserSelection = (user: User, role: string) => {
     const currentSelection = selected.current[role as keyof typeof selected.current];
     const userIndex = currentSelection.findIndex((u: User) => u.id === user.id);
-    
+
     if (userIndex === -1) {
       selected.current[role as keyof typeof selected.current] = [...currentSelection, user];
     } else {
       selected.current[role as keyof typeof selected.current] = currentSelection.filter((u: User) => u.id !== user.id);
     }
-    
+
     setFormData(prev => ({
       ...prev,
       [role]: selected.current[role as keyof typeof selected.current],
@@ -187,6 +261,7 @@ export default function CreateProjectPage() {
                   required
                   value={formData.ProjectTitle}
                   onChange={handleChange}
+                  disabled={loading}
                 />
               </div>
 
@@ -201,6 +276,7 @@ export default function CreateProjectPage() {
                   required
                   value={formData.ProjectNo}
                   onChange={handleChange}
+                  disabled={loading || editMode}
                 />
               </div>
 
@@ -216,6 +292,7 @@ export default function CreateProjectPage() {
                   value={formData.ProjectStartDate}
                   onChange={handleChange}
                   max={formData.ProjectEndDate}
+                  disabled={loading}
                 />
               </div>
 
@@ -231,6 +308,7 @@ export default function CreateProjectPage() {
                   value={formData.ProjectEndDate}
                   onChange={handleChange}
                   min={formData.ProjectStartDate}
+                  disabled={loading}
                 />
               </div>
 
@@ -245,6 +323,7 @@ export default function CreateProjectPage() {
                   required
                   value={formData.SanctionOrderNo}
                   onChange={handleChange}
+                  disabled={loading}
                 />
               </div>
 
@@ -262,6 +341,7 @@ export default function CreateProjectPage() {
                   step="0.01"
                   value={formData.TotalSanctionAmount}
                   onChange={handleChange}
+                  disabled={loading}
                 />
               </div>
 
@@ -276,6 +356,7 @@ export default function CreateProjectPage() {
                   required
                   value={formData.FundedBy}
                   onChange={handleChange}
+                  disabled={loading}
                 />
               </div>
 
@@ -289,6 +370,7 @@ export default function CreateProjectPage() {
                   value={`${formData.PIs.length} PI(s) selected`}
                   className="cursor-pointer"
                   onClick={() => setPopupContent("PIs")}
+                  disabled={loading}
                 />
               </div>
 
@@ -299,18 +381,7 @@ export default function CreateProjectPage() {
                   value={`${formData.CoPIs.length} CoPI(s) selected`}
                   className="cursor-pointer"
                   onClick={() => setPopupContent("CoPIs")}
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label>
-                  Workers <span className="text-red-500">*</span>
-                </Label>
-                <Input
-                  readOnly
-                  value={`${formData.Workers.length} Worker(s) selected`}
-                  className="cursor-pointer"
-                  onClick={() => setPopupContent("Workers")}
+                  disabled={loading}
                 />
               </div>
 
@@ -337,6 +408,7 @@ export default function CreateProjectPage() {
                     step="0.01"
                     value={formData[`${type}AllocationAmt`]}
                     onChange={handleChange}
+                    disabled={loading}
                   />
                 </div>
               ))}
@@ -346,18 +418,28 @@ export default function CreateProjectPage() {
               <Button
                 type="button"
                 variant="outline"
-                onClick={() => router.push("/projects")}
+                onClick={() => router.back()}
+                disabled={loading}
               >
                 Cancel
               </Button>
-              <Button type="submit">Create Project</Button>
+              {
+                loading ? (
+                  <Button disabled>
+                    Loading...
+                  </Button>
+                ) : (
+                  <Button type="submit">{editMode?"Save": "Create Project"}</Button>
+                )
+              }
             </div>
           </form>
         </CardContent>
-      </Card>
+      </Card >
 
       {/* User Selection Dialog */}
-      <Dialog open={!!popupContent} onOpenChange={() => setPopupContent(null)}>
+      < Dialog open={!!popupContent
+      } onOpenChange={() => setPopupContent(null)}>
         <DialogContent className="max-w-2xl">
           <DialogHeader>
             <DialogTitle>Select {popupContent}</DialogTitle>
@@ -371,24 +453,32 @@ export default function CreateProjectPage() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {users.map(user => (
-                <TableRow key={user.id}>
+              {users.map(user => {
+                // if(user.isAdmin) return null;
+                if (popupContent === "CoPIs" && selected.current.PIs.some((u: User) => u.id === user.id)) {
+                  return null;
+                }
+                else if (popupContent === "PIs" && selected.current.CoPIs.some((u: User) => u.id === user.id)) {
+                  return null;
+                }
+                return (<TableRow key={user.email}>
                   <TableCell>
                     <Checkbox
                       checked={selected.current[popupContent as keyof typeof selected.current]?.some(
-                        (u: User) => u.id === user.id
+                        (u: User) => u.email === user.email
                       )}
                       onCheckedChange={() => handleUserSelection(user, popupContent as string)}
+                      disabled={loading}
                     />
                   </TableCell>
                   <TableCell>{user.name}</TableCell>
                   <TableCell>{user.email}</TableCell>
-                </TableRow>
-              ))}
+                </TableRow>)
+              })}
             </TableBody>
           </Table>
-        </DialogContent>
-      </Dialog>
-    </div>
+        </DialogContent >
+      </Dialog >
+    </div >
   );
 }

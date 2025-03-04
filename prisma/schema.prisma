@@ -1,0 +1,100 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id              String    @id @default(cuid())
+  EmployeeId      Int    @unique
+  email           String    @unique
+  name            String?
+  password        String
+  isAdmin         Boolean   @default(false)
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  projectsAsPIs   Project[] @relation("ProjectPIs")
+  projectsAsCoPIs Project[] @relation("ProjectCoPIs")
+  ActionedIndents Indents[]
+}
+
+model Investor {
+  id          String   @id @default(uuid())
+  name        String
+}
+
+enum ProjectStatus {
+  ONGOING
+  COMPLETED
+  TERMINATED
+}
+
+model Project {
+  ProjectTitle             String    @unique
+  ProjectNo                String    @id
+  FundedBy                 String[]
+  ProjectStartDate         DateTime
+  ProjectEndDate           DateTime?
+  SanctionOrderNo          String
+  TotalSanctionAmount      Float
+  PIs                      User[]    @relation("ProjectPIs")
+  CoPIs                    User[]    @relation("ProjectCoPIs")
+  Workers                  Json[]
+  ProjectStatus            ProjectStatus
+  createdAt                DateTime  @default(now())
+  ManpowerAllocationAmt    Float
+  ConsumablesAllocationAmt Float
+  ContingencyAllocationAmt Float
+  OverheadAllocationAmt    Float
+  EquipmentAllocationAmt   Float
+  TravelAllocationAmt      Float
+  Indents                  Indents[]
+}
+
+enum IndentType {
+  CONSUMABLES
+  EQUIPMENT
+  TRAVEL
+  MANPOWER
+  OVERHEAD
+  CONTINGENCY
+}
+
+enum IndentStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  COMPLETED
+}
+
+model Indents {
+  id            String       @id @default(cuid())
+  ProjectNo     String
+  ProjectTitle  String
+  IndentNo      String
+  IndentDate    DateTime
+  Type          IndentType
+  IndentStatus  IndentStatus
+  IndentAmount  Float
+  IndentQty     Float
+  ActionDate    DateTime?
+  ActionedById  String
+  ActionedBy    User         @relation(fields: [ActionedById], references: [id])
+  IndentReason  String 
+  IndentRemarks String
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+  Project       Project      @relation(fields: [ProjectNo], references: [ProjectNo])
+  indentData    Json
+
+  @@index([ProjectNo])
+}

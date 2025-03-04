@@ -10,14 +10,15 @@ import { ProjectDetails } from "@/components/projects/project-details";
 import { ProjectTable } from "@/components/projects/project-table";
 import { formatCurrency } from "@/lib/utils";
 import { FormDialog, type FormField } from "@/components/ui/form-dialog";
+import { useSession } from "next-auth/react";
 
 // Define columns for different indent types
 interface FieldMap {
-    Consumables: FormField[];
-    Travels: FormField[];
-    Contingency: FormField[];
-    Equipments: FormField[];
-    Manpower: FormField[];
+  Consumables: FormField[];
+  Travels: FormField[];
+  Contingency: FormField[];
+  Equipments: FormField[];
+  Manpower: FormField[];
 }
 const consumablesColumns = [
   { header: "Indent ID", accessor: "IndentID" },
@@ -45,67 +46,10 @@ const travelsColumns = [
   { header: "Status", accessor: "Status" }
 ];
 
-const dummyProjectData = {
-  ProjectTitle: "Sample Research Project",
-  ProjectNo: "PRJ-2025-ABCD",
-  FundedBy: "National Science Foundation",
-  SanctionOrderNo: "NSF-12345",
-  TotalSanctionAmount: 500000,
-  ProjectStartDate: "2024-01-01",
-  ProjectEndDate: "2026-12-31",
-  PIs: [{ name: "Dr. John Doe" }],
-  CoPIs: [{ name: "Dr. Jane Smith" }],
-  Workers: [{ name: "Alice Johnson" }],
-  ManpowerAllocationAmt: 100000,
-  ConsumablesAllocationAmt: 50000,
-  ContingencyAllocationAmt: 30000,
-  OverheadAllocationAmt: 20000,
-  EquipmentAllocationAmt: 200000,
-  TravelAllocationAmt: 50000,
-  indents: [
-    {
-      IndentType: "Consumables",
-      EmployeeID: "EMP001",
-      IndentID: "IND-001",
-      RequestedDate: "2025-02-01",
-      Reason: "Lab Equipment Purchase",
-      RequestedAmt: 12000,
-      Status: "Pending"
-    },
-    {
-      IndentType: "Consumables",
-      EmployeeID: "EMP003",
-      IndentID: "IND-003",
-      RequestedDate: "2025-02-15",
-      Reason: "Chemical Reagents",
-      RequestedAmt: 8000,
-      Status: "Approved"
-    },
-    {
-      IndentType: "Travels",
-      EmployeeID: "EMP002",
-      IndentID: "IND-002",
-      RequestedDate: "2025-03-15",
-      Reason: "Conference Visit",
-      RequestedAmt: 30000,
-      Status: "Approved"
-    },
-    {
-      IndentType: "Travels",
-      EmployeeID: "EMP001",
-      IndentID: "IND-004",
-      RequestedDate: "2025-04-01",
-      Reason: "Field Research",
-      RequestedAmt: 15000,
-      Status: "Pending"
-    }
-  ],
-};
-
-
 export default function ProjectPage() {
   const { id } = useParams();
   const [loading, setLoading] = useState(true);
+  const user = useSession().data?.user;
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const [popLoading, setPopLoading] = useState<boolean>(false);
   const [project, setProject] = useState<any>(null);
@@ -125,21 +69,21 @@ export default function ProjectPage() {
         label: "Project No",
         type: "text",
         readOnly: true,
-        value: project?.ProjectNo||"",
+        value: project?.ProjectNo || "",
       },
       {
         id: "ProjectTitle",
         label: "Project Title",
         type: "text",
         readOnly: true,
-        value: project?.ProjectTitle||"",
+        value: project?.ProjectTitle || "",
       },
       {
         id: "RequestedAmt",
         label: "Invoice Amount",
         type: "number",
         min: 1,
-        max: project?.RemainingConsumablesAmt||"",
+        max: project?.RemainingConsumablesAmt || 0,
       },
       {
         id: "EmployeeID",
@@ -147,7 +91,7 @@ export default function ProjectPage() {
         type: "text",
         required: true,
         readOnly: true,
-        value: "project.profile.id",
+        value: user?.EmployeeId || "Error",
       },
       {
         id: "EmployeeName",
@@ -155,7 +99,7 @@ export default function ProjectPage() {
         type: "text",
         required: true,
         readOnly: true,
-        value: "project.profile.name",
+        value: user?.name || "Error",
       },
       {
         id: "Reason",
@@ -184,14 +128,14 @@ export default function ProjectPage() {
         label: "Project No",
         type: "text",
         readOnly: true,
-        value: project?.ProjectNo||"",
+        value: project?.ProjectNo || "",
       },
       {
         id: "ProjectTitle",
         label: "Project Title",
         type: "text",
         readOnly: true,
-        value: project?.ProjectTitle||"",
+        value: project?.ProjectTitle || "",
       },
       {
         id: "RequestedDate",
@@ -254,7 +198,7 @@ export default function ProjectPage() {
         type: "number",
         min: 1,
         required: true,
-        max: project?.RemainingTravelAmt,
+        max: project?.RemainingTravelAmt || 0,
       },
       {
         id: "Remarks",
@@ -285,14 +229,14 @@ export default function ProjectPage() {
         label: "Project No",
         type: "text",
         readOnly: true,
-        value: project?.ProjectNo||"",
+        value: project?.ProjectNo || "",
       },
       {
         id: "ProjectTitle",
         label: "Project Title",
         type: "text",
         readOnly: true,
-        value: project?.ProjectTitle||"",
+        value: project?.ProjectTitle || "",
       },
       {
         id: "EmployeeID",
@@ -320,7 +264,7 @@ export default function ProjectPage() {
         label: "Invoice Amount",
         type: "number",
         min: 0,
-        max: project?.projectRemainingContingencyAmt,
+        max: project?.projectRemainingContingencyAmt || 0,
       },
       {
         id: "Remarks",
@@ -341,12 +285,7 @@ export default function ProjectPage() {
     Manpower: [],
   };
   useEffect(() => {
-    if (id === "abcd") {
-      setProject(dummyProjectData);
-      setLoading(false);
-    } else {
-      fetchProjectData();
-    }
+    fetchProjectData();
   }, [id]);
 
   const handleSubmit = async (data: FormData) => {
@@ -356,17 +295,16 @@ export default function ProjectPage() {
     console.log("Form submitted:", Object.fromEntries(data.entries()));
     setLoading(false);
     setIsOpen(false);
-};
+  };
 
   const fetchProjectData = async () => {
     try {
       setLoading(true);
       const response = await fetch(`/api/projects/${id}`);
+      if (!response.ok) throw new Error("Failed to fetch project data");
       const data = await response.json();
-      if (data.success) {
-        setProject(data.data);
-      } else {
-        throw new Error(data.message);
+      if (data) {
+        setProject(data);
       }
     } catch (error) {
       console.error("Failed to fetch project data:", error);
@@ -425,7 +363,7 @@ export default function ProjectPage() {
 
             <TabsContent value="Consumables">
               <ProjectTable
-                data={project.indents.filter((i:any) => i.IndentType === "Consumables")}
+                data={project.indents ? project.indents.filter((i: any) => i.IndentType === "Consumables") : []}
                 columns={consumablesColumns}
                 onAdd={handleAddNew}
               />
@@ -433,14 +371,14 @@ export default function ProjectPage() {
 
             <TabsContent value="Travels">
               <ProjectTable
-                data={project.indents.filter((i:any) => i.IndentType === "Travels")}
+                data={project.indents ? project.indents.filter((i: any) => i.IndentType === "Travels") : []}
                 columns={travelsColumns}
                 onAdd={handleAddNew}
               />
             </TabsContent>
             <TabsContent value="Contingency">
               <ProjectTable
-                data={project.indents.filter((i:any) => i.IndentType === "Contingency")}
+                data={project.indents ? project.indents.filter((i: any) => i.IndentType === "Contingency") : []}
                 columns={consumablesColumns} // Assuming similar columns for Contingency
                 onAdd={handleAddNew}
               />
@@ -448,7 +386,7 @@ export default function ProjectPage() {
 
             <TabsContent value="Equipments">
               <ProjectTable
-                data={project.indents.filter((i:any) => i.IndentType === "Equipments")}
+                data={project.indents ? project.indents.filter((i: any) => i.IndentType === "Equipments") : []}
                 columns={consumablesColumns} // Assuming similar columns for Equipments
                 onAdd={handleAddNew}
               />
@@ -456,7 +394,7 @@ export default function ProjectPage() {
 
             <TabsContent value="Manpower">
               <ProjectTable
-                data={project.indents.filter((i:any) => i.IndentType === "Manpower")}
+                data={project.indents ? project.indents.filter((i: any) => i.IndentType === "Manpower") : []}
                 columns={consumablesColumns} // Assuming similar columns for Manpower
                 onAdd={handleAddNew}
               />

@@ -5,8 +5,8 @@ import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import CryptoJS from "crypto-js";
 import { toast, Slide } from "react-toastify";
+import { signIn } from "next-auth/react";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -20,24 +20,17 @@ export default function LoginPage() {
     const password = formData.get("password") as string;
 
     try {
-      const hashedPassword = CryptoJS.SHA256(password).toString();
-      const response = await fetch("/api/login", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
+      console.log(email, password);
+      
+      const res = await signIn('credentials', {
         email,
-        password: hashedPassword, // Hashing the password using SHA-256
-      }),
-      });
-
-      if (!response.ok) {
+        password,
+        redirect: false,
+      })
+      if (!res?.ok) {
         throw new Error("Login failed");
       }
-
-      const data = await response.json();
-      router.push("/dashboard");
+      router.push("/protected/dashboard");
     } catch (error) {
       console.error("Error:", error);
       toast.error('Error Occured while logging in', {
@@ -50,7 +43,7 @@ export default function LoginPage() {
         progress: undefined,
         theme: "light",
         transition: Slide,
-        });
+      });
     } finally {
       setIsLoading(false);
     }
@@ -65,10 +58,10 @@ export default function LoginPage() {
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-2">
-              <Input type="email" placeholder="Email" required />
+              <Input type="email" placeholder="Email" required name="email"/>
             </div>
             <div className="space-y-2">
-              <Input type="password" placeholder="Password" required />
+              <Input type="password" placeholder="Password" required name="password" />
             </div>
             <Button className="w-full" type="submit" disabled={isLoading}>
               {isLoading ? "Logging in..." : "Login"}

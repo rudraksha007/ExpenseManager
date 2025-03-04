@@ -13,3 +13,14 @@ export function formatCurrency(amount: number): string {
     maximumFractionDigits: 0,
   }).format(amount);
 }
+
+export type FundData = {
+  projectFund: FundEntry[];
+  piFund: FundEntry[];
+  agencyFund: FundEntry[];
+};
+
+export type FundEntry = {
+  name: string;
+  value: number;
+}

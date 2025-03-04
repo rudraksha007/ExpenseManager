@@ -1,10 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
+import { set, useForm } from "react-hook-form";
 import * as z from "zod";
 import CryptoJS from "crypto-js";
 
@@ -39,7 +39,7 @@ import { toast } from "@/hooks/use-toast";
 const signupSchema = z.object({
     name: z.string().min(2, "Name must be at least 2 characters"),
     email: z.string().email("Invalid email address"),
-    id: z.string().min(1, "Employee ID is required"),
+    id: z.number().min(1, "Employee ID is required"),
     password: z.string().min(6).regex(
         /^(?=.*[a-z])(?=.*[A-Z])(?=.*\W)/,
         "Password must contain uppercase, lowercase and special character"
@@ -62,6 +62,32 @@ export default function SignupPage() {
         },
     });
 
+    useEffect(() => {
+        async function fetchLatestId() {
+            setIsLoading(true);
+            const response = await fetch('/api/users/newId', {
+                method: 'GET',
+            });
+            if (!response.ok) {
+                toast({
+                    variant: "destructive",
+                    title: "Error",
+                    description: "Failed to fetch latest ID",
+                });
+                setIsLoading(false);
+                router.push('/protected/dashboard');
+                return;
+            }
+            const result = await response.json();
+
+            console.log(result);
+
+            form.setValue('id', result.id);
+            setIsLoading(false);
+        }
+        fetchLatestId();
+    }, []);
+
     async function onSubmit(data: z.infer<typeof signupSchema>) {
         setIsLoading(true);
         try {
@@ -70,7 +96,7 @@ export default function SignupPage() {
                 password: CryptoJS.SHA256(data.password).toString(),
             };
 
-            const response = await fetch('/api/users', {
+            const response = await fetch('/api/users/create', {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
@@ -80,14 +106,15 @@ export default function SignupPage() {
 
             const result = await response.json();
 
-            if (result.reqStatus === 'success') {
+            if (response.status === 200) {
                 toast({
                     title: "Success!",
                     description: "Account created successfully.",
                 });
-                router.push('/');
+            
+                router.push('/protected/dashboard');
             } else {
-                throw new Error(result.message);
+                throw new Error(result.msg);
             }
         } catch (error) {
             toast({
@@ -121,7 +148,7 @@ export default function SignupPage() {
                                     <FormItem>
                                         <FormLabel>Name</FormLabel>
                                         <FormControl>
-                                            <Input placeholder="Enter name" {...field} />
+                                            <Input placeholder="Enter name" {...field} disabled={isLoading} />
                                         </FormControl>
                                         <FormMessage />
                                     </FormItem>
@@ -135,7 +162,7 @@ export default function SignupPage() {
                                     <FormItem>
                                         <FormLabel>Employee ID</FormLabel>
                                         <FormControl>
-                                            <Input placeholder="Enter employee ID" {...field} />
+                                            <Input placeholder="Enter employee ID" {...field} type="number" disabled={isLoading} />
                                         </FormControl>
                                         <FormMessage />
                                     </FormItem>
@@ -148,15 +175,14 @@ export default function SignupPage() {
                                 render={({ field }) => (
                                     <FormItem>
                                         <FormLabel>Role</FormLabel>
-                                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                        <Select onValueChange={field.onChange} defaultValue={field.value} disabled={isLoading}>
                                             <FormControl>
                                                 <SelectTrigger>
                                                     <SelectValue placeholder="Select a role" />
                                                 </SelectTrigger>
                                             </FormControl>
                                             <SelectContent>
-                                                <SelectItem value="RA">Research Assistant</SelectItem>
-                                                <SelectItem value="Pi">Principal Investigator</SelectItem>
+                                                <SelectItem value="Pi">PI</SelectItem>
                                                 <SelectItem value="SuperAdmin">Technician</SelectItem>
                                             </SelectContent>
                                         </Select>
@@ -174,7 +200,7 @@ export default function SignupPage() {
                                             <FormItem>
                                                 <FormLabel>Email</FormLabel>
                                                 <FormControl>
-                                                    <Input type="email" placeholder="email@example.com" {...field} />
+                                                    <Input type="email" placeholder="email@example.com" {...field} disabled={isLoading} />
                                                 </FormControl>
                                                 <FormMessage />
                                             </FormItem>
@@ -188,7 +214,7 @@ export default function SignupPage() {
                                             <FormItem>
                                                 <FormLabel>Password</FormLabel>
                                                 <FormControl>
-                                                    <Input type="password" placeholder="Enter your password" {...field} />
+                                                    <Input type="password" placeholder="Enter your password" {...field} disabled={isLoading} />
                                                 </FormControl>
                                                 <FormDescription>
                                                     Password must be at least 6 characters with uppercase, lowercase and special characters
@@ -214,6 +240,7 @@ export default function SignupPage() {
                                                         placeholder="Enter basic salary"
                                                         {...field}
                                                         onChange={(e) => field.onChange(parseFloat(e.target.value))}
+                                                        disabled={isLoading}
                                                     />
                                                 </FormControl>
                                                 <FormMessage />
@@ -233,6 +260,7 @@ export default function SignupPage() {
                                                         placeholder="Enter HRA percentage"
                                                         {...field}
                                                         onChange={(e) => field.onChange(parseFloat(e.target.value))}
+                                                        disabled={isLoading}
                                                     />
                                                 </FormControl>
                                                 <FormMessage />
