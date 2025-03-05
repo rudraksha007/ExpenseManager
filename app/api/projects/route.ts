@@ -15,6 +15,7 @@ export async function GET() {
         }));
         return NextResponse.json(projects || [], { status: 200 });
     }
+    
     const data = await prisma.project.findMany({
         where: {
             OR: [

@@ -82,7 +82,7 @@ export default function SignupPage() {
             setIsLoading(false);
         }
         fetchLatestId();
-    });
+    }, []);
 
     async function onSubmit(data: z.infer<typeof signupSchema>) {
         setIsLoading(true);
