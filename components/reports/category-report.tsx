@@ -50,7 +50,7 @@ export function CategoryReport({ projects }: CategoryReportProps) {
     const aggregatedData = categories.map(category => ({
       name: category.name,
       ...projects.reduce((acc, project) => {
-        //@ts-ignore
+        //@ts-expect-error
         acc[project.ProjectTitle] = project[category.key as keyof Project];
         return acc;
       }, {} as Record<string, number>)

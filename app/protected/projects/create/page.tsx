@@ -37,16 +37,16 @@ interface FormData {
   SanctionOrderNo: string;
   TotalSanctionAmount: number;
   FundedBy: string;
-  PIs: any[];
-  CoPIs: any[];
-  Workers: any[];
+  PIs: unknown[];
+  CoPIs: unknown[];
+  Workers: unknown[];
   ManpowerAllocationAmt: number;
   ConsumablesAllocationAmt: number;
   ContingencyAllocationAmt: number;
   OverheadAllocationAmt: number;
   EquipmentAllocationAmt: number;
   TravelAllocationAmt: number;
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 interface User {
@@ -80,7 +80,7 @@ export default function CreateProjectPage() {
   const [users, setUsers] = useState<User[]>([]);
   const [popupContent, setPopupContent] = useState<string | null>(null);
   const selected = useRef<{ PIs: User[], CoPIs: User[] }>({ PIs: [], CoPIs: [] });
-  const [remaining, setRemaining] = useState<Record<string, number>>({});
+  const [remaining] = useState<Record<string, number>>({});
   const [editMode, setEditMode] = useState(false);
   const [loading, setLoading] = useState(false);
   const search = useSearchParams();
@@ -106,9 +106,9 @@ export default function CreateProjectPage() {
             SanctionOrderNo: projectData.SanctionOrderNo,
             TotalSanctionAmount: projectData.TotalSanctionAmount,
             FundedBy: projectData.FundedBy[0],
-            //@ts-ignore
+            //@ts-expect-error
             PIs: projectData.PIs,
-            //@ts-ignore
+            //@ts-expect-error
             CoPIs: projectData.CoPIs,
             Workers: projectData.Workers,
             ManpowerAllocationAmt: projectData.ManpowerAllocationAmt,
@@ -118,11 +118,7 @@ export default function CreateProjectPage() {
             EquipmentAllocationAmt: projectData.EquipmentAllocationAmt,
             TravelAllocationAmt: projectData.TravelAllocationAmt,
           });
-          // console.log(projectData);
-          
-          //@ts-ignore
-          // selected.current.PIs = projectData.PIs;
-          //@ts-ignore
+          //@ts-expect-error
           selected.current = {PIs: projectData.PIs, CoPIs: projectData.CoPIs};
         }
       } catch (error) {
@@ -134,7 +130,7 @@ export default function CreateProjectPage() {
     };
 
     fetchUsers();
-  }, []);
+  }, [search]);
 
   const getMax = (allocationField: string) => {
     let totalAllocated = 0;
@@ -215,8 +211,8 @@ export default function CreateProjectPage() {
       }
         } catch (error) {
       toast({
-        title: "Error",
-        description: `Failed to ${editMode ? "edit" : "create"} project. Please try again.`,
+        title: `Failed to ${editMode ? "edit" : "create"} project. Please try again.`,
+        description: error as string,
         variant: 'destructive'
       });
         }
@@ -406,7 +402,7 @@ export default function CreateProjectPage() {
                     min={getMin(`${type}AllocationAmt`)}
                     max={getMax(`${type}AllocationAmt`)}
                     step="0.01"
-                    value={formData[`${type}AllocationAmt`]}
+                    value={formData[`${type}AllocationAmt`] as number}
                     onChange={handleChange}
                     disabled={loading}
                   />

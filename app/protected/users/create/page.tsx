@@ -2,9 +2,8 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import Link from "next/link";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { set, useForm } from "react-hook-form";
+import { useForm } from "react-hook-form";
 import * as z from "zod";
 import CryptoJS from "crypto-js";
 
@@ -86,7 +85,7 @@ export default function SignupPage() {
             setIsLoading(false);
         }
         fetchLatestId();
-    }, []);
+    });
 
     async function onSubmit(data: z.infer<typeof signupSchema>) {
         setIsLoading(true);

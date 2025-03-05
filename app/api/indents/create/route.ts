@@ -27,7 +27,7 @@ export async function PUT(req: Request) {
         });
         if (!proj) return NextResponse.json({ msg: "Project doesn't exists" }, { status: 404 });
 
-        const indent = await prisma.indents.create({
+        await prisma.indents.create({
             data: {
                 ProjectNo,
                 ProjectTitle,
@@ -44,7 +44,7 @@ export async function PUT(req: Request) {
             },
         });
         return NextResponse.json({ msg: 'created successfully' }, { status: 200 });
-    }catch(err: any){
+    }catch(err){
         return NextResponse.json({msg: err.message}, {status: 500});
     }
 }

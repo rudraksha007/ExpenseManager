@@ -74,12 +74,12 @@ export default function IndentsPage() {
                 // Optionally, you can refetch the data to update the UI
                 // fetchData();
             } else throw new Error("Failed to perform action");
-        } catch (error: any) {
+        } catch (error) {
             console.error("Failed to perform action", error);
             toast({
                 title: "Failed to perform action",
                 variant: 'destructive',
-                description: error,
+                description: error as string,
             })
         }finally{
             setRequestDetails(null);
@@ -114,7 +114,9 @@ export default function IndentsPage() {
                         {loading ? (
                             <TableRow>
                                 <TableCell colSpan={6}>
-                                    <Skeleton className="h-6 w-full flex justify-center" children={<Loader className="animate-spin" />} />
+                                    <Skeleton className="h-6 w-full flex justify-center" >
+                                    <Loader className="animate-spin" />
+                                    </Skeleton>
                                 </TableCell>
 
                             </TableRow>
@@ -213,7 +215,7 @@ interface PaginationProps {
     loading: boolean;
 }
 
-function Pagination({ currentPage, totalPages, onPageChange, handlePageChange, loading, TOTAL_ITEMS }: PaginationProps) {
+function Pagination({ currentPage, totalPages, handlePageChange, loading, TOTAL_ITEMS }: PaginationProps) {
     return (
         <div className="flex items-center justify-between">
             <div className="text-sm text-muted-foreground">

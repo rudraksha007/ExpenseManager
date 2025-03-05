@@ -1,6 +1,6 @@
 "use client";
 
-import { use, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Eye, Pencil, ChevronDown, ChevronUp, Loader } from "lucide-react";
@@ -20,7 +20,7 @@ import { ProjectStatus } from "@prisma/client";
 import { useRouter } from "next/navigation";
 
 
-const TableRowContent = ({ project, index, role, navigate }: { project: Project; index: any; role: "PI" | "CoPI" | "Tech"; navigate: (id: string) => void }) => (
+const TableRowContent = ({ project, index, role, navigate }: { project: Project; index: number; role: "PI" | "CoPI" | "Tech"; navigate: (id: string) => void }) => (
   <TableRow>
     <TableCell>{index + 1}</TableCell>
     <TableCell className="font-medium">{project.ProjectTitle}</TableCell>
@@ -61,7 +61,7 @@ export default function DashboardPage() {
   useEffect(() => {
     async function fetchData() {
       setLoading(true);
-      let resp = await fetch('/api/projects', {
+      const resp = await fetch('/api/projects', {
         method: 'GET',
       });
       const projectsData = await resp.json();
@@ -115,7 +115,7 @@ export default function DashboardPage() {
                     </TableRow>
                   ) : (
                     projects?.slice(0, 5).map((project, index) => (
-                      //@ts-ignore-next-line
+                      //@ts-expect-error
                       <TableRowContent key={project.ProjectNo} project={project} index={index} role={project.role} navigate={(location) => router.push(location)} />
                     ))
                   )}
@@ -142,7 +142,7 @@ export default function DashboardPage() {
                                     key={project.ProjectNo}
                                     project={project}
                                     index={index + 5}
-                                    //@ts-ignore-next-line
+                                    //@ts-expect-error
                                     role={project.role}
                                     navigate={(location) => router.push(location)}
                                   />

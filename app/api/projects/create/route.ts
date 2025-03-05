@@ -30,7 +30,7 @@ export async function PUT(req: Request) {
     });
     if (proj) return NextResponse.json({ msg: "Project already exists" }, { status: 400 });
     
-    const project = await prisma.project.create({
+    await prisma.project.create({
         data: {
             ProjectTitle,
             ProjectNo,

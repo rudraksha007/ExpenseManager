@@ -3,9 +3,10 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { formatCurrency } from "@/lib/utils";
+import { Project } from "@prisma/client";
 
 interface ProjectDetailsProps {
-  project: any;
+  project: Project;
   onViewTeam: (type: string) => void;
 }
 
@@ -22,7 +23,7 @@ export function ProjectDetails({ project, onViewTeam }: ProjectDetailsProps) {
     },
     { 
       label: "Project End Date", 
-      value: new Date(project.ProjectEndDate).toLocaleDateString() 
+      value: new Date(project.ProjectEndDate||'').toLocaleDateString() 
     },
     { 
       label: "PI Name", 

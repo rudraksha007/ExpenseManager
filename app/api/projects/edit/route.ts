@@ -30,7 +30,7 @@ export async function POST(req: Request) {
     });
     if (!proj) return NextResponse.json({ msg: "Project doesn't exists" }, { status: 404 });
     
-    const project = await prisma.project.update({
+    await prisma.project.update({
         where:{
             ProjectNo
         },

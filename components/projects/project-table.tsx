@@ -10,17 +10,18 @@ import {
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
+import { Indents } from "@prisma/client";
 
 interface Column {
   header: string;
-  accessor: string | ((item: any, index: number) => any);
-  render?: (item: any) => React.ReactNode;
+  accessor: string | ((item: Indents, index: number) => string);
+  render?: (item: Indents) => React.ReactNode;
 }
 
 interface ProjectTableProps {
-  data: any[];
+  data: Indents[];
   columns: Column[];
-  onAdd: null|(() => void);
+  onAdd: null | (() => void);
 }
 
 export function ProjectTable({ data, columns, onAdd }: ProjectTableProps) {
@@ -51,7 +52,8 @@ export function ProjectTable({ data, columns, onAdd }: ProjectTableProps) {
                   {column.render ? column.render(item) :
                     typeof column.accessor === "function" ?
                       column.accessor(item, rowIndex) :
-                      item[column.accessor]}
+                      //@ts-expect-error
+                      item[column.accessor] as string}
                 </TableCell>
               ))}
             </TableRow>

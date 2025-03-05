@@ -19,8 +19,8 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Loader2 } from "lucide-react";
 import { CategoryReport } from "@/components/reports/category-report";
-import { GeneralReport, GeneralReportProps, ProjectReport } from "@/components/reports/general-report";
-import  YearlyReport  from "@/components/reports/yearly-report";
+import { GeneralReport, ProjectReport } from "@/components/reports/general-report";
+import YearlyReport from "@/components/reports/yearly-report";
 import { QuarterlyReport } from "@/components/reports/quarterly-report";
 
 interface Project {
@@ -30,7 +30,7 @@ interface Project {
 
 export default function ReportsPage() {
   const [loading, setLoading] = useState(false);
-  const [reportData, setReportData] = useState<{data: ProjectReport[]; reportType: 'general'| 'category'|'quarterly'|'yearly'|null}>({data: [], reportType: null});
+  const [reportData, setReportData] = useState<{ data: ProjectReport[]; reportType: 'general' | 'category' | 'quarterly' | 'yearly' | null }>({ data: [], reportType: null });
   const [reportType, setReportType] = useState("");
   const [projects, setProjects] = useState<Project[]>([]);
   const [selectedYear, setSelectedYear] = useState<number>(new Date().getFullYear());
@@ -39,20 +39,20 @@ export default function ReportsPage() {
 
   useEffect(() => {
     setLoading(true);
-    if(!projects||!projects.length)fetchProjects();
+    if (!projects || !projects.length) fetchProjects();
     if (!reportType) return;
-    setReportData({data: [], reportType: null});
+    setReportData({ data: [], reportType: null });
     const timer = setTimeout(() => {
       generateReport();
     }, 500);
 
     return () => clearTimeout(timer);
-  }, [reportType, selectedYear, selectedProject, selectedQuarter]);
+  }, [reportType, selectedYear, selectedProject, selectedQuarter, projects]);
 
   const fetchProjects = async () => {
     try {
       console.log("Fetching projects...");
-      
+
       setLoading(true);
       const response = await fetch("/api/projects");
       if (response.ok) {
@@ -72,7 +72,7 @@ export default function ReportsPage() {
     }
   };
 
-  const generateReport = async () => {
+  async function generateReport() {
     if (!reportType || reportType == '') return;
     if ((reportType === "yearly" || reportType === "quarterly") && (!selectedYear || !selectedProject)) {
       setLoading(false);
@@ -213,12 +213,13 @@ export default function ReportsPage() {
 
       {reportData && !loading && (
         <div className="grid gap-6">
-          {/**@ts-ignore*/}
-          {reportType === "category" && reportData.reportType== 'category'&& <CategoryReport projects={reportData.data} />}
-          {reportType === "general" && reportData.reportType== 'general'&& <GeneralReport projects={reportData.data} />}
-          {reportType === "yearly" && reportData.reportType== 'yearly'&& <YearlyReport data={reportData.data as any} year={selectedYear} />}
-          {/**@ts-ignore*/}
-          {reportType === "quarterly" && reportData.reportType== 'quarterly'&& <QuarterlyReport data={reportData.data} />}
+          {/**@ts-expect-error */}
+          {reportType === "category" && reportData.reportType == 'category' && <CategoryReport projects={reportData.data} />}
+          {reportType === "general" && reportData.reportType == 'general' && <GeneralReport projects={reportData.data} />}
+          {/**@ts-expect-error */}
+          {reportType === "yearly" && reportData.reportType == 'yearly' && <YearlyReport data={reportData.data} year={selectedYear} />}
+          {/**@ts-expect-error */}
+          {reportType === "quarterly" && reportData.reportType == 'quarterly' && <QuarterlyReport data={reportData.data} />}
         </div>
       )}
     </div>

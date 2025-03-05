@@ -15,7 +15,7 @@ interface EquipmentItem {
 }
 
 interface EquipmentIndentProps {
-    onSubmit: (data: any) => void;
+    onSubmit: (data: globalThis.FormData) => void;
     project: Project;
 }
 

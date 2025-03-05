@@ -1,7 +1,8 @@
 import CredentialsProvider from "next-auth/providers/credentials";
 import { prisma } from "./prisma";
 import CryptoJS from "crypto-js"; // Added import for CryptoJS
-import { DefaultSession } from "next-auth";
+import { DefaultSession, Session, User } from "next-auth";
+import { JWT } from "next-auth/jwt";
 
 declare module "next-auth" {
     interface User {
@@ -11,7 +12,7 @@ declare module "next-auth" {
         name: string;
     }
     interface Session {
-        user: User & DefaultSession["user"] | null;
+        user: User & DefaultSession["user"];
     }
 }
 
@@ -23,7 +24,7 @@ const authOptions = {
                 email: { label: "Email", type: "email" },
                 password: { label: "Password", type: "password" }
             },
-            async authorize(credentials, req) {
+            async authorize(credentials) {
                 if (!credentials?.email || !credentials?.password) {
                     return null;
                 }
@@ -67,7 +68,7 @@ const authOptions = {
         })
     ],
     callbacks: {
-        async jwt({ token, user }: { token: any, user: any }) {
+        async jwt({ token, user }: { token: JWT, user: User }) {
             // This runs when the JWT is created or updated
             if (user) {
                 // Add user properties to the token when first signing in
@@ -77,12 +78,10 @@ const authOptions = {
             }
             return token;
         },
-        async session({ session, token }: { session: any, token: any }) {
-            // This adds data from the token to the session
+        async session({ session, token }: { session: Session, token: JWT }) {
             if (session.user) {
-                session.user.id = token.id;
-                session.user.EmployeeId = token.EmployeeId;
-                // email is already in the session by default
+            session.user.id = token.id as string;
+            session.user.EmployeeId = token.EmployeeId as number;
             }
             return session;
         }
@@ -91,9 +90,6 @@ const authOptions = {
         signIn: "/auth/login",
     },
     secret: process.env.AUTH_SECRET,
-    //   session: {
-    //     strategy: 'jwt' as 'jwt'
-    //   },
 }
 
 export default authOptions;

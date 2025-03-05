@@ -5,7 +5,11 @@ import { User } from "@prisma/client";
 import { getServerSession } from "next-auth";
 import { NextResponse } from "next/server";
 
-export async function GET(req: Request) {
+interface Funds {
+    [key: string]: number;
+}
+
+export async function GET() {
     const session = await getServerSession(authOptions);
     if (!session || !session.user?.email) return { status: 401, body: { err: "Unauthorized" } };
     let projects = [];
@@ -44,8 +48,8 @@ export async function GET(req: Request) {
         piFund: [],
         agencyFund: [],
     };
-    let piFunds: any = {};
-    let agencyFunds: any = {};
+    const piFunds: Funds= {};
+    const agencyFunds: Funds= {};
     projects.forEach((project) => {
         project.FundedBy.forEach((agency: string) => {
             if (!agencyFunds[agency]) agencyFunds[agency] = project.TotalSanctionAmount;

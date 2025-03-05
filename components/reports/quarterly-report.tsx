@@ -169,7 +169,7 @@ export function QuarterlyReport({ data }: BudgetAllocationReportProps) {
             </TableHeader>
             <TableBody>
               {data.map((item) => {
-                let utilization = { percent: 0, alloc: 0 };
+                const utilization = { percent: 0, alloc: 0 };
 
                 switch (item.Category.toUpperCase()) {
                   case 'MANPOWER':

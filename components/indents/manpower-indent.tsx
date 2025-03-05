@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -15,7 +15,7 @@ interface ManpowerItem {
 }
 
 interface ManpowerIndentProps {
-    onSubmit: (data: any) => void;
+    onSubmit: (data: globalThis.FormData) => void;
     project: Project;
 }
 

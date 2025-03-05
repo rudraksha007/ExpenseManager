@@ -8,19 +8,19 @@ import { useMemo, useState } from "react";
 import { FieldMap } from "./page";
 import { formatCurrency } from "@/lib/utils";
 import { toast } from "@/hooks/use-toast";
-import { IndentType } from "@prisma/client";
+import { Indents, IndentType, Project } from "@prisma/client";
 import { EquipmentIndent } from "@/components/indents/equipment-indent";
 import { ManpowerIndent } from "@/components/indents/manpower-indent";
 
 const consumablesColumns = [
     { header: "Indent ID", accessor: "IndentNo" },
     { header: "Employee ID", accessor: "ActionedById" },
-    { header: "Date", accessor: "IndentDate", render: (item: any) => new Date(item.IndentDate).toISOString().split('T')[0] },
+    { header: "Date", accessor: "IndentDate", render: (item: Indents) => new Date(item.IndentDate).toISOString().split('T')[0] },
     { header: "Description", accessor: "IndentReason" },
     {
         header: "Amount",
         accessor: "IndentAmount",
-        render: (item: any) => formatCurrency(item.IndentAmount)
+        render: (item: Indents) => formatCurrency(item.IndentAmount)
     },
     { header: "Status", accessor: "IndentStatus" }
 ];
@@ -28,21 +28,30 @@ const consumablesColumns = [
 const travelsColumns = [
     { header: "Indent ID", accessor: "IndentNo" },
     { header: "Employee ID", accessor: "ActionedById" },
-    { header: "Travel Date", accessor: "IndentDate", render: (item: any) => new Date(item.IndentDate).toISOString().split('T')[0] },
+    { header: "Travel Date", accessor: "IndentDate", render: (item: Indents) => new Date(item.IndentDate).toISOString().split('T')[0] },
     { header: "Purpose", accessor: "IndentReason" },
     {
         header: "Amount",
         accessor: "IndentAmount",
-        render: (item: any) => formatCurrency(item.IndentAmount)
+        render: (item: Indents) => formatCurrency(item.IndentAmount)
     },
     { header: "Status", accessor: "IndentStatus" }
 ];
+export interface ExtendedProject extends Project {
+    RemainingConsumablesAmt: number;
+    ConsumablesAllocationAmt: number;
+    RemainingTravelAmt: number;
+    TravelAllocationAmt: number;
+    projectRemainingContingencyAmt: number;
+    ContingencyAllocationAmt: number;
+    Indents: Indents[];
+}
 
-export default function ProjectTabs({ project, isOpen, setIsOpen, loading, setLoading, reloadData, activeTab, setActiveTab }:{project: any, isOpen: boolean, setIsOpen: (value: boolean) => void, loading: boolean, setLoading: (value: boolean) => void, reloadData: () => void, activeTab: "Consumables" | "Travel" | "Contingency" | "Equipment" | "Manpower", setActiveTab: (value: "Consumables" | "Travel" | "Contingency" | "Equipment" | "Manpower") => void}) {
+export default function ProjectTabs({ project, isOpen, setIsOpen, loading, setLoading, reloadData, activeTab, setActiveTab }:{project: ExtendedProject, isOpen: boolean, setIsOpen: (value: boolean) => void, loading: boolean, setLoading: (value: boolean) => void, reloadData: () => void, activeTab: "Consumables" | "Travel" | "Contingency" | "Equipment" | "Manpower", setActiveTab: (value: "Consumables" | "Travel" | "Contingency" | "Equipment" | "Manpower") => void}) {
     const user = useSession().data?.user;
     const [popLoading, setPopLoading] = useState<boolean>(false);
 
-    //@ts-ignore
+    //@ts-expect-error
     const fieldMap: FieldMap = useMemo(() => {
         return {
             Consumables: [
@@ -52,7 +61,7 @@ export default function ProjectTabs({ project, isOpen, setIsOpen, loading, setLo
                     type: "date",
                     required: true,
                     min: project?.createdAt ? new Date(project.ProjectStartDate).toISOString().split('T')[0] : new Date().toISOString().split("T")[0], // Project start date
-                    max: project?.createdAt ? new Date(project.ProjectEndDate).toISOString().split('T')[0] : new Date().toISOString().split("T")[0], // Today's date
+                    max: project?.createdAt ? new Date(project.ProjectEndDate||'').toISOString().split('T')[0] : new Date().toISOString().split("T")[0], // Today's date
                 },
                 {
                     id: "ProjectNo",
@@ -145,7 +154,7 @@ export default function ProjectTabs({ project, isOpen, setIsOpen, loading, setLo
                     type: "date",
                     required: true,
                     min: project?.createdAt ? new Date(project.ProjectStartDate).toISOString().split('T')[0] : new Date().toISOString().split("T")[0], // Project start date
-                    max: project?.createdAt ? new Date(project.ProjectEndDate).toISOString().split('T')[0] : new Date().toISOString().split("T")[0], // Today's date
+                    max: project?.createdAt ? new Date(project.ProjectEndDate||'').toISOString().split('T')[0] : new Date().toISOString().split("T")[0], // Today's date
                 },
                 {
                     id: "EmployeeName",
@@ -175,7 +184,7 @@ export default function ProjectTabs({ project, isOpen, setIsOpen, loading, setLo
                     type: "date",
                     required: true,
                     min: project?.createdAt ? new Date(project.ProjectStartDate).toISOString().split('T')[0] : new Date().toISOString().split("T")[0], // Project start date
-                    max: project?.createdAt ? new Date(project.ProjectEndDate).toISOString().split('T')[0] : new Date().toISOString().split("T")[0], // Today's date
+                    max: project?.createdAt ? new Date(project.ProjectEndDate||'').toISOString().split('T')[0] : new Date().toISOString().split("T")[0], // Today's date
                 },
                 {
                     id: "Destination",
@@ -189,7 +198,7 @@ export default function ProjectTabs({ project, isOpen, setIsOpen, loading, setLo
                     type: "date",
                     required: true,
                     min: project?.createdAt ? new Date(project.ProjectStartDate).toISOString().split('T')[0] : new Date().toISOString().split("T")[0], // Project start date
-                    max: project?.createdAt ? new Date(project.ProjectEndDate).toISOString().split('T')[0] : new Date().toISOString().split("T")[0], // Today's date
+                    max: project?.createdAt ? new Date(project.ProjectEndDate||'').toISOString().split('T')[0] : new Date().toISOString().split("T")[0], // Today's date
                 },
                 {
                     id: "IndentReason",
@@ -228,7 +237,7 @@ export default function ProjectTabs({ project, isOpen, setIsOpen, loading, setLo
                     type: "date",
                     required: true,
                     min: project?.createdAt ? new Date(project.ProjectStartDate).toISOString().split('T')[0] : new Date().toISOString().split("T")[0], // Project start date
-                    max: project?.createdAt ? new Date(project.ProjectEndDate).toISOString().split('T')[0] : new Date().toISOString().split("T")[0], // Today's date
+                    max: project?.createdAt ? new Date(project.ProjectEndDate||'').toISOString().split('T')[0] : new Date().toISOString().split("T")[0], // Today's date
                 },
                 {
                     id: "ProjectNo",
@@ -301,7 +310,7 @@ export default function ProjectTabs({ project, isOpen, setIsOpen, loading, setLo
                     type: "date",
                     required: true,
                     min: project?.createdAt ? new Date(project.ProjectStartDate).toISOString().split('T')[0] : new Date().toISOString().split("T")[0], // Project start date
-                    max: project?.createdAt ? new Date(project.ProjectEndDate).toISOString().split('T')[0] : new Date().toISOString().split("T")[0], // Today's date
+                    max: project?.createdAt ? new Date(project.ProjectEndDate||'').toISOString().split('T')[0] : new Date().toISOString().split("T")[0], // Today's date
                 },
                 {
                     id: "ProjectNo",
@@ -374,7 +383,7 @@ export default function ProjectTabs({ project, isOpen, setIsOpen, loading, setLo
                     type: "date",
                     required: true,
                     min: project?.createdAt ? new Date(project.ProjectStartDate).toISOString().split('T')[0] : new Date().toISOString().split("T")[0], // Project start date
-                    max: project?.createdAt ? new Date(project.ProjectEndDate).toISOString().split('T')[0] : new Date().toISOString().split("T")[0], // Today's date
+                    max: project?.createdAt ? new Date(project.ProjectEndDate||'').toISOString().split('T')[0] : new Date().toISOString().split("T")[0], // Today's date
                 },
                 {
                     id: "ProjectNo",
@@ -491,10 +500,10 @@ export default function ProjectTabs({ project, isOpen, setIsOpen, loading, setLo
                     variant: 'default'
                 });
             }
-        } catch (err: any) {
+        } catch (err) {
             toast({
                 title: "Failed to create new indent",
-                description: err,
+                description: err as string,
                 variant: 'destructive'
             });
         }
@@ -525,7 +534,7 @@ export default function ProjectTabs({ project, isOpen, setIsOpen, loading, setLo
 
                     <TabsContent value="Consumables">
                         <ProjectTable
-                            data={project.Indents ? project.Indents.filter((i: any) => i.Type === IndentType.CONSUMABLES) : []}
+                            data={project.Indents ? project.Indents.filter((i: Indents) => i.Type === IndentType.CONSUMABLES) : []}
                             columns={consumablesColumns}
                             onAdd={handleAddNew}
                         />
@@ -533,14 +542,14 @@ export default function ProjectTabs({ project, isOpen, setIsOpen, loading, setLo
 
                     <TabsContent value="Travel">
                         <ProjectTable
-                            data={project.Indents ? project.Indents.filter((i: any) => i.Type === IndentType.TRAVEL) : []}
+                            data={project.Indents ? project.Indents.filter((i: Indents) => i.Type === IndentType.TRAVEL) : []}
                             columns={travelsColumns}
                             onAdd={handleAddNew}
                         />
                     </TabsContent>
                     <TabsContent value="Contingency">
                         <ProjectTable
-                            data={project.Indents ? project.Indents.filter((i: any) => i.Type === IndentType.CONTINGENCY) : []}
+                            data={project.Indents ? project.Indents.filter((i) => i.Type === IndentType.CONTINGENCY) : []}
                             columns={consumablesColumns} // Assuming similar columns for Contingency
                             onAdd={handleAddNew}
                         />
@@ -548,7 +557,7 @@ export default function ProjectTabs({ project, isOpen, setIsOpen, loading, setLo
 
                     <TabsContent value="Equipment">
                         <ProjectTable
-                            data={project.Indents ? project.Indents.filter((i: any) => i.Type === IndentType.EQUIPMENT) : []}
+                            data={project.Indents ? project.Indents.filter((i) => i.Type === IndentType.EQUIPMENT) : []}
                             columns={consumablesColumns} // Assuming similar columns for Equipments
                             onAdd={null}
                         />
@@ -557,7 +566,7 @@ export default function ProjectTabs({ project, isOpen, setIsOpen, loading, setLo
 
                     <TabsContent value="Manpower">
                         <ProjectTable
-                            data={project.Indents ? project.Indents.filter((i: any) => i.Type === IndentType.MANPOWER) : []}
+                            data={project.Indents ? project.Indents.filter((i) => i.Type === IndentType.MANPOWER) : []}
                             columns={consumablesColumns} // Assuming similar columns for Manpower
                             onAdd={null}
                         />

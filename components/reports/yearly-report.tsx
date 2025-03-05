@@ -27,7 +27,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 
-interface YearlyBudgetAllocation {
+export interface YearlyBudgetAllocation {
   Category: string;
   Allocation: number;
   IndentedProposed: number;

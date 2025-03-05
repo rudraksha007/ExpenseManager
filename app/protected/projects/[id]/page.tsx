@@ -6,8 +6,9 @@ import { Button } from "@/components/ui/button";
 import { Loader2, Pencil } from "lucide-react";
 import { ProjectDetails } from "@/components/projects/project-details";
 
-import ProjectTabs from "./ProjectTabs";
+import ProjectTabs, { ExtendedProject } from "./ProjectTabs";
 import { FormField } from "@/components/ui/form-dialog";
+import { Project } from "@prisma/client";
 
 // Define columns for different indent types
 export interface FieldMap {
@@ -22,16 +23,16 @@ export default function ProjectPage() {
   const { id } = useParams();
   const router = useRouter();
   const [loading, setLoading] = useState(true);
-  const [dialogContent, setDialogContent] = useState(null);
+  const [dialogContent] = useState(null);
   const [isOpen, setIsOpen] = useState<boolean>(false);
-  const [project, setProject] = useState<any>(null);
+  const [project, setProject] = useState<Project | null>(null);
   const [activeTab, setActiveTab] = useState<"Consumables" | "Travel" | "Contingency" | "Equipment" | "Manpower">("Consumables");
   
   useEffect(() => {
     fetchProjectData();
   }, [id]);
 
-  const fetchProjectData = async () => {
+  async function fetchProjectData () {
     try {
       setLoading(true);
       const response = await fetch(`/api/projects/${id}`);
@@ -80,7 +81,7 @@ export default function ProjectPage() {
 
       <ProjectDetails project={project} onViewTeam={(type: string) => console.log(`Viewing team of type: ${type}`)} />
 
-      <ProjectTabs project={project} isOpen={isOpen} setIsOpen={setIsOpen} loading setLoading={setLoading} reloadData={fetchProjectData} activeTab={activeTab} setActiveTab={setActiveTab} />
+      <ProjectTabs project={project as ExtendedProject} isOpen={isOpen} setIsOpen={setIsOpen} loading setLoading={setLoading} reloadData={fetchProjectData} activeTab={activeTab} setActiveTab={setActiveTab} />
 
       {dialogContent}
     </div>
