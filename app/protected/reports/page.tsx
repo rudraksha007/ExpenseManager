@@ -20,7 +20,7 @@ import { Button } from "@/components/ui/button";
 import { Loader2 } from "lucide-react";
 import { CategoryReport } from "@/components/reports/category-report";
 import { GeneralReport, GeneralReportProps, ProjectReport } from "@/components/reports/general-report";
-import { YearlyReport } from "@/components/reports/yearly-report";
+import  YearlyReport  from "@/components/reports/yearly-report";
 import { QuarterlyReport } from "@/components/reports/quarterly-report";
 
 interface Project {
@@ -216,7 +216,7 @@ export default function ReportsPage() {
           {/**@ts-ignore*/}
           {reportType === "category" && reportData.reportType== 'category'&& <CategoryReport projects={reportData.data} />}
           {reportType === "general" && reportData.reportType== 'general'&& <GeneralReport projects={reportData.data} />}
-          {reportType === "yearly" && reportData.reportType== 'yearly'&& <YearlyReport data={reportData.data} />}
+          {reportType === "yearly" && reportData.reportType== 'yearly'&& <YearlyReport data={reportData.data as any} year={selectedYear} />}
           {/**@ts-ignore*/}
           {reportType === "quarterly" && reportData.reportType== 'quarterly'&& <QuarterlyReport data={reportData.data} />}
         </div>

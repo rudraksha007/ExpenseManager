@@ -20,19 +20,21 @@ interface Column {
 interface ProjectTableProps {
   data: any[];
   columns: Column[];
-  onAdd: () => void;
+  onAdd: null|(() => void);
 }
 
 export function ProjectTable({ data, columns, onAdd }: ProjectTableProps) {
   return (
     <div className="space-y-4">
-      <div className="flex justify-end">
-        <Button onClick={onAdd} size="sm">
-          <Plus className="h-4 w-4 mr-2" />
-          Add New
-        </Button>
-      </div>
-      
+      {onAdd &&
+        <div className="flex justify-end">
+          <Button onClick={onAdd} size="sm">
+            <Plus className="h-4 w-4 mr-2" />
+            Add New
+          </Button>
+        </div>
+      }
+
       <Table>
         <TableHeader>
           <TableRow>
@@ -46,10 +48,10 @@ export function ProjectTable({ data, columns, onAdd }: ProjectTableProps) {
             <TableRow key={rowIndex}>
               {columns.map((column, colIndex) => (
                 <TableCell key={colIndex}>
-                  {column.render ? column.render(item) : 
-                   typeof column.accessor === "function" ? 
-                     column.accessor(item, rowIndex) : 
-                     item[column.accessor]}
+                  {column.render ? column.render(item) :
+                    typeof column.accessor === "function" ?
+                      column.accessor(item, rowIndex) :
+                      item[column.accessor]}
                 </TableCell>
               ))}
             </TableRow>

@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { X } from "lucide-react";
-import { useState } from "react";
+import React, { useState } from "react";
 
 export type FormField = {
   id: string;
@@ -22,13 +22,14 @@ export type FormField = {
   rows?: number;
 };
 
-type FormDialogProps = {
+export type FormDialogProps = {
   isOpen: boolean;
   onClose: () => void;
   onSubmit: (data: FormData) => void;
   title: string;
-  fields: FormField[];
+  fields: FormField[]|null;
   loading?: boolean;
+  element?: React.ReactElement<FormDialogProps>;
 };
 
 export function FormDialog({
@@ -37,6 +38,7 @@ export function FormDialog({
   onSubmit,
   title,
   fields,
+  element,
   loading = false,
 }: FormDialogProps) {
   const [formData, setFormData] = useState<Record<string, any>>({});
@@ -68,6 +70,7 @@ export function FormDialog({
       [field.id]: value,
     }));
   };
+  if(!fields)return element ? React.cloneElement(element, { isOpen, onClose, onSubmit, title, fields, loading }) : null;
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>

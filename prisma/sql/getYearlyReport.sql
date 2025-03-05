@@ -31,7 +31,8 @@ SELECT
         COALESCE(p."OverheadAllocationAmt", 0) + 
         COALESCE(p."EquipmentAllocationAmt", 0) - 
         COALESCE(SUM(i."IndentAmount"), 0)
-    ) AS "Available"
+    ) AS "AvailableAllocatedAmt",
+    COALESCE(p."TotalSanctionAmount", 0) - COALESCE(SUM(i."IndentAmount"), 0) AS "UnallocatedAmt"
 
 FROM "Indents" AS i
 LEFT JOIN "Project" AS p ON i."ProjectNo" = p."ProjectNo"
@@ -56,4 +57,5 @@ GROUP BY
     p."ConsumablesAllocationAmt",
     p."ContingencyAllocationAmt",
     p."OverheadAllocationAmt",
+    p."TotalSanctionAmount",
     p."EquipmentAllocationAmt";
