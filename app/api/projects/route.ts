@@ -14,7 +14,7 @@ export async function GET() {
             ...project,
             role: 'ROOT'
         }));
-        return NextResponse.json(projects || []);
+        return NextResponse.json(projects || [], { status: 200 });
     }
     const data = await prisma.project.findMany({
         where: {
@@ -46,5 +46,5 @@ export async function GET() {
     }));
     console.log(projects);
 
-    return NextResponse.json(projects || []);
+    return NextResponse.json(projects || [], { status: 200 });
 }

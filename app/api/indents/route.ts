@@ -18,7 +18,7 @@ export async function GET() {
     if (!user) { return NextResponse.json({ msg: "User not found", status: 404 }, { status: 404 }); }
     if(user.isAdmin){
         const indents = await prisma.indents.findMany();
-        return NextResponse.json(indents);
+        return NextResponse.json(indents, {status: 200});
     }
     
     const indents = await prisma.indents.findMany({

@@ -5,7 +5,7 @@ import { NextResponse } from "next/server";
 
 export async function POST(req: Request) {
     const session = await getServerSession(authOptions);
-    if (!session || !session.user?.email) return { status: 401, body: { msg: "Unauthorized" } };
+    if (!session || !session.user?.email) return NextResponse.json({ msg: "Unauthorized" }, { status: 401 });
     const {
         ProjectTitle,
         ProjectNo,

@@ -9,7 +9,7 @@ export async function GET(req: Request, { params }: { params: { id: string } }) 
     // console.log(id);
 
     if (!session || !session.user?.email) return { status: 401, body: { err: "Unauthorized" } };
-    if (!id) return { status: 400, body: { err: "Bad Request" } };
+    if (!id) return NextResponse.json({ err: "Bad Request" }, { status: 400 });
     const project = await prisma.project.findUnique({
         where: {
             ProjectNo: decodeURIComponent(id) as string

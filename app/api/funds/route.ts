@@ -69,5 +69,5 @@ export async function GET() {
         });
         data.piFund = Object.keys(piFunds).map((key) => ({ name: key, value: piFunds[key] }));
     });
-    return NextResponse.json(data);
+    return NextResponse.json(data, {status: 200});
 } 

@@ -45,6 +45,6 @@ export async function PUT(req: Request) {
         });
         return NextResponse.json({ msg: 'created successfully' }, { status: 200 });
     }catch(err){
-        return NextResponse.json({msg: err.message}, {status: 500});
+        return NextResponse.json({msg: err as string}, {status: 500});
     }
 }

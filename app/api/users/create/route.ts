@@ -5,7 +5,7 @@ import { NextResponse } from "next/server";
 
 export async function PUT(req: Request) {
     const session = await getServerSession(authOptions);
-    if (!session || !session.user?.email) return { status: 401, body: { err: "Unauthorized" } };
+    if (!session || !session.user?.email) return NextResponse.json({ msg: "Unauthorized" }, { status: 401 });
     const { name, id, role, email, password } = await req.json();
     const dbUser = await prisma.user.findUnique({ where: { email } });
     if (dbUser) return NextResponse.json({ msg: "User already exists" }, { status: 400 });
