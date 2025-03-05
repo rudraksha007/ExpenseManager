@@ -65,7 +65,6 @@ export default function DashboardPage() {
         method: 'GET',
       });
       const projectsData = await resp.json();
-      console.log(projectsData);
       setProjects(projectsData as Project[]);
 
       const funds = await fetch('/api/funds', {
@@ -73,7 +72,6 @@ export default function DashboardPage() {
       });
       const fundData = await funds.json();
       setFunds(fundData as FundData);
-      // console.log(fundData);
       setLoading(false);
     }
     fetchData();

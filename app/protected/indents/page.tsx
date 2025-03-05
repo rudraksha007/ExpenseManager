@@ -34,7 +34,6 @@ export default function IndentsPage() {
             setLoading(true);
             const response = await fetch("/api/indents");
             const data = await response.json();
-            console.log(data);
             setData(data);
             setLoading(false);
         }
@@ -69,7 +68,6 @@ export default function IndentsPage() {
 
             if (response.ok) {
                 const result = await response.json();
-                console.log(result);
                 setPopup(false);
                 // Optionally, you can refetch the data to update the UI
                 // fetchData();
@@ -200,7 +198,7 @@ export default function IndentsPage() {
                         }
                     }
                 ]}
-                onSubmit={(data) => console.log(data)}
+                onSubmit={(data) => console.log('')}
             />
         </div>
     );

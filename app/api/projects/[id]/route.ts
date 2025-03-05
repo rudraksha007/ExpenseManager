@@ -6,7 +6,6 @@ import { NextResponse } from "next/server";
 export async function GET(req: Request, { params }: { params: Promise<{id: string}> }) {
     const { id } = await params;
     const session = await getServerSession(authOptions);
-    // console.log(id);
 
     if (!session || !session.user?.email) return NextResponse.json({ err: "Unauthorized" }, { status: 401 });
     if (!id) return NextResponse.json({ err: "Bad Request" }, { status: 400 });
@@ -36,7 +35,6 @@ export async function GET(req: Request, { params }: { params: Promise<{id: strin
             Indents: true
         }
     });
-    // console.log(project);
 
     if (!project) return NextResponse.json({ msg: "Project not found" }, { status: 404 });
     const indents = await prisma.indents.groupBy({
@@ -55,7 +53,6 @@ export async function GET(req: Request, { params }: { params: Promise<{id: strin
         resp[`Remaining${indent}Amt`] = project[`${indent}AllocationAmt`] - (indent._sum.IndentAmount || 0);
         return null;
     });
-    // console.log(resp);
     
 
     // project.remainingAmounts = remainingAmounts;

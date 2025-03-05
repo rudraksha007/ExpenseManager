@@ -78,9 +78,6 @@ export default function SignupPage() {
                 return;
             }
             const result = await response.json();
-
-            console.log(result);
-
             form.setValue('id', result.id);
             setIsLoading(false);
         }

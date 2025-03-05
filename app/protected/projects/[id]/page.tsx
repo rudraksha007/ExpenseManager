@@ -41,8 +41,6 @@ export default function ProjectPage() {
       if (data) {
         setProject(data);
       }
-      console.log(data);
-
     } catch (error) {
       console.error("Failed to fetch project data:", error);
     } finally {

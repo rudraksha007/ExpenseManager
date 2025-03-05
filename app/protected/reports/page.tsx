@@ -51,8 +51,6 @@ export default function ReportsPage() {
 
   const fetchProjects = async () => {
     try {
-      console.log("Fetching projects...");
-
       setLoading(true);
       const response = await fetch("/api/projects");
       if (response.ok) {
@@ -96,7 +94,6 @@ export default function ReportsPage() {
 
       if (response.ok) {
         const data = await response.json();
-        console.log(data);
         setReportData(data);
       } else {
         throw new Error("Failed to generate report");
@@ -111,7 +108,6 @@ export default function ReportsPage() {
 
   const handleDownload = () => {
     // Implement download functionality
-    console.log("Downloading report...");
   };
 
   return (

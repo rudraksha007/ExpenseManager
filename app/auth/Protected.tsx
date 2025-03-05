@@ -8,7 +8,6 @@ export default function Protected({ children }: { children: React.ReactNode }) {
     const [isAuthenticated, setIsAuthenticated] = useState(false);
 
     useEffect(() => {
-        console.log(session);
         if (session.status === 'loading') {
             return; // Wait for session to load
         }

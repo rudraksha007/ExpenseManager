@@ -19,9 +19,7 @@ export default function LoginPage() {
     const email = formData.get("email") as string;
     const password = formData.get("password") as string;
 
-    try {
-      console.log(email, password);
-      
+    try {      
       const res = await signIn('credentials', {
         email,
         password,

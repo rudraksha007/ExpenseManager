@@ -479,9 +479,7 @@ export default function ProjectTabs({ project, isOpen, setIsOpen, loading, setLo
             IndentRemarks: data.get("IndentRemarks"),
             BillCopy: BillCopy ? BillCopy : [],
             ...Object.fromEntries(data.entries().filter(([key]) => !["ProjectNo", "ProjectTitle", "IndentNo", "IndentDate", "Type", "IndentAmount", "IndentQty", "ActionDate", "ActionedById", "IndentReason", "IndentRemarks", "BillCopy"].includes(key)))
-        };
-        console.log(newIndent);
-        
+        };        
         try {
             const resp = await fetch('/api/indents/create', {
                 method: 'PUT',
@@ -513,7 +511,6 @@ export default function ProjectTabs({ project, isOpen, setIsOpen, loading, setLo
         }
     }
     const handleAddNew = () => {
-        console.log("Adding new indent for", activeTab);
         setIsOpen(true);
     };
 

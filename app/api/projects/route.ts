@@ -5,7 +5,6 @@ import { NextResponse } from "next/server";
 
 export async function GET() {
     const session = await getServerSession(authOptions);
-    console.log('session', );
     
     if (!session || !session.user?.email) return NextResponse.json({ err: "Unauthorized" }, { status: 401 });
     if (session.user?.email === 'root@ils.in') {
@@ -44,7 +43,6 @@ export async function GET() {
         ...project,
         role: project.PIs.some(pi => pi.email === session.user?.email)? 'PI': 'COPI'
     }));
-    console.log(projects);
 
     return NextResponse.json(projects || [], { status: 200 });
 }

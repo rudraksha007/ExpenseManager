@@ -162,7 +162,6 @@ export default function CreateProjectPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // console.log(formData);
 
     setLoading(true);
     if (formData.PIs.length === 0) {

@@ -31,9 +31,7 @@ interface FormData {
 export function ManpowerIndent({ onSubmit, project }: ManpowerIndentProps) {
     const [items, setItems] = useState<ManpowerItem[]>([
         { employeeName: "", dailySalary: 0, numberOfDays: 1 }
-    ]);
-    // console.log(project.ProjectStartDate);
-    
+    ]);    
     const [formData, setFormData] = useState<FormData>({
         items: items,
         IndentAmount: 0,
