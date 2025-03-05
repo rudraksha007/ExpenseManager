@@ -3,12 +3,12 @@ import { prisma } from "@/lib/prisma";
 import { getServerSession } from "next-auth";
 import { NextResponse } from "next/server";
 
-export async function GET(req: Request, { params }: { params: { id: string } }) {
+export async function GET(req: Request, { params }: { params: Promise<{id: string}> }) {
     const { id } = await params;
     const session = await getServerSession(authOptions);
     // console.log(id);
 
-    if (!session || !session.user?.email) return { status: 401, body: { err: "Unauthorized" } };
+    if (!session || !session.user?.email) return NextResponse.json({ err: "Unauthorized" }, { status: 401 });
     if (!id) return NextResponse.json({ err: "Bad Request" }, { status: 400 });
     const project = await prisma.project.findUnique({
         where: {
