@@ -27,3 +27,4 @@ backend/.vscode/*
 backend/!.vscode/extensions.json
 backend/node_modules
 /build
+.next
