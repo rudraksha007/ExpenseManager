@@ -57,7 +57,7 @@ export default function ReportsPage() {
       const response = await fetch("/api/projects");
       if (response.ok) {
         const data = await response.json();
-        setProjects(data.map((proj: any) => ({
+        setProjects(data.map((proj: Project) => ({
           ProjectNo: proj.ProjectNo,
           ProjectTitle: proj.ProjectTitle
         })));
