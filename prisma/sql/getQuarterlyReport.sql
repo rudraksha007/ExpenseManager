@@ -1,0 +1,68 @@
+WITH QuarterDates AS (
+    SELECT
+        CASE 
+            WHEN $2 = 1 THEN TO_DATE(($3) || '-04-01', 'YYYY-MM-DD')  -- Q1: April 1st
+            WHEN $2 = 2 THEN TO_DATE(($3) || '-07-01', 'YYYY-MM-DD')  -- Q2: July 1st
+            WHEN $2 = 3 THEN TO_DATE(($3) || '-10-01', 'YYYY-MM-DD')  -- Q3: October 1st
+            WHEN $2 = 4 THEN TO_DATE(CAST(($3::integer + 1) AS TEXT) || '-01-01', 'YYYY-MM-DD')        -- Q4: January 1st (Same Year)
+        END AS StartDate,
+        
+        CASE 
+            WHEN $2 = 1 THEN TO_DATE(($3) || '-06-30', 'YYYY-MM-DD')  -- Q1: June 30th
+            WHEN $2 = 2 THEN TO_DATE(($3) || '-09-30', 'YYYY-MM-DD')  -- Q2: September 30th
+            WHEN $2 = 3 THEN TO_DATE(($3) || '-12-31', 'YYYY-MM-DD')  -- Q3: December 31st
+            WHEN $2 = 4 THEN TO_DATE(CAST(($3::integer + 1) AS TEXT) || '-03-31', 'YYYY-MM-DD')  -- Q4: March 31st (Next Year)
+        END AS EndDate
+)
+
+SELECT
+    i."Type" AS "Category",
+
+    -- Directly summing allocations from the Project table
+
+    -- Sum of all requested amounts
+    p."ManpowerAllocationAmt",
+    p."TravelAllocationAmt",
+    p."ConsumablesAllocationAmt",
+    p."ContingencyAllocationAmt",
+    p."OverheadAllocationAmt",
+    p."EquipmentAllocationAmt",
+    COALESCE(SUM(i."IndentAmount"), 0) AS "TotalIndented",
+
+    -- Amount that has been paid
+    COALESCE(SUM(
+        CASE WHEN i."IndentStatus" = 'COMPLETED' THEN i."IndentAmount" ELSE 0 END
+    ), 0) AS "Paid",
+
+    -- Amount that is still pending or approved (committed)
+    COALESCE(SUM(
+        CASE WHEN i."IndentStatus" IN ('APPROVED', 'PENDING') THEN i."IndentAmount" ELSE 0 END
+    ), 0) AS "Committed",
+
+    -- Remaining allocation after all indent requests
+    (
+        COALESCE(p."ManpowerAllocationAmt", 0) + 
+        COALESCE(p."TravelAllocationAmt", 0) + 
+        COALESCE(p."ConsumablesAllocationAmt", 0) + 
+        COALESCE(p."ContingencyAllocationAmt", 0) + 
+        COALESCE(p."OverheadAllocationAmt", 0) + 
+        COALESCE(p."EquipmentAllocationAmt", 0) - 
+        COALESCE(SUM(i."IndentAmount"), 0)
+    ) AS "Allocated"
+
+FROM "Indents" AS i
+LEFT JOIN "Project" AS p ON i."ProjectNo" = p."ProjectNo"  -- Directly using Project table
+CROSS JOIN QuarterDates  -- Using calculated quarter dates
+
+WHERE
+    i."ProjectNo" = $1
+    AND i."IndentDate" BETWEEN QuarterDates.StartDate AND QuarterDates.EndDate
+
+GROUP BY
+    i."Type",
+    p."ManpowerAllocationAmt",
+    p."TravelAllocationAmt",
+    p."ConsumablesAllocationAmt",
+    p."ContingencyAllocationAmt",
+    p."OverheadAllocationAmt",
+    p."EquipmentAllocationAmt";
