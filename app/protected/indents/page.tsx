@@ -7,10 +7,12 @@ import { ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight, Loader } from "
 import { Skeleton } from "@/components/ui/skeleton";
 import { FormDialog } from "@/components/ui/form-dialog";
 import { Indents, IndentStatus } from "@prisma/client";
+import { toast } from "@/hooks/use-toast";
 
 const ITEMS_PER_PAGE = 25;
 
 interface RequestDetails {
+    IndentNo: string;
     ProjectNo: string;
     ProjectTitle: string;
     IndentID: string;
@@ -36,8 +38,12 @@ export default function IndentsPage() {
             setData(data);
             setLoading(false);
         }
+        if (popup) {
+
+            return;
+        }
         fetchData();
-    }, []);
+    }, [popup]);
 
     const handlePageChange = (page: number) => {
         setLoading(true);
@@ -45,6 +51,41 @@ export default function IndentsPage() {
         // Simulate loading
         setTimeout(() => setLoading(false), 500);
     };
+
+    async function action(approved: boolean) {
+        try {
+            setLoading(true);
+            setPopup(false);
+            const response = await fetch("/api/indents/action", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                    approved: approved,
+                    IndentNo: requestDetails?.IndentID,
+                }),
+            });
+
+            if (response.ok) {
+                const result = await response.json();
+                console.log(result);
+                setPopup(false);
+                // Optionally, you can refetch the data to update the UI
+                // fetchData();
+            } else throw new Error("Failed to perform action");
+        } catch (error: any) {
+            console.error("Failed to perform action", error);
+            toast({
+                title: "Failed to perform action",
+                variant: 'destructive',
+                description: error,
+            })
+        }finally{
+            setRequestDetails(null);
+            setLoading(false);
+        }
+    }
 
     return (
         <div className="container mx-auto py-10 space-y-6">
@@ -78,9 +119,22 @@ export default function IndentsPage() {
 
                             </TableRow>
 
-                        ) : data.length!=0?(
+                        ) : data.length != 0 ? (
                             data.map((item, index) => (
-                                <TableRow key={item.id} onClick={() => setPopup(true)}>
+                                <TableRow key={item.id} onClick={() => {
+                                    setRequestDetails({
+                                        IndentNo: item.IndentNo,
+                                        ProjectNo: item.ProjectNo,
+                                        ProjectTitle: item.ProjectTitle,
+                                        IndentID: item.id,
+                                        IndentDate: item.IndentDate.toString().split("T")[0],
+                                        IndentStatus: item.IndentStatus,
+                                        IndentCategory: item.Type,
+                                        IndentAmount: item.IndentAmount,
+                                        IndentedPersonId: item.IndentPersonId.toString(),
+                                    })
+                                    setPopup(true);
+                                }}>
                                     <TableCell>{(currentPage - 1) * ITEMS_PER_PAGE + index + 1}</TableCell>
                                     <TableCell>{item.ProjectNo}</TableCell>
                                     <TableCell>{item.ProjectTitle}</TableCell>
@@ -100,7 +154,7 @@ export default function IndentsPage() {
                                     </TableCell>
                                 </TableRow>
                             ))
-                        ):(
+                        ) : (
                             <TableRow>
                                 <TableCell colSpan={6}>
                                     <div className="text-center text-lg text-muted-foreground">No data found</div>
@@ -125,12 +179,24 @@ export default function IndentsPage() {
                 fields={[
                     { label: "Project No", value: requestDetails?.ProjectNo || "", readOnly: true, id: "projectNo", type: "text" },
                     { label: "Title", value: requestDetails?.ProjectTitle, readOnly: true, id: "title", type: "text" },
-                    { label: "Indent ID", value: requestDetails?.IndentID, readOnly: true, id: "indentId", type: "text" },
+                    { label: "Indent No", value: requestDetails?.IndentNo, readOnly: true, id: "indentId", type: "text" },
                     { label: "Indent Date", value: requestDetails?.IndentDate?.split("T")[0], readOnly: true, id: "indentDate", type: "text" },
                     { label: "Indent Status", value: requestDetails?.IndentStatus, readOnly: true, id: "indentStatus", type: "text" },
                     { label: "Indent Category", value: requestDetails?.IndentCategory, readOnly: true, id: "indentCategory", type: "text" },
                     { label: "Indent Amount", value: requestDetails?.IndentAmount, readOnly: true, id: "indentAmount", type: "text" },
                     { label: "Indented Person ID", value: requestDetails?.IndentedPersonId, readOnly: true, id: "indentedPersonId", type: "text" },
+                ]}
+                buttons={[
+                    {
+                        label: "Approve", onClick: () => {
+                            action(true)
+                        }
+                    },
+                    {
+                        label: "Reject", onClick: () => {
+                            action(false)
+                        }
+                    }
                 ]}
                 onSubmit={(data) => console.log(data)}
             />

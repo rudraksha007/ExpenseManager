@@ -18,7 +18,8 @@ model User {
   isAdmin         Boolean   @default(false)
   createdAt       DateTime  @default(now())
   updatedAt       DateTime  @updatedAt
-  ActionedIndents Indents[]
+  ActionedIndents Indents[] @relation("ActionedBy")
+  Indents         Indents[] @relation("IndentPerson")
   projectsAsCoPIs Project[] @relation("ProjectCoPIs")
   projectsAsPIs   Project[] @relation("ProjectPIs")
 }
@@ -61,14 +62,16 @@ model Indents {
   IndentAmount  Float
   IndentQty     Float
   ActionDate    DateTime?
-  ActionedById  Int
+  IndentPersonId Int
+  IndentPerson   User         @relation(fields: [IndentPersonId], references: [EmployeeId], name: "IndentPerson")
+  ActionedById  Int?
   IndentReason  String
   IndentRemarks String
   createdAt     DateTime     @default(now())
   updatedAt     DateTime     @updatedAt
   indentData    Json
   BillCopy      String[]
-  ActionedBy    User         @relation(fields: [ActionedById], references: [EmployeeId])
+  ActionedBy    User?         @relation(fields: [ActionedById], references: [EmployeeId], name: "ActionedBy")
   Project       Project      @relation(fields: [ProjectNo], references: [ProjectNo])
 
   @@index([ProjectNo])

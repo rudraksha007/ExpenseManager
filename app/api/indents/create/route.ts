@@ -37,7 +37,7 @@ export async function PUT(req: Request) {
                 IndentAmount: parseFloat(IndentAmount),
                 IndentQty: parseInt(IndentQty),
                 ActionDate: new Date(ActionDate),
-                ActionedById: session.user.EmployeeId,
+                IndentPersonId: session.user.EmployeeId,
                 IndentReason,
                 IndentRemarks,
                 indentData

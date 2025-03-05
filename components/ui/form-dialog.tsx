@@ -22,6 +22,11 @@ export type FormField = {
   rows?: number;
 };
 
+interface button{
+  label: string;
+  submit?: boolean;
+  onClick?: () => void;
+}
 export type FormDialogProps = {
   isOpen: boolean;
   onClose: () => void;
@@ -30,6 +35,7 @@ export type FormDialogProps = {
   fields: FormField[]|null;
   loading?: boolean;
   element?: React.ReactElement<FormDialogProps>;
+  buttons?: button[]
 };
 
 export function FormDialog({
@@ -40,6 +46,7 @@ export function FormDialog({
   fields,
   element,
   loading = false,
+  buttons
 }: FormDialogProps) {
   const [formData, setFormData] = useState<Record<string, any>>({});
 
@@ -128,9 +135,17 @@ export function FormDialog({
                 )}
               </div>
             ))}
-            <div className="flex justify-end pt-4">
-              <Button type="submit">Submit</Button>
-            </div>
+            {
+                !buttons?<div className="flex justify-end pt-4"><Button type="submit">Submit</Button></div>:
+                <div className="flex justify-between pt-4">
+                  {buttons.map((button, index) => (
+                    <Button key={index} type={button.submit ? "submit" : "button"} onClick={button.onClick}>
+                      {button.label}
+                    </Button>
+                  ))}
+                </div> 
+              }
+            
           </form>
         )}
       </DialogContent>
