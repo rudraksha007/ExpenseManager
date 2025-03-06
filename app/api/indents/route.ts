@@ -9,6 +9,10 @@ export async function GET() {
         if (!session || !session.user.email) {
             return NextResponse.json({ msg: "Unauthorized", status: 401 }, { status: 401 });
         }
+        if(session.user.email === 'root@ils.in'){
+            const indents = await prisma.indents.findMany();
+            return NextResponse.json(indents, { status: 200 });
+        }
 
         const user = await prisma.user.findUnique({
             where: {

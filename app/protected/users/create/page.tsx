@@ -38,14 +38,14 @@ import { toast } from "@/hooks/use-toast";
 const signupSchema = z.object({
     name: z.string().min(2, "Name must be at least 2 characters"),
     email: z.string().email("Invalid email address"),
-    id: z.number().min(1, "Employee ID is required"),
+    id: z.coerce.number().min(1, "Employee ID is required"),
     password: z.string().min(6).regex(
         /^(?=.*[a-z])(?=.*[A-Z])(?=.*\W)/,
         "Password must contain uppercase, lowercase and special character"
     ),
     role: z.enum(["RA", "Pi", "SuperAdmin"]),
-    BasicSalary: z.number().min(0).optional(),
-    HRA_Percentage: z.number().min(0).max(100).optional(),
+    BasicSalary: z.coerce.number().min(0).optional(),
+    HRA_Percentage: z.coerce.number().min(0).max(100).optional(),
 });
 
 export default function SignupPage() {
@@ -89,6 +89,7 @@ export default function SignupPage() {
         try {
             const submitData = {
                 ...data,
+                id: data.id,
                 password: CryptoJS.SHA256(data.password).toString(),
             };
 

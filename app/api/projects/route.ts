@@ -49,6 +49,8 @@ export async function GET() {
             ...project,
             role: project.PIs.some(pi => pi.email === session.user?.email) ? 'PI' : 'COPI'
         }));
+        console.log(projects);
+        
 
         return NextResponse.json(projects || [], { status: 200 });
     } catch (error) {

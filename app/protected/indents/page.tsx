@@ -54,7 +54,8 @@ export default function IndentsPage() {
     async function action(approved: boolean) {
         try {
             setLoading(true);
-            setPopup(false);
+            console.log(requestDetails?.IndentNo);
+
             const response = await fetch("/api/indents/action", {
                 method: "POST",
                 headers: {
@@ -62,25 +63,34 @@ export default function IndentsPage() {
                 },
                 body: JSON.stringify({
                     approved: approved,
-                    IndentNo: requestDetails?.IndentID,
+                    IndentNo: requestDetails?.IndentNo,
                 }),
             });
 
             if (response.ok) {
-                const result = await response.json();
-                setPopup(false);
-                // Optionally, you can refetch the data to update the UI
-                // fetchData();
-            } else throw new Error("Failed to perform action");
-        } catch (error) {
+                // setPopup(false);
+                toast({
+                    title: "Action performed successfully",
+                    variant: 'default',
+                });
+            } else {
+                if (response.status === 500) {
+                    throw new Error("Server Error");
+                }else{
+                    const data = await response.json();
+                    throw new Error(data.msg);
+                }
+            };
+        } catch (error: any) {
             console.error("Failed to perform action", error);
             toast({
                 title: "Failed to perform action",
                 variant: 'destructive',
-                description: error as string,
+                description: error.message,
             })
-        }finally{
+        } finally {
             setRequestDetails(null);
+            setPopup(false);
             setLoading(false);
         }
     }
@@ -113,7 +123,7 @@ export default function IndentsPage() {
                             <TableRow>
                                 <TableCell colSpan={6}>
                                     <Skeleton className="h-6 w-full flex justify-center" >
-                                    <Loader className="animate-spin" />
+                                        <Loader className="animate-spin" />
                                     </Skeleton>
                                 </TableCell>
 
@@ -176,6 +186,7 @@ export default function IndentsPage() {
                 isOpen={popup} // or manage this state as needed
                 onClose={() => { setPopup(false) }} // or provide a proper handler
                 title="Indent Details"
+                
                 fields={[
                     { label: "Project No", value: requestDetails?.ProjectNo || "", readOnly: true, id: "projectNo", type: "text" },
                     { label: "Title", value: requestDetails?.ProjectTitle, readOnly: true, id: "title", type: "text" },
@@ -190,12 +201,15 @@ export default function IndentsPage() {
                     {
                         label: "Approve", onClick: () => {
                             action(true)
-                        }
+                        },
+                        disabled:loading
+                        
                     },
                     {
                         label: "Reject", onClick: () => {
                             action(false)
-                        }
+                        },
+                        disabled: loading
                     }
                 ]}
                 onSubmit={(data) => console.log('')}

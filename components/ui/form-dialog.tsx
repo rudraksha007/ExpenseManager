@@ -27,6 +27,7 @@ interface button {
   label: string;
   submit?: boolean;
   onClick?: () => void;
+  disabled?: boolean;
 }
 export type FormDialogProps = {
   isOpen: boolean;
@@ -141,7 +142,7 @@ export function FormDialog({
               !buttons ? <div className="flex justify-end pt-4"><Button type="submit">Submit</Button></div> :
                 <div className="flex justify-between pt-4">
                   {buttons.map((button, index) => (
-                    <Button key={index} type={button.submit ? "submit" : "button"} onClick={button.onClick}>
+                    <Button key={index} type={button.submit ? "submit" : "button"} onClick={button.onClick} disabled={button.disabled}>
                       {button.label}
                     </Button>
                   ))}

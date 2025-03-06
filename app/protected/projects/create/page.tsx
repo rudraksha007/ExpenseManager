@@ -222,12 +222,12 @@ export default function CreateProjectPage() {
 
   const handleUserSelection = (user: User, role: string) => {
     const currentSelection = selected.current[role as keyof typeof selected.current];
-    const userIndex = currentSelection.findIndex((u: User) => u.id === user.id);
+    const userIndex = currentSelection.findIndex((u: User) => u.email === user.email);
 
     if (userIndex === -1) {
       selected.current[role as keyof typeof selected.current] = [...currentSelection, user];
     } else {
-      selected.current[role as keyof typeof selected.current] = currentSelection.filter((u: User) => u.id !== user.id);
+      selected.current[role as keyof typeof selected.current] = currentSelection.filter((u: User) => u.email !== user.email);
     }
 
     setFormData(prev => ({
@@ -434,8 +434,9 @@ export default function CreateProjectPage() {
 
       {/* User Selection Dialog */}
       < Dialog open={!!popupContent
-      } onOpenChange={() => setPopupContent(null)}>
-        <DialogContent className="max-w-2xl">
+      } onOpenChange={() => setPopupContent(null)}
+      >
+        <DialogContent className="max-w-2xl max-h-[80%] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Select {popupContent}</DialogTitle>
           </DialogHeader>

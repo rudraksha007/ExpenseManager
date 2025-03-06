@@ -10,6 +10,20 @@ export async function POST(req: Request) {
         if (!session || !session.user.email) {
             return NextResponse.json({ msg: "Unauthorized", status: 401 }, { status: 401 });
         }
+        const { approved, IndentNo } = await req.json();
+        const indent = await prisma.indents.findUnique({
+            where: {
+                IndentNo: parseInt(IndentNo)
+            }
+        });
+
+        if (!indent) {
+            return NextResponse.json({ msg: 'Indent not found' }, { status: 404 });
+        }
+
+        if (session.user.email == 'root@ils.in') {
+            return NextResponse.json({ msg: "Root Account Isn't supposed to perform this action" }, { status: 401 });
+        }
 
         const user = await prisma.user.findUnique({
             where: {
@@ -33,28 +47,14 @@ export async function POST(req: Request) {
             return NextResponse.json({ msg: "User not found", status: 404 }, { status: 404 });
         }
 
-        const { approved, IndentNo } = await req.json();
-
-        const indent = await prisma.indents.findUnique({
-            where: {
-                IndentNo
-            }
-        });
-
-        if (!indent) {
-            return NextResponse.json({ msg: 'Indent not found' }, { status: 404 });
-        }
-
-        if (!user.isAdmin && !user.projectsAsPIs.some((project) => project.ProjectNo === indent.ProjectNo) && !user.projectsAsCoPIs.some((project) => project.ProjectNo === indent.ProjectNo)) {
-            return NextResponse.json({ msg: 'You are not authorized to approve this indent' }, { status: 403 });
-        }
-
         await prisma.indents.update({
             where: {
-                IndentNo
+                IndentNo: parseInt(IndentNo)
             },
             data: {
-                IndentStatus: approved ? IndentStatus.APPROVED : IndentStatus.REJECTED
+                IndentStatus: approved ? IndentStatus.APPROVED : IndentStatus.REJECTED,
+                ActionedById: user.EmployeeId,
+                ActionDate: new Date()
             }
         });
 

@@ -38,7 +38,6 @@ export default function ReportsPage() {
   const [selectedQuarter, setSelectedQuarter] = useState("1");
 
   useEffect(() => {
-    setLoading(true);
     if (!projects || !projects.length) fetchProjects();
     if (!reportType) return;
     setReportData({ data: [], reportType: null });
@@ -51,7 +50,7 @@ export default function ReportsPage() {
 
   const fetchProjects = async () => {
     try {
-      setLoading(true);
+      setLoading(true);      
       const response = await fetch("/api/projects");
       if (response.ok) {
         const data = await response.json();
@@ -65,12 +64,13 @@ export default function ReportsPage() {
     } catch (error) {
       console.error("Error fetching projects:", error);
       alert("Unable to fetch projects");
-    } finally {
+    } finally {      
       setLoading(false);
     }
   };
 
   async function generateReport() {
+    
     if (!reportType || reportType == '') return;
     if ((reportType === "yearly" || reportType === "quarterly") && (!selectedYear || !selectedProject)) {
       setLoading(false);
