@@ -123,7 +123,7 @@ export default function IndentsPage() {
                             data.map((item, index) => (
                                 <TableRow key={item.id} onClick={() => {
                                     setRequestDetails({
-                                        IndentNo: item.IndentNo,
+                                        IndentNo: item.IndentNo.toString(),
                                         ProjectNo: item.ProjectNo,
                                         ProjectTitle: item.ProjectTitle,
                                         IndentID: item.id,

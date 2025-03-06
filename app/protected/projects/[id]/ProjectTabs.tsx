@@ -473,7 +473,6 @@ export default function ProjectTabs({ project, isOpen, setIsOpen, loading, setLo
                 });
             }));
         }
-        // console.log(Object.fromEntries(data));
         
         const newIndent: Record<string, any> = {
             ProjectNo: project?.ProjectNo || "",
@@ -499,7 +498,6 @@ export default function ProjectTabs({ project, isOpen, setIsOpen, loading, setLo
             setLoading(false);
             return;
         }   
-        // console.log(newIndent);
                
         try {
             const resp = await fetch('/api/indents/create', {
@@ -555,15 +553,10 @@ export default function ProjectTabs({ project, isOpen, setIsOpen, loading, setLo
                 });
                 routr.push('/protected/dashboard');
             }
-            // console.log('fetched new indent number');
             
         }
-        console.log(project);
         if(!loading)return;
-        fetchNewId();
-        
-        // console.log('fetching new indent number');
-        
+        fetchNewId();        
     }, [loading]);
 
     return (

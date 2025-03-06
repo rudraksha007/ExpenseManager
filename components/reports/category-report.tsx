@@ -61,7 +61,6 @@ export function CategoryReport({ projects }: CategoryReportProps) {
 
   // Calculate total spending for each category
   const categoryTotals = useMemo(() => {
-    console.log(projects);
     
     return [
       { 
