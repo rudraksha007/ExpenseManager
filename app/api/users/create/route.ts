@@ -4,20 +4,35 @@ import { getServerSession } from "next-auth";
 import { NextResponse } from "next/server";
 
 export async function PUT(req: Request) {
-    const session = await getServerSession(authOptions);
-    if (!session || !session.user?.email) return NextResponse.json({ msg: "Unauthorized" }, { status: 401 });
-    const { name, id, role, email, password } = await req.json();
-    const dbUser = await prisma.user.findUnique({ where: { email } });
-    if (dbUser) return NextResponse.json({ msg: "User already exists" }, { status: 400 });
-    const newUser = await prisma.user.create({
-        data: {
-            name,
-            EmployeeId: id,
-            isAdmin: role==='SuperAdmin',
-            email,
-            password,
+    try {
+        const session = await getServerSession(authOptions);
+        if (!session || !session.user?.email) {
+            return NextResponse.json({ msg: "Unauthorized" }, { status: 401 });
         }
-    });
-    if (!newUser) return NextResponse.json({ err: "Error creating user" }, { status: 500 });
-    return NextResponse.json({ msg: "User created" }, { status: 200 });
+
+        const { name, id, role, email, password } = await req.json();
+        const dbUser = await prisma.user.findUnique({ where: { email } });
+        if (dbUser) {
+            return NextResponse.json({ msg: "User already exists" }, { status: 400 });
+        }
+
+        const newUser = await prisma.user.create({
+            data: {
+                name,
+                EmployeeId: id,
+                isAdmin: role === 'SuperAdmin',
+                email,
+                password,
+            }
+        });
+
+        if (!newUser) {
+            return NextResponse.json({ err: "Error creating user" }, { status: 500 });
+        }
+
+        return NextResponse.json({ msg: "User created" }, { status: 200 });
+    } catch (error) {
+        console.error(error);
+        return NextResponse.json({ err: "Internal Server Error" }, { status: 500 });
+    }
 }

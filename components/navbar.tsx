@@ -75,7 +75,7 @@ export function Navbar() {
                   Reports
                 </DropdownMenuItem>
               </Link>
-              <Link href="/login" onClick={()=> signOut()}>
+              <Link href="/auth/login" onClick={()=> signOut()}>
                 <DropdownMenuItem className="cursor-pointer text-red-600">
                   <LogOut className="mr-2 h-4 w-4" />
                   Logout

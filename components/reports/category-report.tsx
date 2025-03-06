@@ -59,15 +59,10 @@ export function CategoryReport({ projects }: CategoryReportProps) {
     return aggregatedData;
   }, [projects]);
 
-  // COALESCE(SUM(p."ManpowerAllocationAmt"), 0) AS "TotalManpowerAmount",
-  //   COALESCE(SUM(p."ConsumablesAllocationAmt"), 0) AS "TotalConsumablesAmount",
-  //   COALESCE(SUM(p."ContingencyAllocationAmt"), 0) AS "TotalContingencyAmount",
-  //   COALESCE(SUM(p."OverheadAllocationAmt"), 0) AS "TotalOverheadAmount",
-  //   COALESCE(SUM(p."EquipmentAllocationAmt"), 0) AS "TotalEquipmentAmount",
-  //   COALESCE(SUM(p."TravelAllocationAmt"), 0) AS "TotalTravelAmount"
-
   // Calculate total spending for each category
   const categoryTotals = useMemo(() => {
+    console.log(projects);
+    
     return [
       { 
       name: 'Manpower', 

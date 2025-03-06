@@ -64,7 +64,7 @@ export default function SignupPage() {
     useEffect(() => {
         async function fetchLatestId() {
             setIsLoading(true);
-            const response = await fetch('/api/users/newId', {
+            const response = await fetch('/api/newId?type=user', {
                 method: 'GET',
             });
             if (!response.ok) {

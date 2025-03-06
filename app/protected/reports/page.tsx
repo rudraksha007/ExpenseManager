@@ -125,7 +125,7 @@ export default function ReportsPage() {
                 onValueChange={setReportType}
               >
                 <SelectTrigger>
-                  <SelectValue placeholder="Select type" />
+                  <SelectValue placeholder="Select type"/>
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="general">General</SelectItem>

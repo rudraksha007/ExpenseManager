@@ -4,17 +4,18 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { FormDialog } from "@/components/ui/form-dialog";
 import { Tabs, TabsList,TabsContent, TabsTrigger } from "@/components/ui/tabs";
 import { useSession } from "next-auth/react";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { FieldMap } from "./page";
 import { formatCurrency } from "@/lib/utils";
 import { toast } from "@/hooks/use-toast";
 import { Indents, IndentType, Project } from "@prisma/client";
 import { EquipmentIndent } from "@/components/indents/equipment-indent";
 import { ManpowerIndent } from "@/components/indents/manpower-indent";
+import { useRouter } from "next/navigation";
 
 const consumablesColumns = [
     { header: "Indent ID", accessor: "IndentNo" },
-    { header: "Employee ID", accessor: "ActionedById" },
+    { header: "Employee ID", accessor: "IndentPersonId" },
     { header: "Date", accessor: "IndentDate", render: (item: Indents) => new Date(item.IndentDate).toISOString().split('T')[0] },
     { header: "Description", accessor: "IndentReason" },
     {
@@ -27,7 +28,7 @@ const consumablesColumns = [
 
 const travelsColumns = [
     { header: "Indent ID", accessor: "IndentNo" },
-    { header: "Employee ID", accessor: "ActionedById" },
+    { header: "Employee ID", accessor: "IndentPersonId" },
     { header: "Travel Date", accessor: "IndentDate", render: (item: Indents) => new Date(item.IndentDate).toISOString().split('T')[0] },
     { header: "Purpose", accessor: "IndentReason" },
     {
@@ -50,6 +51,8 @@ export interface ExtendedProject extends Project {
 export default function ProjectTabs({ project, isOpen, setIsOpen, loading, setLoading, reloadData, activeTab, setActiveTab }:{project: ExtendedProject, isOpen: boolean, setIsOpen: (value: boolean) => void, loading: boolean, setLoading: (value: boolean) => void, reloadData: () => void, activeTab: "Consumables" | "Travel" | "Contingency" | "Equipment" | "Manpower", setActiveTab: (value: "Consumables" | "Travel" | "Contingency" | "Equipment" | "Manpower") => void}) {
     const user = useSession().data?.user;
     const [popLoading, setPopLoading] = useState<boolean>(false);
+    const [newIndentNo, setNewIndentNo] = useState<number>(0);
+    const routr = useRouter();
 
     //@ts-expect-error
     const fieldMap: FieldMap = useMemo(() => {
@@ -81,7 +84,8 @@ export default function ProjectTabs({ project, isOpen, setIsOpen, loading, setLo
                     id: "IndentNo",
                     label: "Indent No",
                     type: "text",
-                    required: true
+                    required: true,
+                    value: newIndentNo,
                 },
                 {
                     id: "IndentAmount",
@@ -146,7 +150,8 @@ export default function ProjectTabs({ project, isOpen, setIsOpen, loading, setLo
                     id: "IndentNo",
                     label: "Indent No",
                     type: "text",
-                    required: true
+                    required: true,
+                    value: newIndentNo,
                 },
                 {
                     id: "IndentDate",
@@ -250,7 +255,8 @@ export default function ProjectTabs({ project, isOpen, setIsOpen, loading, setLo
                     id: "IndentNo",
                     label: "Indent No",
                     type: "text",
-                    required: true
+                    required: true,
+                    value: newIndentNo,
                 },
                 {
                     id: "ProjectTitle",
@@ -330,7 +336,8 @@ export default function ProjectTabs({ project, isOpen, setIsOpen, loading, setLo
                     id: "IndentNo",
                     label: "Indent No",
                     type: "text",
-                    required: true
+                    required: true,
+                    value: newIndentNo,
                 },
                 {
                     id: "IndentAmount",
@@ -402,8 +409,9 @@ export default function ProjectTabs({ project, isOpen, setIsOpen, loading, setLo
                 {
                     id: "IndentNo",
                     label: "Indent No",
-                    type: "text",
-                    required: true
+                    type: "number",
+                    required: true,
+                    value: newIndentNo,
                 },
                 {
                     id: "IndentAmount",
@@ -450,7 +458,7 @@ export default function ProjectTabs({ project, isOpen, setIsOpen, loading, setLo
                 },
             ],
         };
-    }, [project, user]);
+    }, [project, user, newIndentNo]);
     const handleSubmit = async (data: FormData) => {
         setLoading(true);
         const files = data.getAll("BillCopy") as File[];
@@ -465,10 +473,12 @@ export default function ProjectTabs({ project, isOpen, setIsOpen, loading, setLo
                 });
             }));
         }
-        const newIndent = {
+        // console.log(Object.fromEntries(data));
+        
+        const newIndent: Record<string, any> = {
             ProjectNo: project?.ProjectNo || "",
             ProjectTitle: project?.ProjectTitle || "",
-            IndentNo: data.get("IndentNo"),
+            IndentNo: parseInt(data.get("IndentNo")?.toString() || "0"),
             IndentDate: new Date().toISOString().split("T")[0],
             Type: activeTab.toUpperCase() as IndentType,
             IndentAmount: data.get("IndentAmount"),
@@ -479,7 +489,18 @@ export default function ProjectTabs({ project, isOpen, setIsOpen, loading, setLo
             IndentRemarks: data.get("IndentRemarks"),
             BillCopy: BillCopy ? BillCopy : [],
             ...Object.fromEntries(data.entries().filter(([key]) => !["ProjectNo", "ProjectTitle", "IndentNo", "IndentDate", "Type", "IndentAmount", "IndentQty", "ActionDate", "ActionedById", "IndentReason", "IndentRemarks", "BillCopy"].includes(key)))
-        };        
+        }; 
+        if(project[`${activeTab}AllocationAmt`] < project.Indents.reduce((acc, i)=> i.Type==activeTab.toUpperCase()?acc+i.IndentAmount:acc, 0) + newIndent.IndentAmount){
+            toast({
+                title: "Error",
+                description: "Allocation amount exceeded",
+                variant: 'destructive'
+            });
+            setLoading(false);
+            return;
+        }   
+        // console.log(newIndent);
+               
         try {
             const resp = await fetch('/api/indents/create', {
                 method: 'PUT',
@@ -488,31 +509,62 @@ export default function ProjectTabs({ project, isOpen, setIsOpen, loading, setLo
                 },
                 body: JSON.stringify(newIndent)
             });
-            if (!resp.ok) {
-                throw new Error("Failed to create new indent");
+            if(resp.status==400){
+                throw new Error("Indent No already exists");
             }
-            else {
+            else if(resp.ok){
                 toast({
                     title: "Indent created successfully",
                     description: "The indent has been created successfully.",
                     variant: 'default'
                 });
+                reloadData();
             }
-        } catch (err) {
+            else {
+                throw new Error("Failed to create new indent");
+            }
+        } catch (err: any) {
             toast({
-                title: "Failed to create new indent",
-                description: err as string,
+                title: "Error",
+                description: err.message as string,
                 variant: 'destructive'
             });
+            setLoading(false);
         }
         finally {
-            reloadData();
             setIsOpen(false);
         }
     }
     const handleAddNew = () => {
         setIsOpen(true);
     };
+    useEffect(()=>{
+        async function fetchNewId(){
+            setPopLoading(true);
+            const resp = await fetch('/api/newId?type=indent');
+            if(resp.ok){
+                const data = await resp.json();
+                setNewIndentNo(data.id);
+                setPopLoading(false);
+            }
+            else{
+                toast({
+                    title: 'Error',
+                    description: 'Failed to fetch new indent number',
+                    variant: 'destructive'
+                });
+                routr.push('/protected/dashboard');
+            }
+            // console.log('fetched new indent number');
+            
+        }
+        console.log(project);
+        if(!loading)return;
+        fetchNewId();
+        
+        // console.log('fetching new indent number');
+        
+    }, [loading]);
 
     return (
         <Card>
@@ -558,7 +610,7 @@ export default function ProjectTabs({ project, isOpen, setIsOpen, loading, setLo
                             columns={consumablesColumns} // Assuming similar columns for Equipments
                             onAdd={null}
                         />
-                        <EquipmentIndent onSubmit={handleSubmit} project={project}/>
+                        <EquipmentIndent onSubmit={handleSubmit} project={project} loading={popLoading} newIndentId={newIndentNo}/>
                     </TabsContent>
 
                     <TabsContent value="Manpower">
@@ -567,7 +619,7 @@ export default function ProjectTabs({ project, isOpen, setIsOpen, loading, setLo
                             columns={consumablesColumns} // Assuming similar columns for Manpower
                             onAdd={null}
                         />
-                        <ManpowerIndent onSubmit={handleSubmit} project={project}/>
+                        <ManpowerIndent onSubmit={handleSubmit} project={project} loading={popLoading} newIndentId={newIndentNo}/>
                     </TabsContent>
                     <FormDialog
                         isOpen={isOpen}
@@ -576,6 +628,7 @@ export default function ProjectTabs({ project, isOpen, setIsOpen, loading, setLo
                         title={`Add ${activeTab}`}
                         fields={activeTab=="Manpower"||activeTab=="Equipment"?null:fieldMap[activeTab]}
                         loading={popLoading}
+
                     />
                 </Tabs>
             </CardContent>

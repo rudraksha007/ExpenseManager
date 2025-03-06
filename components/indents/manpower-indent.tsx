@@ -17,6 +17,8 @@ interface ManpowerItem {
 interface ManpowerIndentProps {
     onSubmit: (data: globalThis.FormData) => void;
     project: Project;
+    loading: boolean;
+    newIndentId: number;
 }
 
 interface FormData {
@@ -28,14 +30,14 @@ interface FormData {
     IndentRemarks: string;
 }
 
-export function ManpowerIndent({ onSubmit, project }: ManpowerIndentProps) {
+export function ManpowerIndent({ onSubmit, project, loading, newIndentId }: ManpowerIndentProps) {
     const [items, setItems] = useState<ManpowerItem[]>([
         { employeeName: "", dailySalary: 0, numberOfDays: 1 }
     ]);    
     const [formData, setFormData] = useState<FormData>({
         items: items,
         IndentAmount: 0,
-        IndentNo: '',
+        IndentNo: newIndentId.toString(),
         IndentDate: "",
         IndentReason: "",
         IndentRemarks: ""
@@ -202,7 +204,7 @@ export function ManpowerIndent({ onSubmit, project }: ManpowerIndentProps) {
             </div>
 
             <div className="flex justify-end">
-                <Button type="submit">Submit Indent</Button>
+                {loading? <Button type="submit" disabled>Loading...</Button> : <Button type="submit">Submit</Button>}
             </div>
         </form>
     );

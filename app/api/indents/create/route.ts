@@ -26,6 +26,12 @@ export async function PUT(req: Request) {
             }
         });
         if (!proj) return NextResponse.json({ msg: "Project doesn't exists" }, { status: 404 });
+        const ind = await prisma.indents.findFirst({
+            where:{
+                IndentNo
+            }
+        });
+        if(ind) return NextResponse.json({msg: "Indent No already exists"}, {status: 400});
 
         await prisma.indents.create({
             data: {

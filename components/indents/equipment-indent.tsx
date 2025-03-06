@@ -17,25 +17,27 @@ interface EquipmentItem {
 interface EquipmentIndentProps {
     onSubmit: (data: globalThis.FormData) => void;
     project: Project;
+    loading: boolean;
+    newIndentId: number;
 }
 
 interface FormData {
     items: EquipmentItem[];
     IndentAmount: number;
-    IndentNo: string;
+    IndentNo: number;
     IndentDate: string;
     IndentReason: string;
     IndentRemarks: string;
 }
 
-export function EquipmentIndent({ onSubmit, project }: EquipmentIndentProps) {
+export function EquipmentIndent({ onSubmit, project, loading, newIndentId }: EquipmentIndentProps) {
     const [items, setItems] = useState<EquipmentItem[]>([
         { name: "", quantity: 1, pricePerUnit: 0 }
     ]);
     const [formData, setFormData] = useState<FormData>({
         items: items,
         IndentAmount: 0,
-        IndentNo: '',
+        IndentNo: newIndentId,
         IndentDate: "",
         IndentReason: "",
         IndentRemarks: ""
@@ -68,7 +70,7 @@ export function EquipmentIndent({ onSubmit, project }: EquipmentIndentProps) {
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
         const data = new FormData();
-        data.append("IndentNo", formData.IndentNo);
+        data.append("IndentNo", formData.IndentNo.toString());
         data.append("IndentDate", formData.IndentDate);
         data.append("IndentAmount", calculateGrandTotal().toString());
         data.append("indentData", JSON.stringify(items));
@@ -87,7 +89,7 @@ export function EquipmentIndent({ onSubmit, project }: EquipmentIndentProps) {
                         <Input
                             id={`IndentNo`}
                             value={formData.IndentNo}
-                            onChange={(e) => setFormData({ ...formData, IndentNo: (e.target.value) })}
+                            onChange={(e) => setFormData({ ...formData, IndentNo: Number((e.target.value)) })}
                             placeholder="Enter IndentNo"
                             required
                         />
@@ -201,7 +203,7 @@ export function EquipmentIndent({ onSubmit, project }: EquipmentIndentProps) {
             </div>
 
             <div className="flex justify-end">
-                <Button type="submit">Submit Indent</Button>
+            {loading? <Button type="submit" disabled>Loading...</Button> : <Button type="submit">Submit</Button>}
             </div>
         </form>
     );

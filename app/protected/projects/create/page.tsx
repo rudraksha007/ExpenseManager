@@ -450,10 +450,10 @@ export default function CreateProjectPage() {
             <TableBody>
               {users.map(user => {
                 // if(user.isAdmin) return null;
-                if (popupContent === "CoPIs" && selected.current.PIs.some((u: User) => u.id === user.id)) {
+                if (popupContent === "CoPIs" && selected.current.PIs.some((u: User) => u.email === user.email)) {
                   return null;
                 }
-                else if (popupContent === "PIs" && selected.current.CoPIs.some((u: User) => u.id === user.id)) {
+                else if (popupContent === "PIs" && selected.current.CoPIs.some((u: User) => u.email === user.email)) {
                   return null;
                 }
                 return (<TableRow key={user.email}>

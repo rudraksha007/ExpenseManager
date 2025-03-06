@@ -7,6 +7,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { X } from "lucide-react";
 import React, { useState } from "react";
+import { string } from "zod";
 
 export type FormField = {
   id: string;
@@ -22,7 +23,7 @@ export type FormField = {
   rows?: number;
 };
 
-interface button{
+interface button {
   label: string;
   submit?: boolean;
   onClick?: () => void;
@@ -32,7 +33,7 @@ export type FormDialogProps = {
   onClose: () => void;
   onSubmit: (data: FormData) => void;
   title: string;
-  fields: FormField[]|null;
+  fields: FormField[] | null;
   loading?: boolean;
   element?: React.ReactElement<FormDialogProps>;
   buttons?: button[]
@@ -47,14 +48,12 @@ export function FormDialog({
   element,
   loading = false,
   buttons
-}: FormDialogProps) {
+}: FormDialogProps) {  
   const [formData, setFormData] = useState<Record<string, any>>({});
-
+  const formRef = React.useRef<HTMLFormElement>(null);
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    const form = new FormData();
-    
-    // Append all form data
+    const form = new FormData(formRef.current as HTMLFormElement);    
     Object.entries(formData).forEach(([key, value]) => {
       if (value instanceof FileList) {
         Array.from(value).forEach((file) => {
@@ -64,6 +63,7 @@ export function FormDialog({
         form.append(key, value);
       }
     });
+
 
     onSubmit(form);
   };
@@ -77,7 +77,7 @@ export function FormDialog({
       [field.id]: value,
     }));
   };
-  if(!fields)return element ? React.cloneElement(element, { isOpen, onClose, onSubmit, title, fields, loading }) : null;
+  if (!fields) return element ? React.cloneElement(element, { isOpen, onClose, onSubmit, title, fields, loading }) : null;
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -93,16 +93,17 @@ export function FormDialog({
             <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
           </div>
         ) : (
-          <form onSubmit={handleSubmit} className="space-y-4">
-            {fields.map((field) => (
-              <div key={field.id} className="space-y-2">
+          <form onSubmit={handleSubmit} className="space-y-4" ref={formRef}>
+            {fields.map((field) => {
+              return <div key={field.id} className="space-y-2">
                 <Label htmlFor={field.id}>{field.label}</Label>
                 {field.type === "textarea" ? (
                   <Textarea
                     id={field.id}
                     required={field.required}
                     readOnly={field.readOnly}
-                    value={formData[field.id] || field.value || ""}
+                    name={field.id}
+                    value={formData[field.id] || ""}
                     rows={field.rows}
                     onChange={(e) => handleInputChange(field, e.target.value)}
                     className="resize-none"
@@ -113,6 +114,7 @@ export function FormDialog({
                     id={field.id}
                     required={field.required}
                     readOnly={field.readOnly}
+                    name={field.id}
                     value={
                       field.type !== "file"
                         ? formData[field.id] || field.value || ""
@@ -134,18 +136,18 @@ export function FormDialog({
                   />
                 )}
               </div>
-            ))}
+})}
             {
-                !buttons?<div className="flex justify-end pt-4"><Button type="submit">Submit</Button></div>:
+              !buttons ? <div className="flex justify-end pt-4"><Button type="submit">Submit</Button></div> :
                 <div className="flex justify-between pt-4">
                   {buttons.map((button, index) => (
                     <Button key={index} type={button.submit ? "submit" : "button"} onClick={button.onClick}>
                       {button.label}
                     </Button>
                   ))}
-                </div> 
-              }
-            
+                </div>
+            }
+
           </form>
         )}
       </DialogContent>
