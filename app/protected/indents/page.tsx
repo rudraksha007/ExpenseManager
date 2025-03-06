@@ -47,7 +47,6 @@ export default function IndentsPage() {
     const handlePageChange = (page: number) => {
         setLoading(true);
         setCurrentPage(page);
-        // Simulate loading
         setTimeout(() => setLoading(false), 500);
     };
 
