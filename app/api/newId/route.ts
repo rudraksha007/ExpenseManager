@@ -29,7 +29,7 @@ export async function GET(req: Request) {
                 const newId = await prisma.indents.count();
                 return NextResponse.json({ id: newId + 1 }, { status: 200 });
             }
-        }
+        } 
 
     }
     catch (err: any) {
