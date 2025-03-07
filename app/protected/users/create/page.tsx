@@ -90,7 +90,7 @@ export default function SignupPage() {
             const submitData = {
                 ...data,
                 id: data.id,
-                password: CryptoJS.SHA256(data.password).toString(),
+                password: data.password,
             };
 
             const response = await fetch('/api/users/create', {

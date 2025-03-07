@@ -17,7 +17,8 @@ import {
   FileText, 
   FolderPlus, 
   ClipboardList, 
-  UserPlus
+  UserPlus,
+  User
 } from "lucide-react";
 import { signOut } from "next-auth/react";
 
@@ -61,6 +62,12 @@ export function Navbar() {
                 <DropdownMenuItem className="cursor-pointer">
                   <FolderPlus className="mr-2 h-4 w-4" />
                   Create Project
+                </DropdownMenuItem>
+              </Link>
+              <Link href="/protected/users">
+                <DropdownMenuItem className="cursor-pointer">
+                  <User className="mr-2 h-4 w-4" />
+                  All Users
                 </DropdownMenuItem>
               </Link>
               <Link href="/protected/users/create">

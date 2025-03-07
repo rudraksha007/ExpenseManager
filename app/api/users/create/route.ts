@@ -9,7 +9,13 @@ export async function PUT(req: Request) {
         if (!session || !session.user?.email) {
             return NextResponse.json({ msg: "Unauthorized" }, { status: 401 });
         }
-
+        const user = await prisma.user.findUnique({ where: { email: session.user.email }, select: { isAdmin: true } });
+        if (!user) {
+            return NextResponse.json({ msg: "User not found" }, { status: 404 });
+        }
+        if (!user?.isAdmin) {
+            return NextResponse.json({ msg: "Unauthorized" }, { status: 401 });
+        }
         const { name, id, role, email, password } = await req.json();
         const dbUser = await prisma.user.findUnique({ where: { email } });
         if (dbUser) {
@@ -22,7 +28,7 @@ export async function PUT(req: Request) {
                 EmployeeId: id,
                 isAdmin: role === 'SuperAdmin',
                 email,
-                password,
+                password: CryptoJS.SHA256(password).toString(),
             }
         });
 

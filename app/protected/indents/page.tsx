@@ -67,7 +67,6 @@ export default function IndentsPage() {
             });
 
             if (response.ok) {
-                // setPopup(false);
                 toast({
                     title: "Action performed successfully",
                     variant: 'default',
