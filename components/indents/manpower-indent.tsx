@@ -12,6 +12,7 @@ interface ManpowerItem {
     employeeName: string;
     dailySalary: number;
     numberOfDays: number;
+    hraPercentage?: number| 0;
 }
 
 interface ManpowerIndentProps {
@@ -61,7 +62,7 @@ export function ManpowerIndent({ onSubmit, project, loading, newIndentId }: Manp
     };
 
     const calculateTotal = (item: ManpowerItem) => {
-        return item.dailySalary * item.numberOfDays;
+        return item.dailySalary * item.numberOfDays * (1 + (item.hraPercentage || 0) / 100);
     };
 
     const calculateGrandTotal = () => {
@@ -132,7 +133,7 @@ export function ManpowerIndent({ onSubmit, project, loading, newIndentId }: Manp
                     </div>
                 </div>
                 {items.map((item, index) => (
-                    <div key={index} className="grid grid-cols-4 gap-4 items-end border p-4 rounded-lg">
+                    <div key={index} className="grid grid-cols-5 gap-4 items-end border p-4 rounded-lg">
                         <div className="space-y-2">
                             <Label htmlFor={`employee-${index}`}>Employee Name</Label>
                             <Input
@@ -165,6 +166,20 @@ export function ManpowerIndent({ onSubmit, project, loading, newIndentId }: Manp
                                 min="1"
                                 value={item.numberOfDays}
                                 onChange={(e) => updateItem(index, "numberOfDays", e.target.value)}
+                                required
+                            />
+                        </div>
+
+                        <div className="space-y-2">
+                            <Label htmlFor={`hra-${index}`}>HRA %</Label>
+                            <Input
+                                id={`hra-${index}`}
+                                type="number"
+                                min="0"
+                                max="100"
+                                step="0.01"
+                                value={item.hraPercentage || 0}
+                                onChange={(e) => updateItem(index, "hraPercentage", e.target.value)}
                                 required
                             />
                         </div>

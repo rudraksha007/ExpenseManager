@@ -488,8 +488,8 @@ export default function ProjectTabs({ project, isOpen, setIsOpen, loading, setLo
             IndentRemarks: data.get("IndentRemarks"),
             BillCopy: BillCopy ? BillCopy : [],
             ...Object.fromEntries(data.entries().filter(([key]) => !["ProjectNo", "ProjectTitle", "IndentNo", "IndentDate", "Type", "IndentAmount", "IndentQty", "ActionDate", "ActionedById", "IndentReason", "IndentRemarks", "BillCopy"].includes(key)))
-        }; 
-        if(project[`${activeTab}AllocationAmt`] < project.Indents.reduce((acc, i)=> i.Type==activeTab.toUpperCase()?acc+i.IndentAmount:acc, 0) + newIndent.IndentAmount){
+        };         
+        if(project[`${activeTab}AllocationAmt`] < project.Indents.reduce((acc, i)=> i.Type==activeTab.toUpperCase()?acc+i.IndentAmount:acc, 0) + parseFloat(newIndent.IndentAmount)){
             toast({
                 title: "Error",
                 description: "Allocation amount exceeded",
