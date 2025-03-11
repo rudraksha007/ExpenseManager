@@ -26,8 +26,10 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { Button } from '../ui/button';
+import { exportQuarterlyReport } from '@/lib/file-exporter';
 
-interface BudgetAllocation {
+export interface BudgetAllocation {
   Category: string;
   TotalIndented: number;
   IndentedProposed: number;
@@ -109,7 +111,7 @@ export function QuarterlyReport({ data }: BudgetAllocationReportProps) {
                   outerRadius={80}
                   fill="#8884d8"
                   dataKey="value"
-                  label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+                  // label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
                 >
                   {pieChartData.map((_, index) => (
                     <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
@@ -229,6 +231,7 @@ export function QuarterlyReport({ data }: BudgetAllocationReportProps) {
           </Table>
         </CardContent>
       </Card>
+      <Button onClick={() => exportQuarterlyReport(data)}>Download Report</Button>
     </div>
   );
 }

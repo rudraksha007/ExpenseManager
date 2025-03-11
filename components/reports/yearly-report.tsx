@@ -26,6 +26,8 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { Button } from '../ui/button';
+import { exportYearlyReport } from '@/lib/file-exporter';
 
 export interface YearlyBudgetAllocation {
   Category: string;
@@ -100,7 +102,7 @@ export default function YearlyReport({ data, year }: YearlyBudgetReportProps) {
                   outerRadius={80}
                   fill="#8884d8"
                   dataKey="value"
-                  label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+                  // label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
                 >
                   {pieChartData.map((_, index) => (
                     <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
@@ -195,6 +197,7 @@ export default function YearlyReport({ data, year }: YearlyBudgetReportProps) {
           </Table>
         </CardContent>
       </Card>
+      <Button onClick={() => exportYearlyReport(data, year)}>Download Report</Button>
     </div>
   );
 }

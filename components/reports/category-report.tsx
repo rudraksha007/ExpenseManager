@@ -7,6 +7,8 @@ import {
 } from "@/components/ui/card";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Button } from '../ui/button';
+import { exportCategoryReport } from '@/lib/file-exporter';
 
 interface Project {
   ProjectNo: string;
@@ -28,7 +30,7 @@ interface Project {
   TotalTravelAmount: number;
 }
 
-interface CategoryReportProps {
+export interface CategoryReportProps {
   projects: Project[];
 }
 
@@ -170,6 +172,7 @@ export function CategoryReport({ projects }: CategoryReportProps) {
           </Table>
         </CardContent>
       </Card>
+      <Button onClick={()=>exportCategoryReport(projects)}>Download Report</Button>
     </div>
   );
 }

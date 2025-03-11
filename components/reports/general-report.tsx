@@ -7,6 +7,8 @@ import {
 } from "@/components/ui/card";
 import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from "recharts";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Button } from '../ui/button';
+import { exportGeneralReport } from '@/lib/file-exporter';
 
 export interface ProjectReport {
   ProjectNo: string;
@@ -102,7 +104,7 @@ export function GeneralReport({ projects }: { projects: ProjectReport[] }) {
                   outerRadius={80}
                   paddingAngle={1}
                   dataKey="value"
-                  label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+                  // label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
                 >
                   {fundingDistributionData?.map((_, index) => (
                     <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
@@ -115,6 +117,7 @@ export function GeneralReport({ projects }: { projects: ProjectReport[] }) {
           </CardContent>
         </Card>
       </div>
+          <Button onClick={()=>exportGeneralReport(projects)}>Download Report</Button>
     </div>
   );
 }

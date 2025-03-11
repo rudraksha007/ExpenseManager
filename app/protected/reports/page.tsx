@@ -22,6 +22,7 @@ import { CategoryReport } from "@/components/reports/category-report";
 import { GeneralReport, ProjectReport } from "@/components/reports/general-report";
 import YearlyReport from "@/components/reports/yearly-report";
 import { QuarterlyReport } from "@/components/reports/quarterly-report";
+import { exportCategoryReport, exportGeneralReport } from "@/lib/file-exporter";
 
 interface Project {
   ProjectNo: string;
@@ -106,10 +107,6 @@ export default function ReportsPage() {
     }
   };
 
-  const handleDownload = () => {
-    // Implement download functionality
-  };
-
   return (
     <div className="container mx-auto py-8 space-y-6">
       <Card>
@@ -188,14 +185,6 @@ export default function ReportsPage() {
                   </div>
                 )}
               </>
-            )}
-
-            {reportData && (
-              <div className="col-span-full flex justify-end">
-                <Button onClick={handleDownload}>
-                  Download Report
-                </Button>
-              </div>
             )}
           </div>
         </CardContent>
