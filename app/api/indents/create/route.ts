@@ -18,7 +18,8 @@ export async function PUT(req: Request) {
             ActionDate,
             IndentReason,
             IndentRemarks,
-            indentData
+            indentData,
+            BillCopy
         } = await req.json();
         const proj = await prisma.project.findFirst({
             where: {
@@ -46,7 +47,8 @@ export async function PUT(req: Request) {
                 IndentPersonId: session.user.EmployeeId,
                 IndentReason,
                 IndentRemarks,
-                indentData
+                indentData,
+                BillCopy
             },
         });
         return NextResponse.json({ msg: 'created successfully' }, { status: 200 });

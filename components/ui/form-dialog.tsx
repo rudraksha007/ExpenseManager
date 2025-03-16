@@ -54,7 +54,7 @@ export function FormDialog({
   const formRef = React.useRef<HTMLFormElement>(null);
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    const form = new FormData(formRef.current as HTMLFormElement);    
+    const form = new FormData(formRef.current as HTMLFormElement);   
     Object.entries(formData).forEach(([key, value]) => {
       if (value instanceof FileList) {
         Array.from(value).forEach((file) => {
@@ -115,7 +115,7 @@ export function FormDialog({
                     id={field.id}
                     required={field.required}
                     readOnly={field.readOnly}
-                    name={field.id}
+                    name={field.type!=='file'?field.id : ''}
                     value={
                       field.type !== "file"
                         ? formData[field.id] || field.value || ""

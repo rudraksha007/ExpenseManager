@@ -19,11 +19,8 @@ import {
   CartesianGrid
 } from 'recharts';
 import {
-  Table,
   TableBody,
   TableCell,
-  TableHead,
-  TableHeader,
   TableRow,
 } from "@/components/ui/table";
 import { Button } from '../ui/button';
@@ -31,17 +28,18 @@ import { exportQuarterlyReport } from '@/lib/file-exporter';
 
 export interface BudgetAllocation {
   Category: string;
-  TotalIndented: number;
+  Allocation: number;
   IndentedProposed: number;
   Paid: number;
   Committed: number;
-  Available: number;
+  Remaining: number;
   ManpowerAllocationAmt: number;
   TravelAllocationAmt: number;
   ConsumablesAllocationAmt: number;
   ContingencyAllocationAmt: number;
   OverheadAllocationAmt: number;
   EquipmentAllocationAmt: number;
+  TotalIndented: number;
 }
 
 interface BudgetAllocationReportProps {
@@ -53,44 +51,30 @@ const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884D8', '#FF6384'
 export function QuarterlyReport({ data }: BudgetAllocationReportProps) {
   // Prepare data for pie charts and bar charts
   const pieChartData = useMemo(() => {
-    return data.map(item => {
-      const dic: { [key: string]: number } = {
-        MANPOWER: item.ManpowerAllocationAmt,
-        TRAVEL: item.TravelAllocationAmt,
-        CONSUMABLES: item.ConsumablesAllocationAmt,
-        CONTINGENCY: item.ContingencyAllocationAmt,
-        OVERHEAD: item.OverheadAllocationAmt,
-        EQUIPMENT: item.EquipmentAllocationAmt
-      }
-      return {
-        name: item.Category,
-        value: dic[item.Category.toUpperCase()] / (item.ManpowerAllocationAmt +
-          item.TravelAllocationAmt +
-          item.ConsumablesAllocationAmt +
-          item.ContingencyAllocationAmt +
-          item.OverheadAllocationAmt +
-          item.EquipmentAllocationAmt)
-      }
-    });
+    return data.map(item => ({
+      name: item.Category,
+      value: item.Committed
+    }));
   }, [data]);
 
   const barChartData = useMemo(() => {
-    return data.map(item => {
-      const dic: { [key: string]: number } = {
-        MANPOWER: item.ManpowerAllocationAmt,
-        TRAVEL: item.TravelAllocationAmt,
-        CONSUMABLES: item.ConsumablesAllocationAmt,
-        CONTINGENCY: item.ContingencyAllocationAmt,
-        OVERHEAD: item.OverheadAllocationAmt,
-        EQUIPMENT: item.EquipmentAllocationAmt
-      }
-      return {
-        name: item.Category,
-        IndentedProposed: item.IndentedProposed,
-        Total: dic[item.Category.toUpperCase()]
-      }
-    });
+    return data.map(item => ({
+      name: item.Category,
+      Allocated: item.Allocation,
+      Committed: item.Committed,
+      Available: item.Remaining
+    }));
   }, [data]);
+
+  const totals = useMemo(() => {
+      return {
+        totalAllocation: data.reduce((sum, item) => sum + item.Allocation, 0),
+        totalIndented: data.reduce((sum, item) => sum + item.IndentedProposed, 0),
+        totalPaid: data.reduce((sum, item) => sum + item.Paid, 0),
+        totalCommitted: data.reduce((sum, item) => sum + item.Committed, 0),
+        totalAvailable: data.reduce((sum, item) => sum + item.Remaining, 0),
+      };
+    }, [data]);
 
   return (
     <div className="space-y-6">
@@ -111,7 +95,7 @@ export function QuarterlyReport({ data }: BudgetAllocationReportProps) {
                   outerRadius={80}
                   fill="#8884d8"
                   dataKey="value"
-                  // label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+                // label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
                 >
                   {pieChartData.map((_, index) => (
                     <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
@@ -159,76 +143,24 @@ export function QuarterlyReport({ data }: BudgetAllocationReportProps) {
           <CardTitle>Detailed Budget Breakdown</CardTitle>
         </CardHeader>
         <CardContent>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Category</TableHead>
-                <TableHead>Paid</TableHead>
-                <TableHead>Committed</TableHead>
-                <TableHead>Allocation</TableHead>
-                <TableHead>Utilization %</TableHead>
+          <TableBody>
+            {data.map((item) => (
+              <TableRow key={item.Category}>
+                <TableCell className="font-medium">{item.Category}</TableCell>
+                <TableCell>₹{item.IndentedProposed.toLocaleString()}</TableCell>
+                <TableCell>₹{item.Paid.toLocaleString()}</TableCell>
+                <TableCell>₹{item.Committed.toLocaleString()}</TableCell>
+                <TableCell>₹{item.Remaining.toLocaleString()}</TableCell>
               </TableRow>
-            </TableHeader>
-            <TableBody>
-              {data.map((item) => {
-                const utilization = { percent: 0, alloc: 0 };
-
-                switch (item.Category.toUpperCase()) {
-                  case 'MANPOWER':
-                    utilization.percent = ((item.TotalIndented / item.ManpowerAllocationAmt) * 100);
-                    utilization.alloc = item.ManpowerAllocationAmt;
-                    break;
-                  case 'TRAVEL':
-                    utilization.percent = ((item.TotalIndented / item.TravelAllocationAmt) * 100);
-                    utilization.alloc = item.TravelAllocationAmt;
-                    break;
-                  case 'CONSUMABLES':
-                    utilization.percent = ((item.TotalIndented / item.ConsumablesAllocationAmt) * 100);
-                    utilization.alloc = item.ConsumablesAllocationAmt;
-                    break;
-                  case 'CONTINGENCY':
-                    utilization.percent = ((item.TotalIndented / item.ContingencyAllocationAmt) * 100);
-                    utilization.alloc = item.ContingencyAllocationAmt;
-                    break;
-                  case 'OVERHEAD':
-                    utilization.percent = ((item.TotalIndented / item.OverheadAllocationAmt) * 100);
-                    utilization.alloc = item.OverheadAllocationAmt;
-                    break;
-                  case 'EQUIPMENT':
-                    utilization.percent = ((item.TotalIndented / item.EquipmentAllocationAmt) * 100);
-                    utilization.alloc = item.EquipmentAllocationAmt;
-                    break;
-                  default:
-                    break;
-                }
-
-                return (
-                  <TableRow key={item.Category}>
-                    <TableCell className="font-medium">{item.Category}</TableCell>
-                    <TableCell>₹{item.Paid.toLocaleString()}</TableCell>
-                    <TableCell>₹{item.Committed.toLocaleString()}</TableCell>
-                    <TableCell>₹{utilization.alloc.toLocaleString()}</TableCell>
-                    <TableCell>{utilization.percent.toFixed(2)}%</TableCell>
-                  </TableRow>
-                );
-              })}
-              <TableRow className="font-bold">
-                <TableCell>Total</TableCell>
-                <TableCell>₹{data.reduce((sum, item) => sum + item.Paid, 0).toLocaleString()}</TableCell>
-                <TableCell>₹{data.reduce((sum, item) => sum + item.Committed, 0).toLocaleString()}</TableCell>
-                <TableCell>
-                  ₹{data.reduce((sum, item) =>
-                    sum + item.ManpowerAllocationAmt +
-                    item.TravelAllocationAmt +
-                    item.ConsumablesAllocationAmt +
-                    item.ContingencyAllocationAmt +
-                    item.OverheadAllocationAmt +
-                    item.EquipmentAllocationAmt, 0).toLocaleString()}
-                </TableCell>
-                <TableCell>-</TableCell>
-              </TableRow>
-            </TableBody>
-          </Table>
+            ))}
+            <TableRow className="font-bold">
+              <TableCell>Total</TableCell>
+              <TableCell>₹{totals.totalIndented.toLocaleString()}</TableCell>
+              <TableCell>₹{totals.totalPaid.toLocaleString()}</TableCell>
+              <TableCell>₹{totals.totalCommitted.toLocaleString()}</TableCell>
+              <TableCell>₹{totals.totalAvailable.toLocaleString()}</TableCell>
+            </TableRow>
+          </TableBody>
         </CardContent>
       </Card>
       <Button onClick={() => exportQuarterlyReport(data)}>Download Report</Button>

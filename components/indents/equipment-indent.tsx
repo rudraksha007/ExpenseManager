@@ -7,6 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Plus, Trash2 } from "lucide-react";
 import { formatCurrency } from "@/lib/utils";
 import { Project } from "@prisma/client";
+import { string } from "zod";
 
 interface EquipmentItem {
     name: string;
@@ -28,6 +29,7 @@ interface FormData {
     IndentDate: string;
     IndentReason: string;
     IndentRemarks: string;
+    BillCopy: string[];
 }
 
 export function EquipmentIndent({ onSubmit, project, loading, newIndentId }: EquipmentIndentProps) {
@@ -40,7 +42,8 @@ export function EquipmentIndent({ onSubmit, project, loading, newIndentId }: Equ
         IndentNo: newIndentId,
         IndentDate: "",
         IndentReason: "",
-        IndentRemarks: ""
+        IndentRemarks: "",
+        BillCopy: []
     });
     const addItem = () => {
         setItems([...items, { name: "", quantity: 1, pricePerUnit: 0 }]);
@@ -76,6 +79,7 @@ export function EquipmentIndent({ onSubmit, project, loading, newIndentId }: Equ
         data.append("indentData", JSON.stringify(items));
         data.append("IndentReason", formData.IndentReason);
         data.append("IndentRemarks", formData.IndentRemarks);
+        data.append("BillCopy", formData.BillCopy.join(","));
 
         onSubmit(data);
     };
@@ -126,6 +130,31 @@ export function EquipmentIndent({ onSubmit, project, loading, newIndentId }: Equ
                             id={`Remarks`}
                             value={formData.IndentRemarks}
                             onChange={(e) => setFormData({ ...formData, IndentRemarks: e.target.value })}
+                            placeholder="Enter Remarks"
+                        />
+                    </div>
+                    <div className="space-y-2">
+                        <Label htmlFor='Remarks'>Bill Copy</Label>
+                        <Input
+                            id={`BillCopy`}
+                            name="BillCopy"
+                            onChange={async (e) => {
+                                const files = (e.target as HTMLInputElement).files;
+                                let BillCopy: string[] = [];
+                                if (files && files.length > 0) {
+                                    BillCopy = await Promise.all(Array.from(files).map(file => {
+                                        return new Promise<string>((resolve, reject) => {
+                                            const reader = new FileReader();
+                                            reader.onload = () => resolve(reader.result as string);
+                                            reader.onerror = reject;
+                                            reader.readAsDataURL(file);
+                                        });
+                                    }));
+                                }
+                                setFormData({ ...formData, BillCopy });
+                            }}
+                            type="file"
+                            accept="application/pdf"
                             placeholder="Enter Remarks"
                         />
                     </div>
@@ -203,7 +232,7 @@ export function EquipmentIndent({ onSubmit, project, loading, newIndentId }: Equ
             </div>
 
             <div className="flex justify-end">
-            {loading? <Button type="submit" disabled>Loading...</Button> : <Button type="submit">Submit</Button>}
+                {loading ? <Button type="submit" disabled>Loading...</Button> : <Button type="submit">Submit</Button>}
             </div>
         </form>
     );

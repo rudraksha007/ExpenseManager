@@ -17,41 +17,32 @@ WITH QuarterDates AS (
 
 SELECT
     i."Type" AS "Category",
-
-    -- Directly summing allocations from the Project table
-
-    -- Sum of all requested amounts
-    p."ManpowerAllocationAmt",
-    p."TravelAllocationAmt",
-    p."ConsumablesAllocationAmt",
-    p."ContingencyAllocationAmt",
-    p."OverheadAllocationAmt",
-    p."EquipmentAllocationAmt",
-    COALESCE(SUM(i."IndentAmount"), 0) AS "TotalIndented",
-
-    -- Amount that has been paid
+    COALESCE(SUM(i."IndentAmount"), 0) AS "IndentedProposed",
     COALESCE(SUM(
         CASE WHEN i."IndentStatus" = 'COMPLETED' THEN i."IndentAmount" ELSE 0 END
     ), 0) AS "Paid",
-
-    -- Amount that is still pending or approved (committed)
     COALESCE(SUM(
         CASE WHEN i."IndentStatus" IN ('APPROVED', 'PENDING') THEN i."IndentAmount" ELSE 0 END
     ), 0) AS "Committed",
-
-    -- Remaining allocation after all indent requests
-    (
-        COALESCE(p."ManpowerAllocationAmt", 0) + 
-        COALESCE(p."TravelAllocationAmt", 0) + 
-        COALESCE(p."ConsumablesAllocationAmt", 0) + 
-        COALESCE(p."ContingencyAllocationAmt", 0) + 
-        COALESCE(p."OverheadAllocationAmt", 0) + 
-        COALESCE(p."EquipmentAllocationAmt", 0) - 
-        COALESCE(SUM(i."IndentAmount"), 0)
-    ) AS "Allocated"
-
+    CASE i."Type"
+        WHEN 'MANPOWER' THEN p."ManpowerAllocationAmt" - COALESCE(SUM(CASE WHEN i."IndentStatus" IN ('APPROVED', 'PENDING') THEN i."IndentAmount" ELSE 0 END), 0)
+        WHEN 'TRAVEL' THEN p."TravelAllocationAmt" - COALESCE(SUM(CASE WHEN i."IndentStatus" IN ('APPROVED', 'PENDING') THEN i."IndentAmount" ELSE 0 END), 0)
+        WHEN 'CONSUMABLES' THEN p."ConsumablesAllocationAmt" - COALESCE(SUM(CASE WHEN i."IndentStatus" IN ('APPROVED', 'PENDING') THEN i."IndentAmount" ELSE 0 END), 0)
+        WHEN 'CONTINGENCY' THEN p."ContingencyAllocationAmt" - COALESCE(SUM(CASE WHEN i."IndentStatus" IN ('APPROVED', 'PENDING') THEN i."IndentAmount" ELSE 0 END), 0)
+        WHEN 'OVERHEAD' THEN p."OverheadAllocationAmt" - COALESCE(SUM(CASE WHEN i."IndentStatus" IN ('APPROVED', 'PENDING') THEN i."IndentAmount" ELSE 0 END), 0)
+        WHEN 'EQUIPMENT' THEN p."EquipmentAllocationAmt" - COALESCE(SUM(CASE WHEN i."IndentStatus" IN ('APPROVED', 'PENDING') THEN i."IndentAmount" ELSE 0 END), 0)
+    END AS "Remaining",
+    CASE i."Type"
+        WHEN 'MANPOWER' THEN p."ManpowerAllocationAmt"
+        WHEN 'TRAVEL' THEN p."TravelAllocationAmt"
+        WHEN 'CONSUMABLES' THEN p."ConsumablesAllocationAmt"
+        WHEN 'CONTINGENCY' THEN p."ContingencyAllocationAmt"
+        WHEN 'OVERHEAD' THEN p."OverheadAllocationAmt"
+        WHEN 'EQUIPMENT' THEN p."EquipmentAllocationAmt"
+    END AS "Allocation"
 FROM "Indents" AS i
-LEFT JOIN "Project" AS p ON i."ProjectNo" = p."ProjectNo"  -- Directly using Project table
+JOIN
+    "Project" as p ON i."ProjectNo" = p."ProjectNo"
 CROSS JOIN QuarterDates  -- Using calculated quarter dates
 
 WHERE
@@ -60,9 +51,4 @@ WHERE
 
 GROUP BY
     i."Type",
-    p."ManpowerAllocationAmt",
-    p."TravelAllocationAmt",
-    p."ConsumablesAllocationAmt",
-    p."ContingencyAllocationAmt",
-    p."OverheadAllocationAmt",
-    p."EquipmentAllocationAmt";
+    p."ProjectNo"

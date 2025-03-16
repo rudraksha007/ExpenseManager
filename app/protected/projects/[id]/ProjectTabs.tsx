@@ -473,12 +473,14 @@ export default function ProjectTabs({ project, isOpen, setIsOpen, loading, setLo
                 });
             }));
         }
+        // console.log(BillCopy);
+        
         
         const newIndent: Record<string, any> = {
             ProjectNo: project?.ProjectNo || "",
             ProjectTitle: project?.ProjectTitle || "",
             IndentNo: parseInt(data.get("IndentNo")?.toString() || "0"),
-            IndentDate: new Date().toISOString().split("T")[0],
+            IndentDate: new Date(data.get("IndentDate")?.toString() || "").toISOString().split("T")[0],
             Type: activeTab.toUpperCase() as IndentType,
             IndentAmount: data.get("IndentAmount"),
             IndentQty: parseInt(data.get('IndentQty')?.toString() || "1"),

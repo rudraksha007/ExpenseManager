@@ -194,9 +194,9 @@ export default function DashboardPage() {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        {loading ? <LoaderCard /> : <Chart data={funds?.projectFund} title="Project Fund Distribution" />}
-        {loading ? <LoaderCard /> : <Chart data={funds?.piFund} title="PI Fund Distribution" />}
-        {loading ? <LoaderCard /> : <Chart data={funds?.agencyFund} title="Agency Fund Distribution" />}
+        {loading ? <LoaderCard /> : <Chart data={funds?.projectFund} title="Project Fund Distribution" label={false} />}
+        {loading ? <LoaderCard /> : <Chart data={funds?.piFund} title="PI Fund Distribution" label={false} />}
+        {loading ? <LoaderCard /> : <Chart data={funds?.agencyFund} title="Agency Fund Distribution" label={false}/>}
       </div>
     </div>
   );

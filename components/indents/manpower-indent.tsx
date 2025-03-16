@@ -13,6 +13,7 @@ interface ManpowerItem {
     dailySalary: number;
     numberOfDays: number;
     hraPercentage?: number| 0;
+    remarks?: string;
 }
 
 interface ManpowerIndentProps {
@@ -33,7 +34,7 @@ interface FormData {
 
 export function ManpowerIndent({ onSubmit, project, loading, newIndentId }: ManpowerIndentProps) {
     const [items, setItems] = useState<ManpowerItem[]>([
-        { employeeName: "", dailySalary: 0, numberOfDays: 1 }
+        { employeeName: "", dailySalary: 0, numberOfDays: 1, remarks: "" }
     ]);    
     const [formData, setFormData] = useState<FormData>({
         items: items,
@@ -56,7 +57,7 @@ export function ManpowerIndent({ onSubmit, project, loading, newIndentId }: Manp
         const newItems = [...items];
         newItems[index] = {
             ...newItems[index],
-            [field]: field === "employeeName" ? value : Number(value)
+            [field]: field === "employeeName"||"remarks" ? value : Number(value)
         };
         setItems(newItems);
     };
@@ -181,6 +182,16 @@ export function ManpowerIndent({ onSubmit, project, loading, newIndentId }: Manp
                                 value={item.hraPercentage || 0}
                                 onChange={(e) => updateItem(index, "hraPercentage", e.target.value)}
                                 required
+                            />
+                        </div>
+                        <div className="space-y-2">
+                            <Label htmlFor={`remarks-${index}`}>Remarks</Label>
+                            <Input
+                                id={`remarks-${index}`}
+                                value={item.remarks || ""}
+                                type="text"
+                                onChange={(e) => updateItem(index, "remarks", e.target.value)}
+                                placeholder="Enter remarks"
                             />
                         </div>
 

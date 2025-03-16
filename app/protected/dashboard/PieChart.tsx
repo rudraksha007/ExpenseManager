@@ -4,7 +4,7 @@ import { PieChart, Cell, Legend, Pie, ResponsiveContainer, Tooltip } from "recha
 
 const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042'];
 
-export default function Chart({ data, title }: { data: FundEntry[] | undefined, title: string }) {
+export default function Chart({ data, title, label }: { data: FundEntry[] | undefined, title: string; label?: boolean }) {
     return (
         <Card className="col-span-1">
             <CardHeader>
@@ -29,7 +29,7 @@ export default function Chart({ data, title }: { data: FundEntry[] | undefined, 
                                 ))}
                             </Pie>
                             <Tooltip />
-                            <Legend />
+                            {label && <Legend />}
                         </PieChart>
                     </ResponsiveContainer>
                 ) : (

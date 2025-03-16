@@ -8,19 +8,26 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { FormDialog } from "@/components/ui/form-dialog";
 import { Indents, IndentStatus } from "@prisma/client";
 import { toast } from "@/hooks/use-toast";
+import { saveAs } from "file-saver";
 
 const ITEMS_PER_PAGE = 25;
 
-interface RequestDetails {
+export interface RequestDetails {
     IndentNo: string;
     ProjectNo: string;
     ProjectTitle: string;
     IndentID: string;
     IndentDate: string;
     IndentStatus: string;
-    IndentCategory: string;
+    Type: string;
     IndentAmount: number;
-    IndentedPersonId: string;
+    IndentPersonId: string;
+    BillCopy?: string[];
+    IndentPerson: {
+        name: string;
+        email: string;
+    }
+    indentData: string;
 }
 
 export default function IndentsPage() {
@@ -29,6 +36,8 @@ export default function IndentsPage() {
     const [requestDetails, setRequestDetails] = useState<RequestDetails | null>(null);
     const [popup, setPopup] = useState(false);
     const [data, setData] = useState<Indents[] | []>([]);
+    const [reqLoading, setReqLoading] = useState(false);
+
     useEffect(() => {
         async function fetchData() {
             setLoading(true);
@@ -49,6 +58,26 @@ export default function IndentsPage() {
         setCurrentPage(page);
         setTimeout(() => setLoading(false), 500);
     };
+
+    async function fetchDetail(id: string) {
+        try {
+            setReqLoading(true);
+            setPopup(true);
+            const response = await fetch(`/api/indents/${id}`);
+            const data = await response.json();
+            setRequestDetails(data);
+            console.log(data);
+        } catch (error: any) {
+            console.error("Failed to fetch details", error);
+            toast({
+                title: "Failed to fetch details",
+                variant: 'destructive',
+                description: error.message,
+            })
+        } finally {
+            setReqLoading(false);
+        }
+    }
 
     async function action(approved: boolean) {
         try {
@@ -74,7 +103,7 @@ export default function IndentsPage() {
             } else {
                 if (response.status === 500) {
                     throw new Error("Server Error");
-                }else{
+                } else {
                     const data = await response.json();
                     throw new Error(data.msg);
                 }
@@ -130,18 +159,7 @@ export default function IndentsPage() {
                         ) : data.length != 0 ? (
                             data.map((item, index) => (
                                 <TableRow key={item.id} onClick={() => {
-                                    setRequestDetails({
-                                        IndentNo: item.IndentNo.toString(),
-                                        ProjectNo: item.ProjectNo,
-                                        ProjectTitle: item.ProjectTitle,
-                                        IndentID: item.id,
-                                        IndentDate: item.IndentDate.toString().split("T")[0],
-                                        IndentStatus: item.IndentStatus,
-                                        IndentCategory: item.Type,
-                                        IndentAmount: item.IndentAmount,
-                                        IndentedPersonId: item.IndentPersonId.toString(),
-                                    })
-                                    setPopup(true);
+                                    fetchDetail(item.id);
                                 }}>
                                     <TableCell>{(currentPage - 1) * ITEMS_PER_PAGE + index + 1}</TableCell>
                                     <TableCell>{item.ProjectNo}</TableCell>
@@ -181,36 +199,60 @@ export default function IndentsPage() {
                 loading={loading}
             />
             <FormDialog
-                isOpen={popup} // or manage this state as needed
-                onClose={() => { setPopup(false) }} // or provide a proper handler
+                isOpen={popup}
+                loading={reqLoading}
+                onClose={() => { setPopup(false) }}
                 title="Indent Details"
-                
+
                 fields={[
                     { label: "Project No", value: requestDetails?.ProjectNo || "", readOnly: true, id: "projectNo", type: "text" },
                     { label: "Title", value: requestDetails?.ProjectTitle, readOnly: true, id: "title", type: "text" },
                     { label: "Indent No", value: requestDetails?.IndentNo, readOnly: true, id: "indentId", type: "text" },
                     { label: "Indent Date", value: requestDetails?.IndentDate?.split("T")[0], readOnly: true, id: "indentDate", type: "text" },
                     { label: "Indent Status", value: requestDetails?.IndentStatus, readOnly: true, id: "indentStatus", type: "text" },
-                    { label: "Indent Category", value: requestDetails?.IndentCategory, readOnly: true, id: "indentCategory", type: "text" },
+                    { label: "Indent Category", value: requestDetails?.Type, readOnly: true, id: "indentCategory", type: "text" },
                     { label: "Indent Amount", value: requestDetails?.IndentAmount, readOnly: true, id: "indentAmount", type: "text" },
-                    { label: "Indented Person ID", value: requestDetails?.IndentedPersonId, readOnly: true, id: "indentedPersonId", type: "text" },
+                    { label: "Indented Person ID", value: requestDetails?.IndentPersonId, readOnly: true, id: "indentedPersonId", type: "text" },
+                    { label: "Indented Person", value: requestDetails?.IndentPerson?.name, readOnly: true, id: "indentedPerson", type: "text" },
+                    { label: "Indented Person Email", value: requestDetails?.IndentPerson?.email, readOnly: true, id: "email", type: "text" },
                 ]}
-                buttons={[
-                    {
-                        label: "Approve", onClick: () => {
-                            action(true)
-                        },
-                        disabled:loading
-                        
-                    },
-                    {
-                        label: "Reject", onClick: () => {
-                            action(false)
-                        },
-                        disabled: loading
-                    }
-                ]}
-                onSubmit={(data) => console.log('')}
+                buttons={
+                    requestDetails?.BillCopy && requestDetails.BillCopy.length !== 0
+                        ? requestDetails.BillCopy.map((bill, index) => ({
+                            label: `Download Bill ${index + 1}`,
+                            onClick: () => {
+                                if (bill) {
+                                    try {
+                                        const base64Data = bill.split(',')[1] || bill;
+                                        const byteCharacters = atob(base64Data);
+                                        const byteNumbers = new Array(byteCharacters.length);
+                                        for (let i = 0; i < byteCharacters.length; i++) {
+                                            byteNumbers[i] = byteCharacters.charCodeAt(i);
+                                        }
+                                        const byteArray = new Uint8Array(byteNumbers);
+                                        const file = new Blob([byteArray], { type: 'application/pdf' });
+                                        const url = URL.createObjectURL(file);
+                                        saveAs(url, `bill_copy_${index + 1}.pdf`);
+                                    } catch (error) {
+                                        console.error("Error downloading bill:", error);
+                                        toast({
+                                            title: "Download Failed",
+                                            variant: 'destructive',
+                                            description: "An error occurred while downloading the bill.",
+                                        });
+                                    }
+                                } else {
+                                    toast({
+                                        title: "No Bill Copy",
+                                        variant: 'destructive',
+                                        description: "No bill copy available to download.",
+                                    });
+                                }
+                            },
+                        }))
+                        : []
+                }
+                onSubmit={(data) => { return; }}
             />
         </div>
     );
