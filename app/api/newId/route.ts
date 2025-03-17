@@ -18,7 +18,7 @@ export async function GET(req: Request) {
                 isAdmin: true
             }
         });
-        if (!user) return NextResponse.json({ err: "User not found" }, { status: 404 });
+        if (!user &&session.user.email!==process.env.ROOT_ID) return NextResponse.json({ err: "User not found" }, { status: 404 });
         switch (queryParam) {
             case 'user': {
                 // if (!user.isAdmin) return NextResponse.json({ err: "Unauthorized" }, { status: 401 });
