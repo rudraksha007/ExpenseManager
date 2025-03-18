@@ -2,6 +2,7 @@ import authOptions from "@/lib/authOptions";
 import { prisma } from "@/lib/prisma";
 import { getServerSession } from "next-auth";
 import { NextResponse } from "next/server";
+import CryptoJS from "crypto-js";
 
 export async function PUT(req: Request) {
     try {
@@ -10,10 +11,9 @@ export async function PUT(req: Request) {
             return NextResponse.json({ msg: "Unauthorized" }, { status: 401 });
         }
         const user = await prisma.user.findUnique({ where: { email: session.user.email }, select: { isAdmin: true } });
-        if (!user) {
-            return NextResponse.json({ msg: "User not found" }, { status: 404 });
-        }
-        if (!user?.isAdmin) {
+        if (!user &&session.user.email!==process.env.ROOT_ID) return NextResponse.json({ err: "User not found" }, { status: 404 });
+
+        if (!user?.isAdmin && session.user.email!==process.env.ROOT_ID) {
             return NextResponse.json({ msg: "Unauthorized" }, { status: 401 });
         }
         const { name, id, role, email, password } = await req.json();

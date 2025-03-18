@@ -8,7 +8,7 @@ export async function POST(req: Request) {
         const session = await getServerSession(authOptions);
         if(!session || !session.user?.email) return NextResponse.json({ err: "Unauthorized" }, { status: 401 });
         const user = await prisma.user.findUnique({ where: { email: session.user.email }, select:{isAdmin: true} });
-        if(!user) return NextResponse.json({ err: "User not found" }, { status: 404 });
+        if (!user &&session.user.email!==process.env.ROOT_ID) return NextResponse.json({ err: "User not found" }, { status: 404 });
         if(!user?.isAdmin) return NextResponse.json({ err: "Unauthorized" }, { status: 401 });
         const {name, email, EmployeeId, isAdmin} = await req.json();
         await prisma.user.update({
