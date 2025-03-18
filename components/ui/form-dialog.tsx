@@ -124,6 +124,7 @@ export function FormDialog({
                     min={field.min}
                     max={field.max}
                     accept={field.accept}
+                    step={0.01}
                     multiple={field.multiple}
                     onChange={(e) =>
                       handleInputChange(
