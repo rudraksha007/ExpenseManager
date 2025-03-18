@@ -96,7 +96,7 @@ export default function CreateProjectPage() {
         if (search.get('id')) {
           setEditMode(true);
           const projectNo = decodeURIComponent(search.get('id') as string);
-          const project = await fetch(`/api/projects/${projectNo}`);
+          const project = await fetch(`/api/projects/${encodeURIComponent(projectNo)}`);
           const projectData = await project.json() as Project;
           setFormData({
             ProjectTitle: projectData.ProjectTitle,

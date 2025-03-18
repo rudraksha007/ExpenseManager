@@ -10,8 +10,9 @@ export async function GET() {
         if (!session || !session.user?.email) {
             return NextResponse.json({ err: "Unauthorized" }, { status: 401 });
         }
+        const user = await prisma.user.findUnique({ where: { email: session.user.email }, select: { isAdmin: true } });
 
-        if (session.user?.email === 'root@ils.in') {
+        if (session.user?.email === 'root@ils.in' || user?.isAdmin) {
             const data = await prisma.project.findMany({});
             const projects = data.map(project => ({
                 ...project,
