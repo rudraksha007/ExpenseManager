@@ -27,19 +27,20 @@ interface ProjectTableProps {
   data: Indents[];
   columns: Column[];
   onAdd: null | (() => void);
+  reload: () => void;
 }
 
-export function ProjectTable({ data, columns, onAdd }: ProjectTableProps) {
+export function ProjectTable({ data, columns, onAdd, reload }: ProjectTableProps) {
   const [reqDetails, setReqDetails] = useState<RequestDetails | null>(null);
   const [popup, setPopup] = useState<boolean>(false);
   const [reqLoading, setReqLoading] = useState(false);
   const indentData = useMemo(() => {
     if (!reqDetails) return [];
     // console.log(reqDetails.Type);
-    
-    const details = JSON.parse(reqDetails?.indentData || "[]") as Record<string, string|number>[];
-    if(reqDetails.Type=== IndentType.EQUIPMENT )return (details?.map((data, index) => ({
-      label: `Item ${index + 1}`, value: `${data.quantity} x ${data.name}: (${data.pricePerUnit} per unit) = ${data.quantity as number*(data.pricePerUnit as number)}`, readOnly: true, id: `item-${index}`,type: "text" as FormField["type"]
+
+    const details = JSON.parse(reqDetails?.indentData || "[]") as Record<string, string | number>[];
+    if (reqDetails.Type === IndentType.EQUIPMENT) return (details?.map((data, index) => ({
+      label: `Item ${index + 1}`, value: `${data.quantity} x ${data.name}: (${data.pricePerUnit} per unit) = ${data.quantity as number * (data.pricePerUnit as number)}`, readOnly: true, id: `item-${index}`, type: "text" as FormField["type"]
     })) || []);
     else if (reqDetails.Type === IndentType.MANPOWER) return (details?.map((data, index) => ({
       label: `Person ${index + 1}`, value: `${data.employeeName}: (Salary) ${data.dailySalary} x ${data.numberOfDays} (days) = ${Number(data.dailySalary) * Number(data.numberOfDays)}: Remark: ${data.remarks}`, readOnly: true, id: `person-${index}`, type: "text" as FormField["type"]
@@ -68,6 +69,49 @@ export function ProjectTable({ data, columns, onAdd }: ProjectTableProps) {
       setReqLoading(false);
     }
   }
+  async function action(approved: boolean) {
+    try {
+        setReqLoading(true);
+        console.log(reqDetails?.IndentNo);
+
+        const response = await fetch("/api/indents/action", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+                approved: approved,
+                IndentNo: reqDetails?.IndentNo,
+            }),
+        });
+
+        if (response.ok) {
+            toast({
+                title: "Action performed successfully",
+                variant: 'default',
+            });
+        } else {
+            if (response.status === 500) {
+                throw new Error("Server Error");
+            } else {
+                const data = await response.json();
+                throw new Error(data.msg);
+            }
+        };
+    } catch (error: any) {
+        console.error("Failed to perform action", error);
+        toast({
+            title: "Failed to perform action",
+            variant: 'destructive',
+            description: error.message,
+        })
+    } finally {
+        setReqDetails(null);
+        setPopup(false);
+        setReqLoading(false);
+        reload();
+    }
+}
   return (
     <div className="space-y-4">
       {onAdd &&
@@ -126,8 +170,8 @@ export function ProjectTable({ data, columns, onAdd }: ProjectTableProps) {
           { label: "Indented Person Email", value: reqDetails?.IndentPerson?.email, readOnly: true, id: "email", type: "text" },
           ...(indentData || [])
         ]}
-        buttons={
-          reqDetails?.BillCopy && reqDetails.BillCopy.length !== 0
+        buttons={[
+          ...reqDetails?.BillCopy && reqDetails.BillCopy.length !== 0
             ? reqDetails.BillCopy.map((bill, index) => ({
               label: `Download Bill ${index + 1}`,
               onClick: () => {
@@ -160,8 +204,16 @@ export function ProjectTable({ data, columns, onAdd }: ProjectTableProps) {
                 }
               },
             }))
-            : []
-        }
+            : [],
+            {
+              label: "Approve",
+              onClick: () => action(true),
+            },
+            {
+              label: "Reject",
+              onClick: () => action(false),
+            },
+        ]}
         onSubmit={(data) => { return; }}
       />
     </div>

@@ -216,8 +216,16 @@ export default function IndentsPage() {
                     { label: "Indented Person", value: requestDetails?.IndentPerson?.name, readOnly: true, id: "indentedPerson", type: "text" },
                     { label: "Indented Person Email", value: requestDetails?.IndentPerson?.email, readOnly: true, id: "email", type: "text" },
                 ]}
-                buttons={
-                    requestDetails?.BillCopy && requestDetails.BillCopy.length !== 0
+                buttons={[
+                    {
+                        label: "Approve",
+                        onClick: () => action(true),
+                    },
+                    {
+                        label: "Reject",
+                        onClick: () => action(false),
+                    },
+                    ...requestDetails?.BillCopy && requestDetails.BillCopy.length !== 0
                         ? requestDetails.BillCopy.map((bill, index) => ({
                             label: `Download Bill ${index + 1}`,
                             onClick: () => {
@@ -250,9 +258,9 @@ export default function IndentsPage() {
                                 }
                             },
                         }))
-                        : []
-                }
-                onSubmit={(data) => { return; }}
+                        : [],
+                ]}
+                onSubmit={(data) => {return; }}
             />
         </div>
     );

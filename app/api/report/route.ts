@@ -8,6 +8,12 @@ export async function POST(req: Request) {
     try {
         const session = await getServerSession(authOptions);
         if (!session || !session.user?.email) return NextResponse.json({ msg: "Unauthorized" }, { status: 401 });
+        const user = await prisma.user.findFirst({
+            where: {
+                email: session.user.email
+            }
+        });
+        if(!user) return NextResponse.json({msg: "User not found"}, {status: 404});
         
         const { reportType, year, projectNo, quarter } = await req.json();
         

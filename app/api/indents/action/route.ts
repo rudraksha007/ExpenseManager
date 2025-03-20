@@ -44,7 +44,7 @@ export async function POST(req: Request) {
         });
 
         if (!user) {
-            return NextResponse.json({ msg: "User not found", status: 404 }, { status: 404 });
+            return NextResponse.json({ msg: "User not found or using root account", status: 404 }, { status: 404 });
         }
 
         await prisma.indents.update({

@@ -63,49 +63,51 @@ export function CategoryReport({ projects }: CategoryReportProps) {
 
   // Calculate total spending for each category
   const categoryTotals = useMemo(() => {
+    console.log(projects);
     
+
     return [
-      { 
-      name: 'Manpower', 
-      total: projects.reduce((sum, p) => sum + p.ManpowerUsed, 0),
-      allocated: projects.reduce((sum, p) => sum + p.TotalManpowerAmount, 0),
-      percentage: (projects.reduce((sum, p) => sum + p.ManpowerUsed, 0) / 
-             projects.reduce((sum, p) => sum + p.TotalManpowerAmount, 0) * 100).toFixed(2)
+      {
+        name: 'Manpower',
+        total: projects.reduce((sum, p) => sum + p.ManpowerUsed, 0),
+        allocated: projects.reduce((sum, p) => sum + p.TotalManpowerAmount, 0),
+        percentage: (projects.reduce((sum, p) => sum + p.ManpowerUsed, 0) /
+          projects.reduce((sum, p) => sum + p.TotalManpowerAmount, 0) * 100).toFixed(2)
       },
-      { 
-      name: 'Consumables', 
-      total: projects.reduce((sum, p) => sum + p.ConsumablesUsed, 0),
-      allocated: projects.reduce((sum, p) => sum + p.TotalConsumablesAmount, 0),
-      percentage: (projects.reduce((sum, p) => sum + p.ConsumablesUsed, 0) / 
-             projects.reduce((sum, p) => sum + p.TotalConsumablesAmount, 0) * 100).toFixed(2)
+      {
+        name: 'Consumables',
+        total: projects.reduce((sum, p) => sum + p.ConsumablesUsed, 0),
+        allocated: projects.reduce((sum, p) => sum + p.TotalConsumablesAmount, 0),
+        percentage: (projects.reduce((sum, p) => sum + p.ConsumablesUsed, 0) /
+          projects.reduce((sum, p) => sum + p.TotalConsumablesAmount, 0) * 100).toFixed(2)
       },
-      { 
-      name: 'Contingency', 
-      total: projects.reduce((sum, p) => sum + p.ContingencyUsed, 0),
-      allocated: projects.reduce((sum, p) => sum + p.TotalContingencyAmount, 0),
-      percentage: (projects.reduce((sum, p) => sum + p.ContingencyUsed, 0) / 
-             projects.reduce((sum, p) => sum + p.TotalContingencyAmount, 0) * 100).toFixed(2)
+      {
+        name: 'Contingency',
+        total: projects.reduce((sum, p) => sum + p.ContingencyUsed, 0),
+        allocated: projects.reduce((sum, p) => sum + p.TotalContingencyAmount, 0),
+        percentage: (projects.reduce((sum, p) => sum + p.ContingencyUsed, 0) /
+          projects.reduce((sum, p) => sum + p.TotalContingencyAmount, 0) * 100).toFixed(2)
       },
-      { 
-      name: 'Overhead', 
-      total: projects.reduce((sum, p) => sum + p.OverheadUsed, 0),
-      allocated: projects.reduce((sum, p) => sum + p.TotalOverheadAmount, 0),
-      percentage: (projects.reduce((sum, p) => sum + p.OverheadUsed, 0) / 
-             projects.reduce((sum, p) => sum + p.TotalOverheadAmount, 0) * 100).toFixed(2)
+      {
+        name: 'Overhead',
+        total: projects.reduce((sum, p) => sum + p.OverheadUsed, 0),
+        allocated: projects.reduce((sum, p) => sum + p.TotalOverheadAmount, 0),
+        percentage: (projects.reduce((sum, p) => sum + p.OverheadUsed, 0) /
+          projects.reduce((sum, p) => sum + p.TotalOverheadAmount, 0) * 100).toFixed(2)
       },
-      { 
-      name: 'Equipment', 
-      total: projects.reduce((sum, p) => sum + p.EquipmentUsed, 0),
-      allocated: projects.reduce((sum, p) => sum + p.TotalEquipmentAmount, 0),
-      percentage: (projects.reduce((sum, p) => sum + p.EquipmentUsed, 0) / 
-             projects.reduce((sum, p) => sum + p.TotalEquipmentAmount, 0) * 100).toFixed(2)
+      {
+        name: 'Equipment',
+        total: projects.reduce((sum, p) => sum + p.EquipmentUsed, 0),
+        allocated: projects.reduce((sum, p) => sum + p.TotalEquipmentAmount, 0),
+        percentage: (projects.reduce((sum, p) => sum + p.EquipmentUsed, 0) /
+          projects.reduce((sum, p) => sum + p.TotalEquipmentAmount, 0) * 100).toFixed(2)
       },
-      { 
-      name: 'Travel', 
-      total: projects.reduce((sum, p) => sum + p.TravelUsed, 0),
-      allocated: projects.reduce((sum, p) => sum + p.TotalTravelAmount, 0),
-      percentage: (projects.reduce((sum, p) => sum + p.TravelUsed, 0) / 
-             projects.reduce((sum, p) => sum + p.TotalTravelAmount, 0) * 100).toFixed(2)
+      {
+        name: 'Travel',
+        total: projects.reduce((sum, p) => sum + p.TravelUsed, 0),
+        allocated: projects.reduce((sum, p) => sum + p.TotalTravelAmount, 0),
+        percentage: (projects.reduce((sum, p) => sum + p.TravelUsed, 0) /
+          projects.reduce((sum, p) => sum + p.TotalTravelAmount, 0) * 100).toFixed(2)
       }
     ];
   }, [projects]);
@@ -133,11 +135,11 @@ export function CategoryReport({ projects }: CategoryReportProps) {
               <Tooltip />
               <Legend />
               {projects.map((project, index) => (
-                <Bar 
-                  key={project.ProjectNo} 
-                  dataKey={project.ProjectTitle} 
-                  stackId="a" 
-                  fill={COLORS[index % COLORS.length]} 
+                <Bar
+                  key={project.ProjectNo}
+                  dataKey={project.ProjectTitle}
+                  stackId="a"
+                  fill={COLORS[index % COLORS.length]}
                 />
               ))}
             </BarChart>
@@ -163,8 +165,8 @@ export function CategoryReport({ projects }: CategoryReportProps) {
               {categoryTotals.map((category) => (
                 <TableRow key={category.name}>
                   <TableCell>{category.name}</TableCell>
-                    <TableCell>₹{category.total.toLocaleString('HI')}</TableCell>
-                    <TableCell>₹{category.allocated.toLocaleString('HI')}</TableCell>
+                  <TableCell>₹{category.total.toLocaleString('HI')}</TableCell>
+                  <TableCell>₹{category.allocated.toLocaleString('HI')}</TableCell>
                   <TableCell>{category.percentage}%</TableCell>
                 </TableRow>
               ))}
@@ -172,7 +174,7 @@ export function CategoryReport({ projects }: CategoryReportProps) {
           </Table>
         </CardContent>
       </Card>
-      <Button onClick={()=>exportCategoryReport(projects)}>Download Report</Button>
+      <Button onClick={() => exportCategoryReport(projects)}>Download Report</Button>
     </div>
   );
 }

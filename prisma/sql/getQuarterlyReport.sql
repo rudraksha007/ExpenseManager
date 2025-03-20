@@ -19,7 +19,7 @@ SELECT
     i."Type" AS "Category",
     COALESCE(SUM(i."IndentAmount"), 0) AS "IndentedProposed",
     COALESCE(SUM(
-        CASE WHEN i."IndentStatus" = 'COMPLETED' THEN i."IndentAmount" ELSE 0 END
+        CASE WHEN i."IndentStatus" IN ('COMPLETED', 'APPROVED') THEN i."IndentAmount" ELSE 0 END
     ), 0) AS "Paid",
     COALESCE(SUM(
         CASE WHEN i."IndentStatus" IN ('APPROVED', 'PENDING') THEN i."IndentAmount" ELSE 0 END

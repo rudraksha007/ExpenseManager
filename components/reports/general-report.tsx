@@ -21,7 +21,7 @@ export interface ProjectReport {
   EquipmentUsed: number;
   TravelUsed: number;
   RemainingAllocatedAmount: number;
-  UnallocatedAmount	:number;
+  UnallocatedAmount: number;
 }
 
 export interface GeneralReportProps {
@@ -73,15 +73,15 @@ export function GeneralReport({ projects }: { projects: ProjectReport[] }) {
                 <TableRow key={project.ProjectNo}>
                   <TableCell>{project.ProjectNo}</TableCell>
                   <TableCell>{project.ProjectTitle}</TableCell>
-                    <TableCell>₹{project.ManpowerUsed.toLocaleString("HI")}</TableCell>
-                    <TableCell>₹{project.ConsumablesUsed.toLocaleString("HI")}</TableCell>
-                    <TableCell>₹{project.ContingencyUsed.toLocaleString("HI")}</TableCell>
-                    <TableCell>₹{project.OverheadUsed.toLocaleString("HI")}</TableCell>
-                    <TableCell>₹{project.EquipmentUsed.toLocaleString("HI")}</TableCell>
-                    <TableCell>₹{project.TravelUsed.toLocaleString("HI")}</TableCell>
-                    <TableCell>₹{project.RemainingAllocatedAmount.toLocaleString("HI")}</TableCell>
-                    <TableCell>₹{project.UnallocatedAmount.toLocaleString("HI")}</TableCell>
-                    <TableCell>₹{project.TotalSanctionAmount.toLocaleString("HI")}</TableCell>
+                  <TableCell>₹{project.ManpowerUsed.toLocaleString("HI")}</TableCell>
+                  <TableCell>₹{project.ConsumablesUsed.toLocaleString("HI")}</TableCell>
+                  <TableCell>₹{project.ContingencyUsed.toLocaleString("HI")}</TableCell>
+                  <TableCell>₹{project.OverheadUsed.toLocaleString("HI")}</TableCell>
+                  <TableCell>₹{project.EquipmentUsed.toLocaleString("HI")}</TableCell>
+                  <TableCell>₹{project.TravelUsed.toLocaleString("HI")}</TableCell>
+                  <TableCell>₹{project.RemainingAllocatedAmount.toLocaleString("HI")}</TableCell>
+                  <TableCell>₹{project.UnallocatedAmount.toLocaleString("HI")}</TableCell>
+                  <TableCell>₹{project.TotalSanctionAmount.toLocaleString("HI")}</TableCell>
                 </TableRow>
               ))}
             </TableBody>
@@ -104,7 +104,7 @@ export function GeneralReport({ projects }: { projects: ProjectReport[] }) {
                   outerRadius={80}
                   paddingAngle={1}
                   dataKey="value"
-                  // label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+                // label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
                 >
                   {fundingDistributionData?.map((_, index) => (
                     <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
@@ -117,7 +117,7 @@ export function GeneralReport({ projects }: { projects: ProjectReport[] }) {
           </CardContent>
         </Card>
       </div>
-          <Button onClick={()=>exportGeneralReport(projects)}>Download Report</Button>
+      <Button onClick={() => exportGeneralReport(projects)}>Download Report</Button>
     </div>
   );
 }

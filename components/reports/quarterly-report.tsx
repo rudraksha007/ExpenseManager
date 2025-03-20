@@ -19,8 +19,11 @@ import {
   CartesianGrid
 } from 'recharts';
 import {
+  Table,
   TableBody,
   TableCell,
+  TableHead,
+  TableHeader,
   TableRow,
 } from "@/components/ui/table";
 import { Button } from '../ui/button';
@@ -58,6 +61,13 @@ export function QuarterlyReport({ data }: BudgetAllocationReportProps) {
   }, [data]);
 
   const barChartData = useMemo(() => {
+    console.log(data.map(item => ({
+      name: item.Category,
+      Allocated: item.Allocation,
+      Committed: item.Committed,
+      Available: item.Remaining
+    })));
+    
     return data.map(item => ({
       name: item.Category,
       Allocated: item.Allocation,
@@ -67,14 +77,14 @@ export function QuarterlyReport({ data }: BudgetAllocationReportProps) {
   }, [data]);
 
   const totals = useMemo(() => {
-      return {
-        totalAllocation: data.reduce((sum, item) => sum + item.Allocation, 0),
-        totalIndented: data.reduce((sum, item) => sum + item.IndentedProposed, 0),
-        totalPaid: data.reduce((sum, item) => sum + item.Paid, 0),
-        totalCommitted: data.reduce((sum, item) => sum + item.Committed, 0),
-        totalAvailable: data.reduce((sum, item) => sum + item.Remaining, 0),
-      };
-    }, [data]);
+    return {
+      totalAllocation: data.reduce((sum, item) => sum + item.Allocation, 0),
+      totalIndented: data.reduce((sum, item) => sum + item.IndentedProposed, 0),
+      totalPaid: data.reduce((sum, item) => sum + item.Paid, 0),
+      totalCommitted: data.reduce((sum, item) => sum + item.Committed, 0),
+      totalAvailable: data.reduce((sum, item) => sum + item.Remaining, 0),
+    };
+  }, [data]);
 
   return (
     <div className="space-y-6">
@@ -115,7 +125,7 @@ export function QuarterlyReport({ data }: BudgetAllocationReportProps) {
           </CardHeader>
           <CardContent className="h-[300px]">
             <ResponsiveContainer width="100%" height="100%">
-              <BarChart
+                <BarChart
                 data={barChartData}
                 margin={{
                   top: 5,
@@ -123,15 +133,16 @@ export function QuarterlyReport({ data }: BudgetAllocationReportProps) {
                   left: 20,
                   bottom: 5,
                 }}
-              >
+                >
                 <CartesianGrid strokeDasharray="3 3" />
                 <XAxis dataKey="name" />
                 <YAxis />
                 <Tooltip />
                 <Legend />
-                <Bar dataKey="IndentedProposed" fill="#0088FE" />
-                <Bar dataKey="Total" fill="#00C49F" />
-              </BarChart>
+                <Bar dataKey="Allocated" fill="#0088FE" />
+                <Bar dataKey="Committed" fill="#00C49F" />
+                <Bar dataKey="Available" fill="#FFBB28" />
+                </BarChart>
             </ResponsiveContainer>
           </CardContent>
         </Card>
@@ -143,24 +154,36 @@ export function QuarterlyReport({ data }: BudgetAllocationReportProps) {
           <CardTitle>Detailed Budget Breakdown</CardTitle>
         </CardHeader>
         <CardContent>
-          <TableBody>
-            {data.map((item) => (
-              <TableRow key={item.Category}>
-                <TableCell className="font-medium">{item.Category}</TableCell>
-                <TableCell>₹{item.IndentedProposed.toLocaleString()}</TableCell>
-                <TableCell>₹{item.Paid.toLocaleString()}</TableCell>
-                <TableCell>₹{item.Committed.toLocaleString()}</TableCell>
-                <TableCell>₹{item.Remaining.toLocaleString()}</TableCell>
+          <Table>
+
+            <TableHeader>
+              <TableRow>
+                <TableHead>Category</TableHead>
+                <TableHead>Indent Proposed</TableHead>
+                <TableHead>Paid</TableHead>
+                <TableHead>Committed</TableHead>
+                <TableHead>Available</TableHead>
               </TableRow>
-            ))}
-            <TableRow className="font-bold">
-              <TableCell>Total</TableCell>
-              <TableCell>₹{totals.totalIndented.toLocaleString()}</TableCell>
-              <TableCell>₹{totals.totalPaid.toLocaleString()}</TableCell>
-              <TableCell>₹{totals.totalCommitted.toLocaleString()}</TableCell>
-              <TableCell>₹{totals.totalAvailable.toLocaleString()}</TableCell>
-            </TableRow>
-          </TableBody>
+            </TableHeader>
+            <TableBody>
+              {data.map((item) => (
+                <TableRow key={item.Category}>
+                  <TableCell className="font-medium">{item.Category}</TableCell>
+                  <TableCell>₹{item.IndentedProposed.toLocaleString()}</TableCell>
+                  <TableCell>₹{item.Paid.toLocaleString()}</TableCell>
+                  <TableCell>₹{item.Committed.toLocaleString()}</TableCell>
+                  <TableCell>₹{item.Remaining.toLocaleString()}</TableCell>
+                </TableRow>
+              ))}
+              <TableRow className="font-bold">
+                <TableCell>Total</TableCell>
+                <TableCell>₹{totals.totalIndented.toLocaleString()}</TableCell>
+                <TableCell>₹{totals.totalPaid.toLocaleString()}</TableCell>
+                <TableCell>₹{totals.totalCommitted.toLocaleString()}</TableCell>
+                <TableCell>₹{totals.totalAvailable.toLocaleString()}</TableCell>
+              </TableRow>
+            </TableBody>
+          </Table>
         </CardContent>
       </Card>
       <Button onClick={() => exportQuarterlyReport(data)}>Download Report</Button>

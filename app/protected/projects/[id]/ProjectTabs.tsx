@@ -581,6 +581,7 @@ export default function ProjectTabs({ project, isOpen, setIsOpen, loading, setLo
                             data={project.Indents ? project.Indents.filter((i: Indents) => i.Type === IndentType.CONSUMABLES) : []}
                             columns={consumablesColumns}
                             onAdd={handleAddNew}
+                            reload={reloadData}
                         />
                     </TabsContent>
 
@@ -589,6 +590,7 @@ export default function ProjectTabs({ project, isOpen, setIsOpen, loading, setLo
                             data={project.Indents ? project.Indents.filter((i: Indents) => i.Type === IndentType.TRAVEL) : []}
                             columns={travelsColumns}
                             onAdd={handleAddNew}
+                            reload={reloadData}
                         />
                     </TabsContent>
                     <TabsContent value="Contingency">
@@ -596,6 +598,7 @@ export default function ProjectTabs({ project, isOpen, setIsOpen, loading, setLo
                             data={project.Indents ? project.Indents.filter((i) => i.Type === IndentType.CONTINGENCY) : []}
                             columns={consumablesColumns} // Assuming similar columns for Contingency
                             onAdd={handleAddNew}
+                            reload={reloadData}
                         />
                     </TabsContent>
 
@@ -604,6 +607,7 @@ export default function ProjectTabs({ project, isOpen, setIsOpen, loading, setLo
                             data={project.Indents ? project.Indents.filter((i) => i.Type === IndentType.EQUIPMENT) : []}
                             columns={consumablesColumns} // Assuming similar columns for Equipments
                             onAdd={null}
+                            reload={reloadData}
                         />
                         <EquipmentIndent onSubmit={handleSubmit} project={project} loading={popLoading} newIndentId={newIndentNo}/>
                     </TabsContent>
@@ -613,6 +617,7 @@ export default function ProjectTabs({ project, isOpen, setIsOpen, loading, setLo
                             data={project.Indents ? project.Indents.filter((i) => i.Type === IndentType.MANPOWER) : []}
                             columns={consumablesColumns} // Assuming similar columns for Manpower
                             onAdd={null}
+                            reload={reloadData}
                         />
                         <ManpowerIndent onSubmit={handleSubmit} project={project} loading={popLoading} newIndentId={newIndentNo}/>
                     </TabsContent>
@@ -623,7 +628,6 @@ export default function ProjectTabs({ project, isOpen, setIsOpen, loading, setLo
                         title={`Add ${activeTab}`}
                         fields={activeTab=="Manpower"||activeTab=="Equipment"?null:fieldMap[activeTab]}
                         loading={popLoading}
-
                     />
                 </Tabs>
             </CardContent>
