@@ -26,6 +26,18 @@ const consumablesColumns = [
     { header: "Status", accessor: "IndentStatus" }
 ];
 
+const manpowerColumns = [
+    { header: "Indent ID", accessor: "IndentNo" },
+    { header: "Employee ID", accessor: "IndentPersonId" },
+    { header: "Date", accessor: "IndentDate", render: (item: Indents) => new Date(item.IndentDate).toISOString().split('T')[0] },
+    { header: "Description", accessor: "IndentReason" },
+    {
+        header: "Amount",
+        accessor: "IndentAmount",
+        render: (item: Indents) => formatCurrency(item.IndentAmount)
+    },
+];
+
 const travelsColumns = [
     { header: "Indent ID", accessor: "IndentNo" },
     { header: "Employee ID", accessor: "IndentPersonId" },
@@ -461,19 +473,7 @@ export default function ProjectTabs({ project, isOpen, setIsOpen, loading, setLo
     }, [project, user, newIndentNo]);
     const handleSubmit = async (data: FormData) => {
         setLoading(true);
-        const files = data.getAll("BillCopy") as File[];
-        let BillCopy;
-        if (files&&files.length !== 0) {
-            BillCopy = await Promise.all(files.map(file => {
-                return new Promise<string>((resolve, reject) => {
-                    const reader = new FileReader();
-                    reader.onload = () => resolve(reader.result as string);
-                    reader.onerror = reject;
-                    reader.readAsDataURL(file);
-                });
-            }));
-        }
-        // console.log(BillCopy);
+        const BillCopy = data.getAll("BillCopy") as string[];
         
         
         const newIndent: Record<string, any> = {
@@ -615,7 +615,7 @@ export default function ProjectTabs({ project, isOpen, setIsOpen, loading, setLo
                     <TabsContent value="Manpower">
                         <ProjectTable
                             data={project.Indents ? project.Indents.filter((i) => i.Type === IndentType.MANPOWER) : []}
-                            columns={consumablesColumns} // Assuming similar columns for Manpower
+                            columns={manpowerColumns} // Assuming similar columns for Manpower
                             onAdd={null}
                             reload={reloadData}
                         />

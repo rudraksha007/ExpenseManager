@@ -23,6 +23,8 @@ export interface RequestDetails {
     IndentAmount: number;
     IndentPersonId: string;
     BillCopy?: string[];
+    FinalBill?: string[]
+    FinalAmount?: number;
     IndentPerson: {
         name: string;
         email: string;

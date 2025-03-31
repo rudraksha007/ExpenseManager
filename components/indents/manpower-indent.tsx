@@ -113,25 +113,6 @@ export function ManpowerIndent({ onSubmit, project, loading, newIndentId }: Manp
                         />
                         }
                     </div>
-                    <div className="space-y-2">
-                        <Label htmlFor='IndentReason'>Indent Reason</Label>
-                        <Input
-                            id={`IndentReason`}
-                            value={formData.IndentReason}
-                            onChange={(e) => setFormData({ ...formData, IndentReason: e.target.value })}
-                            placeholder="Enter Indent Reason"
-                            required
-                        />
-                    </div>
-                    <div className="space-y-2">
-                        <Label htmlFor='Remarks'>Remarks</Label>
-                        <Input
-                            id={`Remarks`}
-                            value={formData.IndentRemarks}
-                            onChange={(e) => setFormData({ ...formData, IndentRemarks: e.target.value })}
-                            placeholder="Enter Remarks"
-                        />
-                    </div>
                 </div>
                 {items.map((item, index) => (
                     <div key={index} className="grid grid-cols-5 gap-4 items-end border p-4 rounded-lg">

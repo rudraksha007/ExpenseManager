@@ -49,17 +49,19 @@ export function FormDialog({
   element,
   loading = false,
   buttons
-}: FormDialogProps) {  
+}: FormDialogProps) {
   const [formData, setFormData] = useState<Record<string, any>>({});
   const formRef = React.useRef<HTMLFormElement>(null);
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    const form = new FormData(formRef.current as HTMLFormElement);   
+  const handleSubmit = (e: React.FormEvent | null) => {
+    if (e) e.preventDefault();
+    const form = new FormData(formRef.current as HTMLFormElement);
     Object.entries(formData).forEach(([key, value]) => {
-      if (value instanceof FileList) {
-        Array.from(value).forEach((file) => {
-          form.append(key, file);
+      const arr: string[] = [];
+      if (Array.isArray(value)) {
+        value.forEach((file) => {
+          arr.push(file);
         });
+        form.append(key, JSON.stringify(arr));        
       } else {
         form.append(key, value);
       }
@@ -71,8 +73,9 @@ export function FormDialog({
 
   const handleInputChange = (
     field: FormField,
-    value: string | number | FileList | null
+    value: string | number | FileList | null | string[]
   ) => {
+
     setFormData((prev) => ({
       ...prev,
       [field.id]: value,
@@ -115,7 +118,7 @@ export function FormDialog({
                     id={field.id}
                     required={field.required}
                     readOnly={field.readOnly}
-                    name={field.type!=='file'?field.id : ''}
+                    name={field.type !== 'file' ? field.id : ''}
                     value={
                       field.type !== "file"
                         ? formData[field.id] || field.value || ""
@@ -126,11 +129,11 @@ export function FormDialog({
                     accept={field.accept}
                     step={0.01}
                     multiple={field.multiple}
-                    onChange={(e) =>
+                    onChange={async (e) =>
                       handleInputChange(
                         field,
                         field.type === "file"
-                          ? e.target.files
+                          ? await getFileData(e)
                           : e.target.value
                       )
                     }
@@ -138,12 +141,12 @@ export function FormDialog({
                   />
                 )}
               </div>
-})}
+            })}
             {
               !buttons ? <div className="flex justify-end pt-4"><Button type="submit">Submit</Button></div> :
                 <div className="flex justify-between pt-4">
                   {buttons.map((button, index) => (
-                    <Button key={index} type={button.submit ? "submit" : "button"} onClick={button.onClick} disabled={button.disabled}>
+                    <Button key={index} type={button.submit ? "submit" : "button"} onClick={button.onClick ? button.onClick : () => handleSubmit(null)} disabled={button.disabled}>
                       {button.label}
                     </Button>
                   ))}
@@ -155,4 +158,21 @@ export function FormDialog({
       </DialogContent>
     </Dialog>
   );
+}
+
+async function getFileData(e: React.ChangeEvent<HTMLInputElement>) {
+  const files = (e.target as HTMLInputElement).files;
+
+  let BillCopy: string[] = [];
+  if (files && files.length > 0) {
+    BillCopy = await Promise.all(Array.from(files).map(file => {
+      return new Promise<string>((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result as string);
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+      });
+    }));
+  }
+  return BillCopy;
 }

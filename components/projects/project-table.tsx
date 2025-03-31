@@ -71,47 +71,47 @@ export function ProjectTable({ data, columns, onAdd, reload }: ProjectTableProps
   }
   async function action(approved: boolean) {
     try {
-        setReqLoading(true);
-        console.log(reqDetails?.IndentNo);
+      setReqLoading(true);
+      console.log(reqDetails?.IndentNo);
 
-        const response = await fetch("/api/indents/action", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-                approved: approved,
-                IndentNo: reqDetails?.IndentNo,
-            }),
-        });
+      const response = await fetch("/api/indents/action", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          approved: approved,
+          IndentNo: reqDetails?.IndentNo,
+        }),
+      });
 
-        if (response.ok) {
-            toast({
-                title: "Action performed successfully",
-                variant: 'default',
-            });
-        } else {
-            if (response.status === 500) {
-                throw new Error("Server Error");
-            } else {
-                const data = await response.json();
-                throw new Error(data.msg);
-            }
-        };
-    } catch (error: any) {
-        console.error("Failed to perform action", error);
+      if (response.ok) {
         toast({
-            title: "Failed to perform action",
-            variant: 'destructive',
-            description: error.message,
-        })
+          title: "Action performed successfully",
+          variant: 'default',
+        });
+      } else {
+        if (response.status === 500) {
+          throw new Error("Server Error");
+        } else {
+          const data = await response.json();
+          throw new Error(data.msg);
+        }
+      };
+    } catch (error: any) {
+      console.error("Failed to perform action", error);
+      toast({
+        title: "Failed to perform action",
+        variant: 'destructive',
+        description: error.message,
+      })
     } finally {
-        setReqDetails(null);
-        setPopup(false);
-        setReqLoading(false);
-        reload();
+      setReqDetails(null);
+      setPopup(false);
+      setReqLoading(false);
+      reload();
     }
-}
+  }
   return (
     <div className="space-y-4">
       {onAdd &&
@@ -168,7 +168,12 @@ export function ProjectTable({ data, columns, onAdd, reload }: ProjectTableProps
           { label: "Indented Person ID", value: reqDetails?.IndentPersonId, readOnly: true, id: "indentedPersonId", type: "text" },
           { label: "Indented Person", value: reqDetails?.IndentPerson?.name, readOnly: true, id: "indentedPerson", type: "text" },
           { label: "Indented Person Email", value: reqDetails?.IndentPerson?.email, readOnly: true, id: "email", type: "text" },
-          ...(indentData || [])
+          ...(indentData || []),
+          ...(reqDetails?.Type === 'CONSUMABLES' || reqDetails?.Type === 'EQUIPMENTS'
+            ? [{ label: "Final Bill", id: "finalBill", type: "file" as FormField["type"], accept: "application/pdf", multiple: true },
+              // { label: "Final Amount", value: reqDetails?.FinalAmount, id: "finalAmount", type: "number" as FormField["type"] }
+            ]
+            : []),
         ]}
         buttons={[
           ...reqDetails?.BillCopy && reqDetails.BillCopy.length !== 0
@@ -205,16 +210,87 @@ export function ProjectTable({ data, columns, onAdd, reload }: ProjectTableProps
               },
             }))
             : [],
-            {
-              label: "Approve",
-              onClick: () => action(true),
-            },
-            {
-              label: "Reject",
-              onClick: () => action(false),
-            },
+          ...reqDetails?.FinalBill && reqDetails.FinalBill.length !== 0 ?
+            reqDetails.FinalBill.map((bill, index) => ({
+              label: `Download Final Bill ${index + 1}`,
+              onClick: () => {
+                if (bill) {
+                  try {
+                    const base64Data = bill.split(',')[1] || bill;
+                    const byteCharacters = atob(base64Data);
+                    const byteNumbers = new Array(byteCharacters.length);
+                    for (let i = 0; i < byteCharacters.length; i++) {
+                      byteNumbers[i] = byteCharacters.charCodeAt(i);
+                    }
+                    const byteArray = new Uint8Array(byteNumbers);
+                    const file = new Blob([byteArray], { type: 'application/pdf' });
+                    const url = URL.createObjectURL(file);
+                    saveAs(url, `bill_copy_${index + 1}.pdf`);
+                  } catch (error) {
+                    console.error("Error downloading bill:", error);
+                    toast({
+                      title: "Download Failed",
+                      variant: 'destructive',
+                      description: "An error occurred while downloading the bill.",
+                    });
+                  }
+                } else {
+                  toast({
+                    title: "No Bill Copy",
+                    variant: 'destructive',
+                    description: "No bill copy available to download.",
+                  });
+                }
+              },
+            })) : [],
+          {
+            label: "Approve",
+            onClick: () => action(true),
+          },
+          {
+            label: "Reject",
+            onClick: () => action(false),
+          },
+          {
+            label: "Submit"
+          }
         ]}
-        onSubmit={(data) => { return; }}
+        onSubmit={async (form) => {
+          const formData = Object.fromEntries(form);
+          setReqLoading(true);
+          try {
+            const resp = await fetch('/api/indents/finalBill', {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({
+                IndentNo: reqDetails?.IndentNo,
+                BillCopy: JSON.parse(formData.finalBill as string),
+              }),
+            });
+            const data = await resp.json();
+            if (resp.ok) {
+              toast({
+                title: "Final Bill Uploaded",
+                variant: 'default',
+              });
+            }else{
+              throw new Error(data.msg);
+            }
+          } catch (err: any) {
+            toast({
+              title: "Failed to upload final bill",
+              variant: 'destructive',
+              description: err.msg,
+            })
+          }finally{
+            setPopup(false);
+            setReqDetails(null);
+            reload();
+          }
+          return;
+        }}
       />
     </div>
   );

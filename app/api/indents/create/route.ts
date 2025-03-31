@@ -47,6 +47,7 @@ export async function PUT(req: Request) {
                 IndentPersonId: session.user.EmployeeId,
                 IndentReason,
                 IndentRemarks,
+                IndentStatus: Type === "MANPOWER"? "APPROVED" : "PENDING",
                 indentData,
                 BillCopy
             },

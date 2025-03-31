@@ -71,6 +71,7 @@ model Indents {
   updatedAt      DateTime     @updatedAt
   indentData     Json?
   BillCopy       String[]
+  FinalBill      String[]
   ActionedBy     User?        @relation(fields: [ActionedById], references: [EmployeeId], name: "ActionedBy")
   Project        Project      @relation(fields: [ProjectNo], references: [ProjectNo])
 
