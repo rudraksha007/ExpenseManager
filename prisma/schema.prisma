@@ -60,6 +60,7 @@ model Indents {
   Type           IndentType
   IndentStatus   IndentStatus @default(PENDING)
   IndentAmount   Float
+  FinalAmount    Float
   IndentQty      Float
   ActionDate     DateTime?
   IndentPersonId Int

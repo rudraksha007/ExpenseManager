@@ -21,7 +21,7 @@ const consumablesColumns = [
     {
         header: "Amount",
         accessor: "IndentAmount",
-        render: (item: Indents) => formatCurrency(item.IndentAmount)
+        render: (item: Indents) => formatCurrency(item.FinalAmount)
     },
     { header: "Status", accessor: "IndentStatus" }
 ];
@@ -34,7 +34,7 @@ const manpowerColumns = [
     {
         header: "Amount",
         accessor: "IndentAmount",
-        render: (item: Indents) => formatCurrency(item.IndentAmount)
+        render: (item: Indents) => formatCurrency(item.FinalAmount)
     },
 ];
 
@@ -46,7 +46,7 @@ const travelsColumns = [
     {
         header: "Amount",
         accessor: "IndentAmount",
-        render: (item: Indents) => formatCurrency(item.IndentAmount)
+        render: (item: Indents) => formatCurrency(item.FinalAmount)
     },
     { header: "Status", accessor: "IndentStatus" }
 ];

@@ -170,8 +170,8 @@ export function ProjectTable({ data, columns, onAdd, reload }: ProjectTableProps
           { label: "Indented Person Email", value: reqDetails?.IndentPerson?.email, readOnly: true, id: "email", type: "text" },
           ...(indentData || []),
           ...(reqDetails?.Type === 'CONSUMABLES' || reqDetails?.Type === 'EQUIPMENTS'
-            ? [{ label: "Final Bill", id: "finalBill", type: "file" as FormField["type"], accept: "application/pdf", multiple: true },
-              // { label: "Final Amount", value: reqDetails?.FinalAmount, id: "finalAmount", type: "number" as FormField["type"] }
+            ? [{ label: "Final Bill", id: "finalBill", type: "file" as FormField["type"], accept: "application/pdf", multiple: true, required: true },
+              { label: "Final Amount", value: reqDetails?.FinalAmount, id: "FinalAmount", type: "number" as FormField["type"], required: true }
             ]
             : []),
         ]}
@@ -259,6 +259,14 @@ export function ProjectTable({ data, columns, onAdd, reload }: ProjectTableProps
           const formData = Object.fromEntries(form);
           setReqLoading(true);
           try {
+            if(!formData.finalBill || !formData.FinalAmount){
+              toast({
+                title: "Please fill all the fields",
+                variant: 'destructive',
+                description: "Please fill all the fields",
+              })
+              return;
+            }
             const resp = await fetch('/api/indents/finalBill', {
               method: "POST",
               headers: {
@@ -267,6 +275,7 @@ export function ProjectTable({ data, columns, onAdd, reload }: ProjectTableProps
               body: JSON.stringify({
                 IndentNo: reqDetails?.IndentNo,
                 BillCopy: JSON.parse(formData.finalBill as string),
+                FinalAmount: parseFloat(formData.FinalAmount as string),
               }),
             });
             const data = await resp.json();

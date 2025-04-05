@@ -9,7 +9,8 @@ export async function POST(req: Request) {
         if (!session || !session.user?.email) return NextResponse.json({ msg: "Unauthorized" }, { status: 401 });
         const {
             IndentNo,
-            BillCopy
+            BillCopy,
+            FinalAmount
         } = await req.json();
         const ind = await prisma.indents.findFirst({
             where:{
@@ -23,7 +24,8 @@ export async function POST(req: Request) {
                 IndentNo
             },
             data: {
-                FinalBill: BillCopy
+                FinalBill: BillCopy,
+                FinalAmount: FinalAmount,
             },
         });
         return NextResponse.json({ msg: 'updated successfully' }, { status: 200 });

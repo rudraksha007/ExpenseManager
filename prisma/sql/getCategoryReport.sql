@@ -5,7 +5,7 @@ SELECT
     COALESCE(
         SUM(
             CASE
-                WHEN i."Type" = 'MANPOWER' THEN i."IndentAmount"
+                WHEN i."Type" = 'MANPOWER' THEN i."FinalAmount"
                 ELSE 0
             END
         ),
@@ -14,7 +14,7 @@ SELECT
     COALESCE(
         SUM(
             CASE
-                WHEN i."Type" = 'CONSUMABLES' THEN i."IndentAmount"
+                WHEN i."Type" = 'CONSUMABLES' THEN i."FinalAmount"
                 ELSE 0
             END
         ),
@@ -23,7 +23,7 @@ SELECT
     COALESCE(
         SUM(
             CASE
-                WHEN i."Type" = 'CONTINGENCY' THEN i."IndentAmount"
+                WHEN i."Type" = 'CONTINGENCY' THEN i."FinalAmount"
                 ELSE 0
             END
         ),
@@ -32,7 +32,7 @@ SELECT
     COALESCE(
         SUM(
             CASE
-                WHEN i."Type" = 'OVERHEAD' THEN i."IndentAmount"
+                WHEN i."Type" = 'OVERHEAD' THEN i."FinalAmount"
                 ELSE 0
             END
         ),
@@ -41,7 +41,7 @@ SELECT
     COALESCE(
         SUM(
             CASE
-                WHEN i."Type" = 'EQUIPMENT' THEN i."IndentAmount"
+                WHEN i."Type" = 'EQUIPMENT' THEN i."FinalAmount"
                 ELSE 0
             END
         ),
@@ -50,7 +50,7 @@ SELECT
     COALESCE(
         SUM(
             CASE
-                WHEN i."Type" = 'TRAVEL' THEN i."IndentAmount"
+                WHEN i."Type" = 'TRAVEL' THEN i."FinalAmount"
                 ELSE 0
             END
         ),
@@ -65,7 +65,7 @@ SELECT
         COALESCE(p."ManpowerAllocationAmt", 0) - COALESCE(
             SUM(
                 CASE
-                    WHEN i."Type" = 'MANPOWER' THEN i."IndentAmount"
+                    WHEN i."Type" = 'MANPOWER' THEN i."FinalAmount"
                     ELSE 0
                 END
             ),
@@ -73,7 +73,7 @@ SELECT
         ) + COALESCE(p."ConsumablesAllocationAmt", 0) - COALESCE(
             SUM(
                 CASE
-                    WHEN i."Type" = 'CONSUMABLES' THEN i."IndentAmount"
+                    WHEN i."Type" = 'CONSUMABLES' THEN i."FinalAmount"
                     ELSE 0
                 END
             ),
@@ -81,7 +81,7 @@ SELECT
         ) + COALESCE(p."ContingencyAllocationAmt", 0) - COALESCE(
             SUM(
                 CASE
-                    WHEN i."Type" = 'CONTINGENCY' THEN i."IndentAmount"
+                    WHEN i."Type" = 'CONTINGENCY' THEN i."FinalAmount"
                     ELSE 0
                 END
             ),
@@ -89,7 +89,7 @@ SELECT
         ) + COALESCE(p."OverheadAllocationAmt", 0) - COALESCE(
             SUM(
                 CASE
-                    WHEN i."Type" = 'OVERHEAD' THEN i."IndentAmount"
+                    WHEN i."Type" = 'OVERHEAD' THEN i."FinalAmount"
                     ELSE 0
                 END
             ),
@@ -97,7 +97,7 @@ SELECT
         ) + COALESCE(p."EquipmentAllocationAmt", 0) - COALESCE(
             SUM(
                 CASE
-                    WHEN i."Type" = 'EQUIPMENT' THEN i."IndentAmount"
+                    WHEN i."Type" = 'EQUIPMENT' THEN i."FinalAmount"
                     ELSE 0
                 END
             ),
@@ -105,7 +105,7 @@ SELECT
         ) + COALESCE(p."TravelAllocationAmt", 0) - COALESCE(
             SUM(
                 CASE
-                    WHEN i."Type" = 'TRAVEL' THEN i."IndentAmount"
+                    WHEN i."Type" = 'TRAVEL' THEN i."FinalAmount"
                     ELSE 0
                 END
             ),

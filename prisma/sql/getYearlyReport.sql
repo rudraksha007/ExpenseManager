@@ -1,19 +1,19 @@
 SELECT
     i."Type" AS "Category",
-    COALESCE(SUM(i."IndentAmount"), 0) AS "IndentedProposed",
+    COALESCE(SUM(i."FinalAmount"), 0) AS "IndentedProposed",
     COALESCE(SUM(
-        CASE WHEN i."IndentStatus" IN ('COMPLETED', 'APPROVED') THEN i."IndentAmount" ELSE 0 END
+        CASE WHEN i."IndentStatus" IN ('COMPLETED', 'APPROVED') THEN i."FinalAmount" ELSE 0 END
     ), 0) AS "Paid",
     COALESCE(SUM(
-        CASE WHEN i."IndentStatus" IN ('APPROVED', 'PENDING') THEN i."IndentAmount" ELSE 0 END
+        CASE WHEN i."IndentStatus" IN ('APPROVED', 'PENDING') THEN i."FinalAmount" ELSE 0 END
     ), 0) AS "Committed",
     CASE i."Type"
-        WHEN 'MANPOWER' THEN p."ManpowerAllocationAmt" - COALESCE(SUM(CASE WHEN i."IndentStatus" IN ('APPROVED', 'PENDING') THEN i."IndentAmount" ELSE 0 END), 0)
-        WHEN 'TRAVEL' THEN p."TravelAllocationAmt" - COALESCE(SUM(CASE WHEN i."IndentStatus" IN ('APPROVED', 'PENDING') THEN i."IndentAmount" ELSE 0 END), 0)
-        WHEN 'CONSUMABLES' THEN p."ConsumablesAllocationAmt" - COALESCE(SUM(CASE WHEN i."IndentStatus" IN ('APPROVED', 'PENDING') THEN i."IndentAmount" ELSE 0 END), 0)
-        WHEN 'CONTINGENCY' THEN p."ContingencyAllocationAmt" - COALESCE(SUM(CASE WHEN i."IndentStatus" IN ('APPROVED', 'PENDING') THEN i."IndentAmount" ELSE 0 END), 0)
-        WHEN 'OVERHEAD' THEN p."OverheadAllocationAmt" - COALESCE(SUM(CASE WHEN i."IndentStatus" IN ('APPROVED', 'PENDING') THEN i."IndentAmount" ELSE 0 END), 0)
-        WHEN 'EQUIPMENT' THEN p."EquipmentAllocationAmt" - COALESCE(SUM(CASE WHEN i."IndentStatus" IN ('APPROVED', 'PENDING') THEN i."IndentAmount" ELSE 0 END), 0)
+        WHEN 'MANPOWER' THEN p."ManpowerAllocationAmt" - COALESCE(SUM(CASE WHEN i."IndentStatus" IN ('APPROVED', 'PENDING') THEN i."FinalAmount" ELSE 0 END), 0)
+        WHEN 'TRAVEL' THEN p."TravelAllocationAmt" - COALESCE(SUM(CASE WHEN i."IndentStatus" IN ('APPROVED', 'PENDING') THEN i."FinalAmount" ELSE 0 END), 0)
+        WHEN 'CONSUMABLES' THEN p."ConsumablesAllocationAmt" - COALESCE(SUM(CASE WHEN i."IndentStatus" IN ('APPROVED', 'PENDING') THEN i."FinalAmount" ELSE 0 END), 0)
+        WHEN 'CONTINGENCY' THEN p."ContingencyAllocationAmt" - COALESCE(SUM(CASE WHEN i."IndentStatus" IN ('APPROVED', 'PENDING') THEN i."FinalAmount" ELSE 0 END), 0)
+        WHEN 'OVERHEAD' THEN p."OverheadAllocationAmt" - COALESCE(SUM(CASE WHEN i."IndentStatus" IN ('APPROVED', 'PENDING') THEN i."FinalAmount" ELSE 0 END), 0)
+        WHEN 'EQUIPMENT' THEN p."EquipmentAllocationAmt" - COALESCE(SUM(CASE WHEN i."IndentStatus" IN ('APPROVED', 'PENDING') THEN i."FinalAmount" ELSE 0 END), 0)
     END AS "Remaining",
     CASE i."Type"
         WHEN 'MANPOWER' THEN p."ManpowerAllocationAmt"
