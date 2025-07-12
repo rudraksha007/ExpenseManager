@@ -96,6 +96,8 @@ A comprehensive project expense management system built with Next.js, TypeScript
    DATABASE_DIRECT_URL="postgresql://username:password@localhost:5432/expense_manager"
    NEXTAUTH_SECRET="your-nextauth-secret"
    NEXTAUTH_URL="http://localhost:3000"
+   ROOT_ID="root.mail@example.com"
+   ROOT_PASS="password_for_root"
    ```
 
 4. **Set up the database**
